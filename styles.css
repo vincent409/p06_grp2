@@ -9,3 +9,7 @@ body, html {
     top: 10px; 
     text-align: center;
 }
+.center {
+    vertical-align: middle;
+    text-align: center;
+}
