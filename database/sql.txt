@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS amc;
+USE amc;
+
 -- Create the Role table
 CREATE TABLE Role (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -18,36 +21,36 @@ CREATE TABLE Profile (
     email VARCHAR(255) NOT NULL,
     phone_number INT,
     department VARCHAR(255) NOT NULL,
-    first_logon INT,
+    has_logged_in TINYINT(1) NOT NULL DEFAULT 0,
     FOREIGN KEY (role_id) REFERENCES Role(id)
 );
 
 -- Create the User table
-CREATE TABLE User (
+CREATE TABLE User_Credentials (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    password VARCHAR(255) NOT NULL,
     profile_id INT NOT NULL,
-    FOREIGN KEY (profile_id) REFERENCES Profile(id)
+    password VARCHAR(255) NOT NULL,
+    FOREIGN KEY (profile_id) REFERENCES Profile(id) ON DELETE CASCADE
 );
 
 -- Create the Equipment table
 CREATE TABLE Equipment (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    status_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     type VARCHAR(255) NOT NULL,
     purchase_date TIMESTAMP NOT NULL,
-    model_number VARCHAR(255) NOT NULL,
-    FOREIGN KEY (status_id) REFERENCES Status(id)
+    model_number VARCHAR(255) NOT NULL
 );
 
 -- Create the Loan table
 CREATE TABLE Loan (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    status_id INT NOT NULL,
     profile_id INT NOT NULL,
     equipment_id INT NOT NULL,
     FOREIGN KEY (profile_id) REFERENCES Profile(id),
-    FOREIGN KEY (equipment_id) REFERENCES Equipment(id)
+    FOREIGN KEY (equipment_id) REFERENCES Equipment(id),
+    FOREIGN KEY (status_id) REFERENCES Status(id)
 );
 
 -- Create the Usage_Log table
@@ -59,3 +62,17 @@ CREATE TABLE Usage_Log (
     returned_date TIMESTAMP NULL,
     FOREIGN KEY (equipment_id) REFERENCES Equipment(id)
 );
+
+-- Insert data into Role table
+INSERT INTO Role (name) 
+VALUES 
+    ('Admin'),
+    ('Facility Manager'),
+    ('Student');
+
+-- Insert data into Status table
+INSERT INTO Status (name) 
+VALUES 
+    ('Assigned'),
+    ('In-Use'),
+    ('Returned');

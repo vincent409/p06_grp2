@@ -15,10 +15,10 @@ SELECT
     Status.name AS equipment_status,
     Profile.phone_number AS admin_number
 FROM Equipment
-JOIN Status
-    ON Equipment.status_id = Status.id
 LEFT JOIN Loan
     ON Loan.equipment_id = Equipment.id
+LEFT JOIN Status
+    ON Loan.status_id = Status.id
 LEFT JOIN Profile
     ON Loan.profile_id = Profile.id;
 ";
@@ -73,7 +73,7 @@ if (!$result) {
                             <td>{$row['equipment_id']}</td>
                             <td>{$row['equipment_name']}</td>
                             <td>{$row['equipment_status']}</td>
-                            <td>" . ($row['admin_number'] ?? "N/A") . "</td>
+                            <td>" . ($row['admin_number'] ? $row['admin_number'] : "N/A") . "</td>
                           </tr>";
                 }
             } else {
