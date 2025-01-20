@@ -12,16 +12,15 @@ if (isset($_POST['login-button'])) {
     // Retrieve form inputs
     $equipment_name = $_POST['equipment_name'];
     $equipment_type = $_POST['equipment_type'];
-    $status_id = $_POST['status_id'];
     $purchase_date = $_POST['purchase_date'];
     $model_number = $_POST['model_number'];
 
     // Insert new equipment into the database
-    $query = $connect->prepare("INSERT INTO equipment (name, type, status_id, purchase_date, model_number) VALUES (?, ?, ?, ?, ?)");
+    $query = $connect->prepare("INSERT INTO Equipment (name, type, purchase_date, model_number) VALUES (?, ?, ?, ?)");
 
-    // Bind parameters: "ssiss" means:
-    // s = string, s = string, i = integer, s = string, s = string
-    $query->bind_param("ssiss", $equipment_name, $equipment_type, $status_id, $purchase_date, $model_number);
+    // Bind parameters: "ssss" means:
+    // s = string, s = string, s = string, s = string
+    $query->bind_param("ssss", $equipment_name, $equipment_type, $purchase_date, $model_number);
 
     // Execute the query
     if ($query->execute()) {
@@ -32,12 +31,6 @@ if (isset($_POST['login-button'])) {
 
     // Close the statement
     $query->close();
-}
-
-// Fetch statuses for the dropdown
-$status_result = mysqli_query($connect, "SELECT id, name FROM Status");
-if (!$status_result) {
-    die("Failed to fetch statuses: " . mysqli_error($connect));
 }
 
 // Close the database connection
@@ -59,17 +52,6 @@ mysqli_close($connect);
 
         <label for="equipment_type">Equipment Type:</label><br>
         <input type="text" id="equipment_type" name="equipment_type" required><br><br>
-
-        <label for="status_id">Status:</label><br>
-        <select id="status_id" name="status_id" required>
-            <option value="">Select Status</option>
-            <?php
-            // Populate the dropdown with statuses
-            while ($row = mysqli_fetch_assoc($status_result)) {
-                echo "<option value='{$row['id']}'>{$row['name']}</option>";
-            }
-            ?>
-        </select><br><br>
 
         <label for="purchase_date">Purchase Date:</label><br>
         <input type="date" id="purchase_date" name="purchase_date" required><br><br>

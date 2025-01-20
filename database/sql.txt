@@ -17,9 +17,9 @@ CREATE TABLE Status (
 CREATE TABLE Profile (
     id INT PRIMARY KEY AUTO_INCREMENT,
     role_id INT NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    phone_number INT,
+    phone_number VARCHAR(8),
     department VARCHAR(255) NOT NULL,
     has_logged_in TINYINT(1) NOT NULL DEFAULT 0,
     FOREIGN KEY (role_id) REFERENCES Role(id)

@@ -7,13 +7,13 @@ if (!$connect) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// SQL query to fetch equipment data with status and admin number
+// SQL query to fetch equipment data with status and email
 $sql = "
 SELECT 
     Equipment.id AS equipment_id,
     Equipment.name AS equipment_name,
     Status.name AS equipment_status,
-    Profile.phone_number AS admin_number
+    Profile.email AS email
 FROM Equipment
 LEFT JOIN Loan
     ON Loan.equipment_id = Equipment.id
@@ -61,7 +61,7 @@ if (!$result) {
                 <th>Equipment ID</th>
                 <th>Equipment Name</th>
                 <th>Equipment Status</th>
-                <th>Admin Number</th>
+                <th>Admin Email</th>
             </tr>
         </thead>
         <tbody>
@@ -72,8 +72,8 @@ if (!$result) {
                     echo "<tr>
                             <td>{$row['equipment_id']}</td>
                             <td>{$row['equipment_name']}</td>
-                            <td>{$row['equipment_status']}</td>
-                            <td>" . ($row['admin_number'] ? $row['admin_number'] : "N/A") . "</td>
+                            <td>" . ($row['equipment_status'] ? $row['equipment_status'] : "N/A") . "</td>
+                            <td>" . ($row['email'] ? $row['email'] : "N/A") . "</td>
                           </tr>";
                 }
             } else {

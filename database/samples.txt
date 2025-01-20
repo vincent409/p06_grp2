@@ -1,0 +1,4 @@
+INSERT INTO Equipment (name, type, purchase_date, model_number)
+VALUES
+    ('Screwdriver', 'Tool', '2025-01-16', 'SD-12345'),
+    ('Hammer', 'Tool', '2025-01-15', 'HM-67890');
