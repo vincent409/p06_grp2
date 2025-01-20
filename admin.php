@@ -51,6 +51,13 @@ if (!$result) {
         th {
             background-color: #f2f2f2;
         }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -61,7 +68,8 @@ if (!$result) {
                 <th>Equipment ID</th>
                 <th>Equipment Name</th>
                 <th>Equipment Status</th>
-                <th>Admin Email</th>
+                <th>Email</th>
+                <th>Assign Equipment</th> <!-- New Column for Assign -->
             </tr>
         </thead>
         <tbody>
@@ -69,15 +77,18 @@ if (!$result) {
             // Fetch and display data in a table
             if (mysqli_num_rows($result) > 0) {
                 while ($row = mysqli_fetch_assoc($result)) {
+                    // Create the link for assigning the equipment
+                    $assign_link = "assign-equipment.php?equipment_id=" . $row['equipment_id'];
                     echo "<tr>
                             <td>{$row['equipment_id']}</td>
                             <td>{$row['equipment_name']}</td>
                             <td>" . ($row['equipment_status'] ? $row['equipment_status'] : "N/A") . "</td>
                             <td>" . ($row['email'] ? $row['email'] : "N/A") . "</td>
+                            <td><a href='$assign_link'>Assign</a></td>
                           </tr>";
                 }
             } else {
-                echo "<tr><td colspan='4'>No data available</td></tr>";
+                echo "<tr><td colspan='5'>No data available</td></tr>";
             }
 
             // Close the database connection
@@ -85,5 +96,6 @@ if (!$result) {
             ?>
         </tbody>
     </table>
+    <button onclick="window.location.href='equipment.php';">Go to Equipment</button>
 </body>
 </html>

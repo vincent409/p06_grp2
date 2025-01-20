@@ -1,4 +1,11 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
+    // Redirect the user to login page or show an error message
+    header("Location: login.php");
+    exit(); // Stop further execution
+}
 // Connect to the database
 $connect = mysqli_connect("localhost", "root", "", "amc");
 
