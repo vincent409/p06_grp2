@@ -48,7 +48,7 @@ function authenticate($myemail, $mypassword)
             // If it's the first login, redirect to student.php for password reset
             if ($has_logged_in == 0 && $role == "Student") {
                 // Redirect to the student password reset page
-                header("Location: student.php");
+                header("Location: change_password.php");
                 exit();
             }
 

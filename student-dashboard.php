@@ -1,4 +1,5 @@
 <?php
+// Start the session at the very beginning of the script
 session_start();
 
 // Check if the student is logged in
@@ -16,28 +17,35 @@ if (!$connect) {
 
 // Get the student's profile ID from the session
 $profile_id = $_SESSION['profile_id'];
+$email = $_SESSION['email'];
 
-// Fetch inventory records
-$inventory_query = "SELECT Equipment.id AS equipment_id, Equipment.name, Equipment.model_number, Equipment.purchase_date, Status.name AS status
-                    FROM Loan
-                    JOIN Equipment ON Loan.equipment_id = Equipment.id
-                    JOIN Status ON Loan.status_id = Status.id
-                    WHERE Loan.profile_id = ?";
-$stmt = $connect->prepare($inventory_query);
-$stmt->bind_param("i", $profile_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-// Store inventory data in an array
+// Initialize inventory records as an empty array
 $inventory_records = [];
-while ($row = $result->fetch_assoc()) {
-    $inventory_records[] = $row;
+
+try {
+    // Fetch inventory records
+    $inventory_query = "SELECT Equipment.id AS equipment_id, Equipment.name, Equipment.model_number, Equipment.purchase_date, Status.name AS status
+                        FROM Loan
+                        JOIN Equipment ON Loan.equipment_id = Equipment.id
+                        JOIN Status ON Loan.status_id = Status.id
+                        WHERE Loan.profile_id = ?";
+    $stmt = $connect->prepare($inventory_query);
+    $stmt->bind_param("i", $profile_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    // Fetch data and populate the $inventory_records array
+    while ($row = $result->fetch_assoc()) {
+        $inventory_records[] = $row;
+    }
+    $stmt->close();
+} catch (Exception $e) {
+    // Handle any query or connection errors
+    error_log("Error fetching inventory records: " . $e->getMessage());
 }
-$stmt->close();
+
 mysqli_close($connect);
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -72,6 +80,21 @@ mysqli_close($connect);
         }
         .logout-btn button:hover {
             background-color: #FF4500;
+        }
+        .change-password-btn {
+            margin-top: 20px;
+        }
+        .change-password-btn button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .change-password-btn button:hover {
+            background-color: #0056b3;
         }
         h1, h2 {
             color: #333;
@@ -115,28 +138,27 @@ mysqli_close($connect);
             display: none;
         }
     </style>
-    <script>
-        // JavaScript to toggle visibility of equipment details
-        function toggleDetails(id) {
-            const details = document.getElementById(`details-${id}`);
-            details.classList.toggle("hidden");
-        }
-    </script>
 </head>
 <body>
-    <!-- Logout Button -->
     <div class="logout-btn">
         <form action="logout.php" method="POST">
             <button type="submit">Logout</button>
         </form>
     </div>
 
-    <h1>Welcome to Your Dashboard, <?php echo htmlspecialchars($_SESSION['email']); ?>!</h1>
+    <h1>Welcome to Your Dashboard, <?php echo htmlspecialchars($email); ?>!</h1>
 
     <!-- Profile Button -->
     <div class="profile-btn">
         <a href="profile.php">
             <button>View Your Profile</button>
+        </a>
+    </div>
+
+    <!-- Change Password Button -->
+    <div class="change-password-btn">
+        <a href="change_password.php">
+            <button>Change Password</button>
         </a>
     </div>
 
@@ -160,11 +182,9 @@ mysqli_close($connect);
                             <td><?php echo htmlspecialchars($record['model_number']); ?></td>
                             <td><?php echo htmlspecialchars($record['status']); ?></td>
                             <td>
-                                <!-- Button to toggle details -->
                                 <button onclick="toggleDetails(<?php echo $record['equipment_id']; ?>)">View Details</button>
                             </td>
                         </tr>
-                        <!-- Hidden section for equipment details -->
                         <tr id="details-<?php echo $record['equipment_id']; ?>" class="hidden">
                             <td colspan="4">
                                 <div class="details-section">
