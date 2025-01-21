@@ -138,6 +138,17 @@ mysqli_close($connect);
             display: none;
         }
     </style>
+    <script>
+        // Function to toggle the visibility of details
+        function toggleDetails(id) {
+            const detailsRow = document.getElementById(`details-${id}`);
+            if (detailsRow.classList.contains('hidden')) {
+                detailsRow.classList.remove('hidden');
+            } else {
+                detailsRow.classList.add('hidden');
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="logout-btn">
