@@ -37,6 +37,8 @@ $stmt->close();
 mysqli_close($connect);
 ?>
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,6 +51,27 @@ mysqli_close($connect);
             margin: 20px;
             padding: 0;
             background-color: #f9f9f9;
+            position: relative;
+        }
+        .logout-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        .logout-btn form {
+            margin: 0;
+        }
+        .logout-btn button {
+            padding: 8px 12px;
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .logout-btn button:hover {
+            background-color: #FF4500;
         }
         h1, h2 {
             color: #333;
@@ -101,6 +124,13 @@ mysqli_close($connect);
     </script>
 </head>
 <body>
+    <!-- Logout Button -->
+    <div class="logout-btn">
+        <form action="logout.php" method="POST">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+
     <h1>Welcome to Your Dashboard, <?php echo htmlspecialchars($_SESSION['email']); ?>!</h1>
 
     <!-- Profile Button -->

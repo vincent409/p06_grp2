@@ -32,7 +32,8 @@ if ($has_logged_in == 1) {
 }
 
 // Handle password reset
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$success = false; // Flag to track if password was changed successfully
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Get new password
     $new_password = $_POST['new_password'];
 
@@ -53,15 +54,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_update_login->bind_param("i", $profile_id);
         $stmt_update_login->execute();
 
-        // Redirect to the student dashboard
-        echo "<p>Password reset successful!</p>";
-        header("refresh:2;url=student-dashboard.php");  // Redirect after 2 seconds
+        // Indicate success
+        $success = true;
+
+        // Redirect after success
+        echo "<script>
+            alert('Password has been changed successfully!');
+            window.location.href = 'student-dashboard.php';
+        </script>";
         exit();
     } else {
-        echo "<p>Password must be at least 6 characters long!</p>";
+        echo "<script>alert('Password must be at least 6 characters long!');</script>";
     }
 }
-
 ?>
 
 <!DOCTYPE html>
