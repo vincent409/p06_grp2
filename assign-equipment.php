@@ -172,7 +172,7 @@ if (isset($_POST['delete_equipment'])) {
         <form method="POST" action="assign-equipment.php?equipment_id=<?php echo $equipment_id; ?>">
             <button type="submit" name="delete_equipment" onclick="return confirm('Are you sure you want to delete this equipment assignment?');">Delete Assignment</button>
         </form>
-    <?php endif; ?>
+
 
     <button onclick="window.location.href='admin.php';">Back to Assignment List</button>
 </body>

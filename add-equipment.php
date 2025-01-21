@@ -67,6 +67,7 @@ mysqli_close($connect);
         <input type="text" id="model_number" name="model_number" required><br><br>
 
         <button type="submit" name="login-button">Add Equipment</button>
+        <button onclick="window.location.href='equipment.php';">View All Equipment</button>
     </form>
 </body>
 </html>

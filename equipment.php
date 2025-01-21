@@ -7,6 +7,7 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
     header("Location: login.php");
     exit(); // Stop further execution
 }
+
 // Establish a database connection
 $connect = mysqli_connect("localhost", "root", "", "amc") or die("Cannot connect to database");
 
@@ -20,7 +21,6 @@ $result = mysqli_query($connect, $sql);
 if (!$result) {
     die("Query failed: " . mysqli_error($connect));
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,10 +42,19 @@ if (!$result) {
         th {
             background-color: #f2f2f2;
         }
+        .success-message {
+            color: green;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <h1>Equipment List</h1>
+
+    <!-- Success message -->
+    <?php if (isset($_GET['deleted']) && $_GET['deleted'] == 1) { ?>
+        <p class="success-message">Equipment successfully deleted!</p>
+    <?php } ?>
 
     <?php
     // Check if any records were returned
@@ -53,11 +62,11 @@ if (!$result) {
         echo "<table>";
         echo "<thead>
                 <tr>
-                    <th>ID</th>
                     <th>Name</th>
                     <th>Type</th>
                     <th>Purchase Date</th>
                     <th>Model Number</th>
+                    <th>Action</th> <!-- New column for Edit -->
                 </tr>
               </thead>";
         echo "<tbody>";
@@ -65,11 +74,11 @@ if (!$result) {
         // Fetch and display each row of data
         while ($row = mysqli_fetch_assoc($result)) {
             echo "<tr>
-                    <td>" . $row['id'] . "</td>
                     <td>" . $row['name'] . "</td>
                     <td>" . $row['type'] . "</td>
                     <td>" . $row['purchase_date'] . "</td>
                     <td>" . $row['model_number'] . "</td>
+                    <td><a href='update-equipment.php?id=" . $row['id'] . "'>Edit</a></td>
                   </tr>";
         }
 

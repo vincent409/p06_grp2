@@ -102,6 +102,6 @@ if (!$result) {
             ?>
         </tbody>
     </table>
-    <button onclick="window.location.href='equipment.php';">Go to Equipment</button>
+    <button onclick="window.location.href='equipment.php';">View All Equipment</button>
 </body>
 </html>
