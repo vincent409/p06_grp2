@@ -21,3 +21,9 @@ VALUES
 ALTER TABLE Profile
 ADD reset_token VARCHAR(255),
 ADD reset_token_time DATETIME;
+
+INSERT INTO `usage_log`(`id`, `equipment_id`, `log_details`, `assigned_date`, `returned_date`)
+VALUES 
+    ('1','1','Cool','2025-10-10','NULL')
+    ('2','2','Hard','2025-11-11','NULL')
+    ('3','3','Wrench Wrench','2025-12-12','NULL')
