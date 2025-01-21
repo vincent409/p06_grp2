@@ -9,6 +9,9 @@ require 'C:\xampp\htdocs\xampp\p06_grp2\PHPMailer-master\src\SMTP.php';         
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+// Set the default timezone to Singapore Time (SGT)
+date_default_timezone_set('Asia/Singapore');
+
 // Connect to the database
 $connect = mysqli_connect("localhost", "root", "", "amc");
 
@@ -30,30 +33,31 @@ if (isset($_POST['email'])) {
     if ($stmt->num_rows > 0) {
         // Generate a unique token for the password reset link
         $token = bin2hex(random_bytes(50)); // Generate a secure token
-        $current_time = date('Y-m-d H:i:s');
+        $current_time = date('Y-m-d H:i:s'); // Current time in Singapore Time
 
         // Store the token in the database
         $update_sql = "UPDATE Profile SET reset_token = ?, reset_token_time = ? WHERE email = ?";
         $stmt_update = $connect->prepare($update_sql);
-        $stmt_update->bind_param("ss", $token, $email,$current_time);
+        $stmt_update->bind_param("sss", $token, $current_time, $email);
         $stmt_update->execute();
 
         // Send the password reset link to the user's email using PHPMailer
         $reset_link = "http://localhost/xampp/p06_grp2/reset_password.php?token=" . $token;
         $message = "Click the link to reset your password: <a href='" . $reset_link . "'>Reset Password</a>";
         $subject = "Password Reset Request";
+
         // Set up PHPMailer
         $mail = new PHPMailer(true); // Create a new PHPMailer instance
 
         try {
             // Server settings
             $mail->isSMTP();                          // Set mailer to use SMTP
-            $mail->Host = 'smtp.gmail.com';       // Outlook SMTP server
+            $mail->Host = 'smtp.gmail.com';           // Gmail SMTP server
             $mail->SMTPAuth = true;                   // Enable SMTP authentication
-            $mail->Username = 'amctemasek@gmail.com'; // Your Outlook email address
-            $mail->Password = 'itub szoc bbtw mqld';         // Your Outlook email password
+            $mail->Username = 'amctemasek@gmail.com'; // Your Gmail email address
+            $mail->Password = 'itub szoc bbtw mqld';  // Your Gmail email password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;  // Enable TLS encryption
-            $mail->Port = 587;                        // TCP port for Outlook SMTP server
+            $mail->Port = 587;                        // TCP port for Gmail SMTP server
 
             // Recipients
             $mail->setFrom('amctemasek@gmail.com');
@@ -81,4 +85,3 @@ if (isset($_POST['email'])) {
     header("Location: forgot_password.php");
     exit();
 }
-?>
