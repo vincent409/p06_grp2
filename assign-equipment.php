@@ -2,10 +2,10 @@
 session_start();
 
 // Check if the user has the Admin role
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== "Admin") {
-    // Redirect to another page or show an error if the user is not an Admin
-    echo "You do not have permission to access this page.";
-    exit();
+if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
+    // Redirect the user to login page or show an error message
+    header("Location: login.php");
+    exit(); // Stop further execution
 }
 
 // Check if the equipment_id is provided via GET
@@ -169,12 +169,11 @@ if (isset($_POST['delete_equipment'])) {
     </form>
 
     <!-- Only show the delete button if the user is an admin -->
-    <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'Admin'): ?>
         <form method="POST" action="assign-equipment.php?equipment_id=<?php echo $equipment_id; ?>">
             <button type="submit" name="delete_equipment" onclick="return confirm('Are you sure you want to delete this equipment assignment?');">Delete Assignment</button>
         </form>
     <?php endif; ?>
 
-    <button onclick="window.location.href='admin.php';">Back to Equipment List</button>
+    <button onclick="window.location.href='admin.php';">Back to Assignment List</button>
 </body>
 </html>

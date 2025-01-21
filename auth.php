@@ -55,16 +55,20 @@ function authenticate($myemail, $mypassword)
             // Redirect based on the role
             if ($role == "Student") {
                 header("Location: student-dashboard.php");  // Redirect to student dashboard
+                exit();
             } else if ($role == "Facility Manager" || $role == "Admin") {
                 header("Location: admin.php");  // Redirect to admin page
+                exit();
             }
         } else {
             // Password does not match
-            echo "Invalid email or password!";
+            header("Location: login.php?error=1");  // Redirect back with error message
+            exit();
         }
     } else {
         // If no matching email is found
-        echo "Invalid email or password!";
+        header("Location: login.php?error=1");  // Redirect back with error message
+        exit();
     }
 
     // Close the statement
@@ -81,8 +85,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     authenticate($myemail, $mypassword);
 } else {
     // If the form is not submitted properly, redirect to login page
-    header("Location: login.php");
+    header("Location: login.php");  // Redirect to login page
     exit();
 }
 ?>
-

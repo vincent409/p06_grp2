@@ -4,40 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Login</h1>
-    
-    <?php
-    // Check if there is an error query parameter
-    if (isset($_GET['error']) && $_GET['error'] == 1) {
-        echo "<p style='color: red;'>email and password do not match!</p>";
-    }
-    ?>
 
-    <form name="form1" method="post" action="auth.php">
-        <table>
-            <tr>
-                <td><strong>Member Login</strong></td>
-            </tr>
-            <tr>
-                <td>Email</td>
-                <td>:</td>
-                <td><input name="email" type="email" id="email" required></td>
-            </tr>
+    <div class="login-container">
+        <img src="img/TP-logo.png" alt="TP Logo" width="325" height="120">
+        <h1>AMC Login</h1>
 
-            <tr>
-                <td>Password</td>
-                <td>:</td>
-                <td><input name="password" type="password" id="password" required></td>
-            </tr>
+        <?php
+        // Check if there is an error query parameter
+        if (isset($_GET['error']) && $_GET['error'] == 1) {
+            echo "<p style='color: red;'>Email and password do not match!</p>";
+        }
+        ?>
 
-            <tr>
-                <td></td>
-                <td></td>
-                <td><input type="submit" name="Submit" value="Login"></td>
-            </tr>
-        </table>
-    </form>
+        <form name="form1" method="post" action="auth.php">
+            <input name="email" type="email" id="email" class="input-field" placeholder="Email" required><br>
+            <input name="password" type="password" id="password" class="input-field" placeholder="Password" required><br>
+            <input type="submit" name="Submit" value="Login" class="btn">
+        </form>
+
+        <a href="forgot-password.html" class="forgot-password">Forgot password?</a>
+    </div>
+
 </body>
 </html>
