@@ -43,12 +43,16 @@ if (!$result) {
         th {
             background-color: #f2f2f2;
         }
-        a {
-            text-decoration: none;
-            color: blue;
+        .btn-edit {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
         }
-        a:hover {
-            text-decoration: underline;
+        .btn-edit:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
@@ -70,8 +74,10 @@ if (!$result) {
             <td><?php echo htmlspecialchars($row['phone_number']); ?></td>
             <td><?php echo htmlspecialchars($row['department']); ?></td>
             <td>
-                <a href="edit_profile.php?id=<?php echo $row['id']; ?>">Edit</a> |
-                <a href="delete_profile.php?id=<?php echo $row['id']; ?>" onclick="return confirm('Are you sure you want to delete this profile?');">Delete</a>
+                <form action="edit_profile.php" method="GET" style="display: inline;">
+                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                    <button type="submit" class="btn-edit">Edit</button>
+                </form>
             </td>
         </tr>
         <?php } ?>

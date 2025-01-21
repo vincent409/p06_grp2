@@ -6,35 +6,10 @@ $connect = mysqli_connect("localhost", "root", "", "amc");
 if (!$connect) {
     die("Connection failed: " . mysqli_connect_error());
 }
-
 // Check if the user is an Admin or Facility Manager
 if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
-    die("You do not have permission to create or delete profiles.");
+    die("You do not have permission to create profiles.");
 }
-
-// Handle profile deletion
-if (isset($_GET['delete_id'])) {
-    $delete_id = $_GET['delete_id'];
-
-    // Delete the profile from the database
-    $delete_sql = "DELETE FROM Profile WHERE id = ?";
-    $stmt = $connect->prepare($delete_sql);
-    $stmt->bind_param("i", $delete_id);
-    if ($stmt->execute()) {
-        // Redirect to the same page after deletion
-        header("Location: create_profile.php?message=deleted");
-        exit;
-    } else {
-        echo "Error deleting profile: " . $stmt->error;
-    }
-}
-
-// Handle success message after deletion
-if (isset($_GET['message']) && $_GET['message'] == 'deleted') {
-    echo "<p style='color: green;'>Profile deleted successfully.</p>";
-}
-
-// Handle profile creation
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Collect form data
     $name = $_POST['name'];
@@ -50,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->execute();
 
     // Redirect after successful creation
-    header("Location: create_profile.php?message=created");
+    header("Location: manage_profile.php");
     exit;
 }
 ?>
@@ -59,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Create or Manage Profiles</title>
+    <title>Create Profile</title>
 </head>
 <body>
     <h1>Create New Student Profile</h1>
@@ -78,38 +53,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <input type="submit" value="Create Profile">
     </form>
-
-    <h2>Manage Profiles</h2>
-
-    <table border="1">
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone Number</th>
-            <th>Department</th>
-            <th>Actions</th>
-        </tr>
-        <?php
-        // Fetch and display profiles
-        $fetch_sql = "SELECT id, name, email, phone_number, department FROM Profile";
-        $result = $connect->query($fetch_sql);
-
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                echo "<tr>";
-                echo "<td>" . $row['name'] . "</td>";
-                echo "<td>" . $row['email'] . "</td>";
-                echo "<td>" . $row['phone_number'] . "</td>";
-                echo "<td>" . $row['department'] . "</td>";
-                echo "<td>
-                        <a href='create_profile.php?delete_id=" . $row['id'] . "' onclick='return confirm(\"Are you sure you want to delete this profile?\");'>Delete</a>
-                      </td>";
-                echo "</tr>";
-            }
-        } else {
-            echo "<tr><td colspan='6'>No profiles found.</td></tr>";
-        }
-        ?>
-    </table>
 </body>
 </html>
