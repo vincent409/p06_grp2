@@ -16,3 +16,8 @@ INSERT INTO User_Credentials (profile_id, password)
 VALUES
     (1, '$2y$10$HE02jImEn1yfE2xnf.qeZuJhDu5vwzjwO09/Chg1TTU4yh9i8WUJC'),
     (2, '$2y$10$Qvb79s46q5sCCY4b9oqdAe.VyMXJ90fMdhxaeM30/TZ9dZKMlnRH6');
+
+
+ALTER TABLE Profile
+ADD reset_token VARCHAR(255),
+ADD reset_token_time DATETIME;

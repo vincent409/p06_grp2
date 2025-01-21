@@ -30,11 +30,12 @@ if (isset($_POST['email'])) {
     if ($stmt->num_rows > 0) {
         // Generate a unique token for the password reset link
         $token = bin2hex(random_bytes(50)); // Generate a secure token
+        $current_time = date('Y-m-d H:i:s');
 
         // Store the token in the database
-        $update_sql = "UPDATE Profile SET reset_token = ? WHERE email = ?";
+        $update_sql = "UPDATE Profile SET reset_token = ?, reset_token_time = ? WHERE email = ?";
         $stmt_update = $connect->prepare($update_sql);
-        $stmt_update->bind_param("ss", $token, $email);
+        $stmt_update->bind_param("ss", $token, $email,$current_time);
         $stmt_update->execute();
 
         // Send the password reset link to the user's email using PHPMailer
