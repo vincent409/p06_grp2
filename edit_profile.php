@@ -44,6 +44,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update'])) {
 
 // Handle deletion
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
+    // Ensure only Admins can delete profiles
+    if ($_SESSION['role'] != 'Admin') {
+        die("You do not have permission to delete profiles.");
+    }
+
     $id = $_POST['id'];
     $delete_sql = "DELETE FROM Profile WHERE id = ?";
     $stmt = $connect->prepare($delete_sql);
@@ -62,7 +67,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
+    <style>
+        .btn-delete {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .btn-delete:hover {
+            background-color: darkred;
+        }
+    </style>
 </head>
 <body>
     <h1>Edit Profile</h1>
@@ -71,25 +90,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
         <input type="hidden" name="id" value="<?php echo $id; ?>">
 
         <label for="name">Name:</label>
-        <input type="text" name="name" value="<?php echo $name; ?>" required><br><br>
+        <input type="text" name="name" value="<?php echo htmlspecialchars($name); ?>" required><br><br>
 
         <label for="email">Email:</label>
-        <input type="email" name="email" value="<?php echo $email; ?>" required><br><br>
+        <input type="email" name="email" value="<?php echo htmlspecialchars($email); ?>" required><br><br>
 
         <label for="phone_number">Phone Number:</label>
-        <input type="text" name="phone_number" value="<?php echo $phone_number; ?>"><br><br>
+        <input type="text" name="phone_number" value="<?php echo htmlspecialchars($phone_number); ?>"><br><br>
 
         <label for="department">Department:</label>
-        <input type="text" name="department" value="<?php echo $department; ?>" required><br><br>
+        <input type="text" name="department" value="<?php echo htmlspecialchars($department); ?>" required><br><br>
 
         <input type="submit" name="update" value="Update Profile">
     </form>
 
+    <!-- Only show the delete button if the user is an Admin -->
+    <?php if ($_SESSION['role'] == 'Admin') { ?>
     <form action="edit_profile.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this profile?');">
         <!-- Pass the ID as a hidden field -->
         <input type="hidden" name="id" value="<?php echo $id; ?>">
         <input type="hidden" name="delete" value="1">
-        <input type="submit" value="Delete Profile" style="background-color: red; color: white;">
+        <input type="submit" value="Delete Profile" class="btn-delete">
     </form>
+    <?php } ?>
 </body>
 </html>
+

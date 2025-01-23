@@ -12,8 +12,13 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['rol
     die("You do not have permission to view this page.");
 }
 
-// Fetch all student profiles from the database
-$sql = "SELECT id, name, email, phone_number, department FROM Profile WHERE role_id = 3"; // Assuming role_id=3 corresponds to 'Student'
+// Fetch only student profiles from the database
+$sql = "
+    SELECT Profile.id, Profile.name, Profile.email, Profile.phone_number, Profile.department 
+    FROM Profile 
+    JOIN Role ON Profile.role_id = Role.id 
+    WHERE Role.name = 'Student';
+";
 $result = mysqli_query($connect, $sql);
 
 if (!$result) {
