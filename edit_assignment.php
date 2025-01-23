@@ -61,7 +61,7 @@ $query = "SELECT loan.id, loan.status_id, loan.profile_id, loan.equipment_id, us
           LEFT JOIN usage_log ON loan.equipment_id = usage_log.equipment_id
           LEFT JOIN status ON loan.status_id = status.id
           LEFT JOIN profile ON loan.profile_id = profile.id
-          ORDER BY loan.id ASC";  // Order by id in ascending order
+          ORDER BY loan.profile_id ASC";
 $result = mysqli_query($connect, $query);
 
 // Check if there are any records
@@ -76,117 +76,165 @@ if (mysqli_num_rows($result) > 0):
     <title>Edit Assignments</title>
     <style>
         body {
-            background-color: white;
-            font-family: Arial, sans-serif;
-            color: black;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
+    background-color: white;
+    font-family: Arial, sans-serif;
+    color: black;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
 
-        h1 {
-            color: black;
-            background-color: white;
-            padding: 20px;
-            margin: 0;
-            font-size: 2em;
-        }
+h1 {
+    color: black;
+    background-color: white;
+    padding: 20px;
+    margin: 0;
+    font-size: 2em;
+}
 
-        form, table {
-            width: 100%;
-            max-width: 900px;
-            margin: 20px auto;
-            box-sizing: border-box;
-        }
+form, table {
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    box-sizing: border-box;
+}
 
-        label {
-            font-size: 1em;
-            display: block;
-            margin: 10px 0 5px;
-        }
+label {
+    font-size: 1em;
+    display: block;
+    margin: 10px 0 5px;
+}
 
-        input, button {
-            padding: 12px;
-            margin: 10px 0;
-            font-size: 1.2em;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            width: 100%;
-            max-width: 300px; /* Ensures inputs are not too wide */
-        }
+input, button {
+    padding: 12px;
+    margin: 10px 0;
+    font-size: 1.2em;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
+    max-width: 300px; /* Ensures inputs are not too wide */
+    box-sizing: border-box; /* Prevents padding from increasing the width */
+}
 
-        button {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-            width: auto;
-            padding: 12px 20px;
-        }
+button {
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+    width: auto;
+    padding: 12px 20px;
+}
 
-        button:hover {
-            background-color: #0056b3;
-        }
+button:hover {
+    background-color: #0056b3;
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-            font-size: 1em;
-        }
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+    font-size: 1em;
+}
 
-        th {
-            background-color: #f2f2f2;
-        }
+th {
+    background-color: #f2f2f2;
+}
 
-        td input, td button {
-            width: 100%;
-            max-width: 250px; /* Make inputs inside the actions column fit */
-            padding: 12px;
-            font-size: 1em;
-        }
+td input, td button {
+    width: 100%;
+    max-width: 250px; /* Make inputs inside the actions column fit */
+    padding: 12px;
+    font-size: 1em;
+}
 
-        .action-button {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-            width: auto;
-            font-size: 1em;
-            padding: 10px 15px;
-            text-decoration: none; /* Remove underline */
-        }
+/* Action Buttons Styling */
+.update-button, .delete-button {
+    font-size: 1em;
+    padding: 12px 20px;
+    width: 48%;
+    text-align: center;
+    cursor: pointer;
+    display: inline-block;
+}
 
-        .action-button:hover {
-            background-color: #0056b3;
-        }
+.update-button {
+    background-color: #007BFF;
+    color: white;
+}
 
-        .back-button {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-            width: auto;
-            font-size: 1em;
-            padding: 10px 15px;
-            text-decoration: none; /* Remove underline */
-        }
+.update-button:hover {
+    background-color: #0056b3;
+}
 
-        .back-button:hover {
-            background-color: #0056b3;
-        }
+.delete-button {
+    background-color: #FF0000;
+    color: white;
+}
 
-        td a {
-            color: #FF0000; /* Make Delete button red */
-            text-decoration: none;
-            font-size: 1.1em;
-        }
+.delete-button:hover {
+    background-color: #cc0000;
+}
 
-        td a:hover {
-            text-decoration: underline;
-        }
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+td a {
+    text-decoration: none;
+}
+
+/* Back Button Styling */
+.back-button {
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+    padding: 15px 20px;
+    margin-top: 20px;
+    font-size: 1.2em;
+    text-decoration: none;
+}
+
+.back-button:hover {
+    background-color: #0056b3;
+}
+
+/* Button Styling for No Inventory */
+.no-inventory-button {
+    background-color: #007BFF; /* Blue color */
+    color: white;
+    cursor: pointer;
+    padding: 15px 20px;
+    margin-top: 20px;
+    font-size: 1.2em;
+    text-decoration: none; /* Remove underline */
+    display: inline-block; /* Ensures the link behaves like a block-level button */
+    border-radius: 5px; /* Rounded corners to match button style */
+    width: auto;
+}
+
+.no-inventory-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.input-container input {
+    margin-top: 5px;
+    width: 100%;  /* Ensure the input is always within the container */
+    max-width: 300px; /* Keep the width manageable */
+    box-sizing: border-box; /* Ensures padding doesn't push the element outside the container */
+}
     </style>
 </head>
 <body>
@@ -214,11 +262,22 @@ if (mysqli_num_rows($result) > 0):
                 <td>
                     <form action="edit_assignment.php" method="POST" style="display:inline;">
                         <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
-                        Email: <input type="email" name="email" value="<?php echo $row['profile_email']; ?>" required><br>
-                        Equipment ID: <input type="text" name="equipment_id" value="<?php echo $row['equipment_id']; ?>" required><br>
-                        <button type="submit" class="action-button">Update</button>
+
+                        <div class="input-container">
+                            <label>Email:</label>
+                            <input type="email" name="email" value="<?php echo $row['profile_email']; ?>" required>
+                        </div>
+
+                        <div class="input-container">
+                            <label>Equipment ID:</label>
+                            <input type="text" name="equipment_id" value="<?php echo $row['equipment_id']; ?>" required>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button type="submit" class="update-button">Update</button>
+                            <button type="button" class="delete-button" onclick="if (confirm('Are you sure you want to delete this assignment?')) { window.location.href='edit_assignment.php?delete_id=<?php echo $row['id']; ?>'; }">Delete</button>
+                        </div>
                     </form>
-                    <a href="edit_assignment.php?delete_id=<?php echo $row['id']; ?>" class="action-button" onclick="return confirm('Are you sure you want to delete this assignment?')">Delete</a>
                 </td>
             </tr>
             <?php endwhile; ?>
@@ -226,13 +285,12 @@ if (mysqli_num_rows($result) > 0):
     </table>
 
     <!-- Back button to add_assignment.php -->
-    <a href="add_assignment.php" class="action-button">Back</a>
+    <a href="add_assignment.php" class="back-button">Back</a>
 
     <?php else: ?>
 
     <h2 style="text-align:center;">No inventory has been assigned.</h2>
-    <!-- Back button when no data is present -->
-    <a href="add_assignment.php" class="back-button">Back</a>
+    <a href="add_assignment.php" class="no-inventory-button">Back</a>
 
     <?php endif; ?>
 
