@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/xampp/p06_grp2/styles.css">
 </head>
 <body>
 
     <div class="login-container">
-        <img src="img/TP-logo.png" alt="TP Logo" width="325" height="120">
+        <img src="/xampp/p06_grp2/img/TP-logo.png" alt="TP Logo" width="325" height="120">
         <h1>AMC Login</h1>
 
         <?php
