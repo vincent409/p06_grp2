@@ -9,16 +9,16 @@ if (isset($_GET['token'])) {
         die("Connection failed: " . mysqli_connect_error());
     }
 
-    // Query the Profile table for the token and its timestamp
-    $sql = "SELECT reset_token_time, email, id FROM Profile WHERE reset_token = ?";
+    // Query the PasswordReset table for the token and its timestamp
+    $sql = "SELECT reset_token_time, profile_id FROM PasswordReset WHERE reset_token = ?";
     $stmt = $connect->prepare($sql);
     $stmt->bind_param("s", $token);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        // Fetch the stored reset_token_time, email, and profile_id from the Profile table
-        $stmt->bind_result($reset_token_time, $email, $profile_id);
+        // Fetch the stored reset_token_time and profile_id from the PasswordReset table
+        $stmt->bind_result($reset_token_time, $profile_id);
         $stmt->fetch();
 
         $current_time = new DateTime();
@@ -29,6 +29,13 @@ if (isset($_GET['token'])) {
 
         if ($current_time > $expiry_time) {
             echo "This password reset link has expired.";
+
+            // Optionally, delete the expired token
+            $delete_sql = "DELETE FROM PasswordReset WHERE reset_token = ?";
+            $delete_stmt = $connect->prepare($delete_sql);
+            $delete_stmt->bind_param("s", $token);
+            $delete_stmt->execute();
+            $delete_stmt->close();
         } else {
             // Token is valid, show the password reset form
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -46,11 +53,11 @@ if (isset($_GET['token'])) {
                     $update_stmt = $connect->prepare($update_sql);
                     $update_stmt->bind_param("si", $hashed_password, $profile_id);
                     if ($update_stmt->execute()) {
-                        // Clear the reset token from the Profile table after password reset
-                        $clear_token_sql = "UPDATE Profile SET reset_token = NULL, reset_token_time = NULL WHERE id = ?";
-                        $clear_token_stmt = $connect->prepare($clear_token_sql);
-                        $clear_token_stmt->bind_param("i", $profile_id);
-                        $clear_token_stmt->execute();
+                        // Delete the token from the PasswordReset table after password reset
+                        $delete_token_sql = "DELETE FROM PasswordReset WHERE profile_id = ?";
+                        $delete_token_stmt = $connect->prepare($delete_token_sql);
+                        $delete_token_stmt->bind_param("i", $profile_id);
+                        $delete_token_stmt->execute();
 
                         // Redirect to the login page
                         header("Location: login.php?message=success");
@@ -60,7 +67,7 @@ if (isset($_GET['token'])) {
                     }
 
                     $update_stmt->close();
-                    $clear_token_stmt->close();
+                    $delete_token_stmt->close();
                 } else {
                     echo "The passwords do not match. Please try again.";
                 }
@@ -97,4 +104,3 @@ if (isset($_GET['token'])) {
     echo "No token provided.";
 }
 ?>
-

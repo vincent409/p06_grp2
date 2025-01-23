@@ -152,9 +152,7 @@ mysqli_close($connect);
 </head>
 <body>
     <div class="logout-btn">
-        <form action="logout.php" method="POST">
-            <button type="submit">Logout</button>
-        </form>
+        <button onclick="window.location.href='logout.php';">Logout</button>
     </div>
 
     <h1>Welcome to Your Dashboard, <?php echo htmlspecialchars($email); ?>!</h1>

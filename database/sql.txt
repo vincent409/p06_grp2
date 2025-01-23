@@ -76,3 +76,10 @@ VALUES
     ('Assigned'),
     ('In-Use'),
     ('Returned');
+CREATE TABLE PasswordReset (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    profile_id INT NOT NULL,
+    reset_token VARCHAR(255) NOT NULL,
+    reset_token_time DATETIME NOT NULL,
+    FOREIGN KEY (profile_id) REFERENCES Profile(id) ON DELETE CASCADE
+);

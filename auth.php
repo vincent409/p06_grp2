@@ -57,7 +57,7 @@ function authenticate($myemail, $mypassword)
                 header("Location: student-dashboard.php");  // Redirect to student dashboard
                 exit();
             } else if ($role == "Facility Manager" || $role == "Admin") {
-                header("Location: admin.php");  // Redirect to admin page
+                header("Location: admin-dashboard.php");  // Redirect to admin page
                 exit();
             }
         } else {

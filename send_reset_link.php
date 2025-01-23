@@ -23,7 +23,7 @@ if (!$connect) {
 if (isset($_POST['email'])) {
     $email = $_POST['email'];
 
-    // Check if the email exists in the database
+    // Check if the email exists in the database and get the profile_id
     $sql = "SELECT id FROM Profile WHERE email = ?";
     $stmt = $connect->prepare($sql);
     $stmt->bind_param("s", $email);
@@ -31,15 +31,19 @@ if (isset($_POST['email'])) {
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
+        // Fetch the profile ID
+        $stmt->bind_result($profile_id);
+        $stmt->fetch();
+
         // Generate a unique token for the password reset link
         $token = bin2hex(random_bytes(50)); // Generate a secure token
         $current_time = date('Y-m-d H:i:s'); // Current time in Singapore Time
 
-        // Store the token in the database
-        $update_sql = "UPDATE Profile SET reset_token = ?, reset_token_time = ? WHERE email = ?";
-        $stmt_update = $connect->prepare($update_sql);
-        $stmt_update->bind_param("sss", $token, $current_time, $email);
-        $stmt_update->execute();
+        // Insert the token into the PasswordReset table
+        $insert_sql = "INSERT INTO PasswordReset (profile_id, reset_token, reset_token_time) VALUES (?, ?, ?)";
+        $stmt_insert = $connect->prepare($insert_sql);
+        $stmt_insert->bind_param("iss", $profile_id, $token, $current_time);
+        $stmt_insert->execute();
 
         // Send the password reset link to the user's email using PHPMailer
         $reset_link = "http://localhost/xampp/p06_grp2/reset_password.php?token=" . $token;
@@ -66,7 +70,7 @@ if (isset($_POST['email'])) {
             // Content
             $mail->isHTML(true);                      // Set email format to HTML
             $mail->Subject = $subject;
-            $mail->Body    = nl2br($message); 
+            $mail->Body    = nl2br($message);
 
             // Send the email
             $mail->send();
@@ -79,9 +83,11 @@ if (isset($_POST['email'])) {
     }
 
     $stmt->close();
+    $stmt_insert->close();
     mysqli_close($connect);
 } else {
     // If email is not set, redirect to forgot password page
     header("Location: forgot_password.php");
     exit();
 }
+
