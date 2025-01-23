@@ -84,7 +84,7 @@ if (!$result) {
             if (mysqli_num_rows($result) > 0) {
                 while ($row = mysqli_fetch_assoc($result)) {
                     // Create the link for assigning the equipment
-                    $assign_link = "assign-equipment.php?equipment_id=" . $row['equipment_id'];
+                    $assign_link = "add_assignment.php?equipment_id=" . $row['equipment_id'];
                     echo "<tr>
                             <td>{$row['equipment_id']}</td>
                             <td>{$row['equipment_name']}</td>
