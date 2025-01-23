@@ -2,10 +2,12 @@
 // Include database connection
 $connect = mysqli_connect("localhost", "root", "", "amc");
 
-// Check connection
 if (!$connect) {
     die("Connection failed: " . mysqli_connect_error());
 }
+
+// Initialize error message variable
+$error_message = '';
 
 // Handle DELETE request
 if (isset($_GET['delete_id'])) {
@@ -33,25 +35,44 @@ if (isset($_POST['update_id'])) {
     $new_email = $_POST['email'];  // Get the email from the form
     $new_equipment_id = $_POST['equipment_id'];
 
-    // Fetch the profile_id from the Profile table using the provided email
-    $profile_query = "SELECT id FROM Profile WHERE email = '$new_email' LIMIT 1";
-    $profile_result = mysqli_query($connect, $profile_query);
-
-    if (mysqli_num_rows($profile_result) > 0) {
-        // Retrieve the profile_id from the result
-        $profile_row = mysqli_fetch_assoc($profile_result);
-        $profile_id = $profile_row['id'];
-
-        // Update the loan table (profile_id and equipment_id)
-        $update_query = "UPDATE loan SET profile_id = '$profile_id', equipment_id = '$new_equipment_id' WHERE id = '$update_id'";
-
-        if (mysqli_query($connect, $update_query)) {
-            echo "Assignment updated successfully.";
-        } else {
-            echo "Error: " . $update_query . "<br>" . mysqli_error($connect);
-        }
+    // Check if the email exists in the Profile table
+    $check_email_query = "SELECT * FROM Profile WHERE LOWER(email) = LOWER('$new_email')";
+    $check_email_result = mysqli_query($connect, $check_email_query);
+    
+    if (mysqli_num_rows($check_email_result) == 0) {
+        // If the email doesn't exist, set the error message
+        $error_message = "Error: The entered email does not exist.";
     } else {
-        echo "Error: No profile found for the provided email.";
+        // Check if the equipment_id exists in the Equipment table
+        $check_equipment_query = "SELECT * FROM Equipment WHERE id = '$new_equipment_id'";
+        $check_equipment_result = mysqli_query($connect, $check_equipment_query);
+        
+        if (mysqli_num_rows($check_equipment_result) == 0) {
+            // If the equipment_id does not exist, set the error message
+            $error_message = "Error: The entered equipment ID does not exist.";
+        } else {
+            // Check if the equipment_id is already assigned to another user
+            $check_equipment_query = "SELECT * FROM loan WHERE equipment_id = '$new_equipment_id' AND id != '$update_id'";
+            $check_equipment_result = mysqli_query($connect, $check_equipment_query);
+            
+            if (mysqli_num_rows($check_equipment_result) > 0) {
+                // If the equipment_id is already assigned, set error message
+                $error_message = "Error: This equipment ID is already assigned to another user.";
+            } else {
+                // Retrieve the profile_id from the result
+                $profile_row = mysqli_fetch_assoc($check_email_result);
+                $profile_id = $profile_row['id'];
+
+                // Update the loan table (profile_id and equipment_id)
+                $update_query = "UPDATE loan SET profile_id = '$profile_id', equipment_id = '$new_equipment_id' WHERE id = '$update_id'";
+
+                if (mysqli_query($connect, $update_query)) {
+                    echo "Assignment updated successfully.";
+                } else {
+                    echo "Error: " . $update_query . "<br>" . mysqli_error($connect);
+                }
+            }
+        }
     }
 }
 
@@ -76,170 +97,172 @@ if (mysqli_num_rows($result) > 0):
     <title>Edit Assignments</title>
     <style>
         body {
-    background-color: white;
-    font-family: Arial, sans-serif;
-    color: black;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-}
+            background-color: white;
+            font-family: Arial, sans-serif;
+            color: black;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
 
-h1 {
-    color: black;
-    background-color: white;
-    padding: 20px;
-    margin: 0;
-    font-size: 2em;
-}
+        h1 {
+            color: black;
+            background-color: white;
+            padding: 20px;
+            margin: 0;
+            font-size: 2em;
+        }
 
-form, table {
-    width: 100%;
-    max-width: 900px;
-    margin: 20px auto;
-    box-sizing: border-box;
-}
+        form, table {
+            width: 100%;
+            max-width: 900px;
+            margin: 20px auto;
+            box-sizing: border-box;
+        }
 
-label {
-    font-size: 1em;
-    display: block;
-    margin: 10px 0 5px;
-}
+        label {
+            font-size: 1em;
+            display: block;
+            margin: 10px 0 5px;
+        }
 
-input, button {
-    padding: 12px;
-    margin: 10px 0;
-    font-size: 1.2em;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    width: 100%;
-    max-width: 300px; /* Ensures inputs are not too wide */
-    box-sizing: border-box; /* Prevents padding from increasing the width */
-}
+        input, button {
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 1.2em;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 300px; /* Ensures inputs are not too wide */
+            box-sizing: border-box; /* Prevents padding from increasing the width */
+        }
 
-button {
-    background-color: #007BFF;
-    color: white;
-    cursor: pointer;
-    width: auto;
-    padding: 12px 20px;
-}
+        button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            width: auto;
+            padding: 12px 20px;
+        }
 
-button:hover {
-    background-color: #0056b3;
-}
+        button:hover {
+            background-color: #0056b3;
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 12px;
-    text-align: left;
-    font-size: 1em;
-}
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            font-size: 1em;
+        }
 
-th {
-    background-color: #f2f2f2;
-}
+        th {
+            background-color: #f2f2f2;
+        }
 
-td input, td button {
-    width: 100%;
-    max-width: 250px; /* Make inputs inside the actions column fit */
-    padding: 12px;
-    font-size: 1em;
-}
+        td input, td button {
+            width: 100%;
+            max-width: 250px; /* Make inputs inside the actions column fit */
+            padding: 12px;
+            font-size: 1em;
+        }
 
-/* Action Buttons Styling */
-.update-button, .delete-button {
-    font-size: 1em;
-    padding: 12px 20px;
-    width: 48%;
-    text-align: center;
-    cursor: pointer;
-    display: inline-block;
-}
+        /* Action Buttons Styling */
+        .update-button, .delete-button {
+            font-size: 1em;
+            padding: 12px 20px;
+            width: 48%;
+            text-align: center;
+            cursor: pointer;
+            display: inline-block;
+        }
 
-.update-button {
-    background-color: #007BFF;
-    color: white;
-}
+        .update-button {
+            background-color: #007BFF;
+            color: white;
+        }
 
-.update-button:hover {
-    background-color: #0056b3;
-}
+        .update-button:hover {
+            background-color: #0056b3;
+        }
 
-.delete-button {
-    background-color: #FF0000;
-    color: white;
-}
+        .delete-button {
+            background-color: #FF0000;
+            color: white;
+        }
 
-.delete-button:hover {
-    background-color: #cc0000;
-}
+        .delete-button:hover {
+            background-color: #cc0000;
+        }
 
-.action-buttons {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-}
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
 
-td a {
-    text-decoration: none;
-}
+        td a {
+            text-decoration: none;
+        }
 
-/* Back Button Styling */
-.back-button {
-    background-color: #007BFF;
-    color: white;
-    cursor: pointer;
-    padding: 15px 20px;
-    margin-top: 20px;
-    font-size: 1.2em;
-    text-decoration: none;
-}
+        /* Back Button Styling */
+        .back-button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            padding: 15px 20px;
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-decoration: none;
+        }
 
-.back-button:hover {
-    background-color: #0056b3;
-}
+        .back-button:hover {
+            background-color: #0056b3;
+        }
 
-/* Button Styling for No Inventory */
-.no-inventory-button {
-    background-color: #007BFF; /* Blue color */
-    color: white;
-    cursor: pointer;
-    padding: 15px 20px;
-    margin-top: 20px;
-    font-size: 1.2em;
-    text-decoration: none; /* Remove underline */
-    display: inline-block; /* Ensures the link behaves like a block-level button */
-    border-radius: 5px; /* Rounded corners to match button style */
-    width: auto;
-}
+        /* Button Styling for No Inventory */
+        .no-inventory-button {
+            background-color: #007BFF; /* Blue color */
+            color: white;
+            cursor: pointer;
+            padding: 15px 20px;
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-decoration: none; /* Remove underline */
+            display: inline-block; /* Ensures the link behaves like a block-level button */
+            border-radius: 5px; /* Rounded corners to match button style */
+            width: auto;
+        }
 
-.no-inventory-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-}
+        .no-inventory-button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
 
-.input-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 20px;
-}
-
-.input-container input {
-    margin-top: 5px;
-    width: 100%;  /* Ensure the input is always within the container */
-    max-width: 300px; /* Keep the width manageable */
-    box-sizing: border-box; /* Ensures padding doesn't push the element outside the container */
-}
+        .error-message {
+            color: red;
+            font-size: 1.2em;
+            margin: 20px;
+        }
     </style>
+    <script>
+        // Show the error message in a pop-up
+        <?php if (!empty($error_message)): ?>
+            alert("<?php echo $error_message; ?>");
+        <?php endif; ?>
+    </script>
 </head>
 <body>
 
     <h1>Manage Inventory Assignments</h1>
+
+    <?php if (!empty($error_message)): ?>
+        <div class="error-message"><?php echo $error_message; ?></div>
+    <?php endif; ?>
 
     <!-- Display the assignments in a table -->
     <table>

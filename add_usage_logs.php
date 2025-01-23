@@ -137,7 +137,7 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
         <button class="view-button" onclick="window.location.href='edit_usage_logs.php';">View/Edit</button>
 
         <!-- Go back to admin.php -->
-        <button class="back-button" onclick="window.location.href='admin.php';">Back to Admin</button>
+        <button class="back-button" onclick="window.location.href='assignment.php';">Back to Admin</button>
     </form>
 
 </body>

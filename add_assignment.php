@@ -6,30 +6,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']); // Get the email from the form, removing any leading/trailing spaces
     $equipment_id = $_POST['equipment_id'];
 
-    // Fetch the profile_id from the Profile table using the provided email
-    $profile_query = "SELECT id FROM profile WHERE LOWER(email) = LOWER('$email') LIMIT 1"; // Case-insensitive comparison
-    $profile_result = mysqli_query($connect, $profile_query);
+    // Check if the equipment_id is already assigned to someone else
+    $check_equipment_query = "SELECT * FROM loan WHERE equipment_id = '$equipment_id' AND status_id = 1"; // Assuming 1 represents 'Assigned' status
+    $check_equipment_result = mysqli_query($connect, $check_equipment_query);
 
-    // Check if the profile exists
-    if (mysqli_num_rows($profile_result) > 0) {
-        // Retrieve the profile_id from the result
-        $profile_row = mysqli_fetch_assoc($profile_result);
-        $profile_id = $profile_row['id'];
-
-        // Fetch the status ID for the new loan (this might need adjustment based on logic)
-        $status_id = 1;  // Default status_id for "Assigned"
-
-        // Now insert the assignment into the loan table
-        $insert_query = "INSERT INTO loan (profile_id, equipment_id, status_id) 
-                         VALUES ('$profile_id', '$equipment_id', '$status_id')";
-
-        if (mysqli_query($connect, $insert_query)) {
-            echo "<div style='color:green;'>Assignment added successfully!</div>";
-        } else {
-            echo "<div style='color:red;'>Error: " . mysqli_error($connect) . "</div>";
-        }
+    if (mysqli_num_rows($check_equipment_result) > 0) {
+        // If the equipment is already assigned, show an error
+        echo "<div style='color:red;'>Error: This equipment ID is already assigned to another user.</div>";
     } else {
-        echo "<div style='color:red;'>Error: No profile found for the provided email.</div>";
+        // Fetch the profile_id from the Profile table using the provided email
+        $profile_query = "SELECT id FROM profile WHERE LOWER(email) = LOWER('$email') LIMIT 1"; // Case-insensitive comparison
+        $profile_result = mysqli_query($connect, $profile_query);
+
+        // Check if the profile exists
+        if (mysqli_num_rows($profile_result) > 0) {
+            // Retrieve the profile_id from the result
+            $profile_row = mysqli_fetch_assoc($profile_result);
+            $profile_id = $profile_row['id'];
+
+            // Check if the profile already has an existing assignment for this equipment_id
+            $check_duplicate_query = "SELECT * FROM loan WHERE profile_id = '$profile_id' AND equipment_id = '$equipment_id'";
+            $check_duplicate_result = mysqli_query($connect, $check_duplicate_query);
+
+            if (mysqli_num_rows($check_duplicate_result) > 0) {
+                // If the profile already has this equipment assigned, show an error
+                echo "<div style='color:red;'>Error: This profile already has this equipment assigned.</div>";
+            } else {
+                // Fetch the status ID for the new loan (this might need adjustment based on logic)
+                $status_id = 1;  // Default status_id for "Assigned"
+
+                // Now insert the assignment into the loan table
+                $insert_query = "INSERT INTO loan (profile_id, equipment_id, status_id) 
+                                 VALUES ('$profile_id', '$equipment_id', '$status_id')";
+
+                if (mysqli_query($connect, $insert_query)) {
+                    echo "<div style='color:green;'>Assignment added successfully!</div>";
+                } else {
+                    echo "<div style='color:red;'>Error: " . mysqli_error($connect) . "</div>";
+                }
+            }
+        } else {
+            echo "<div style='color:red;'>Error: No profile found for the provided email.</div>";
+        }
     }
 }
 
@@ -45,17 +63,17 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
     <title>Add Assignment</title>
     <style>
         body {
-            background-color: white; /* Page background is white */
+            background-color: white;
             font-family: Arial, sans-serif;
-            color: black; /* Text color is black */
+            color: black;
             margin: 0;
             padding: 0;
             text-align: center;
         }
 
         h1 {
-            color: black; /* Make the "Add New Assignment" text black */
-            background-color: white; /* The background color around the text is white */
+            color: black;
+            background-color: white;
             padding: 20px;
             margin: 0;
             font-size: 2em;
@@ -64,12 +82,13 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
         form {
             display: inline-block;
             text-align: left;
-            background-color: white; /* White background for the form */
+            background-color: white;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-top: 20px;
-            width: 80%; /* Adjust width to prevent buttons from being stretched */
-            max-width: 400px; /* Max width to keep the form centered */
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;  /* Ensures padding does not exceed container */
         }
 
         label {
@@ -85,30 +104,32 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
             font-size: 1.2em;
             border: 1px solid #ddd;
             border-radius: 5px;
+            box-sizing: border-box; /* Ensures the input elements fit within the container */
         }
 
         button {
-            background-color: #007BFF; /* Set all buttons to blue */
+            background-color: #007BFF;
             color: white;
             cursor: pointer;
         }
 
         button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
+            background-color: #0056b3;
         }
 
         .back-button, .view-button {
-            background-color: #007BFF; /* Blue background for the buttons */
+            background-color: #007BFF;
             border: none;
             cursor: pointer;
             font-size: 1.2em;
             padding: 12px 20px;
             margin-top: 10px;
-            width: 100%; /* Ensure these buttons are not stretched and match the width of the form */
+            width: 100%; /* Ensure buttons are not stretched out */
+            box-sizing: border-box;
         }
 
         .back-button:hover, .view-button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -129,7 +150,7 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
         <button class="view-button" onclick="window.location.href='edit_assignment.php';">View Assignments</button>
 
         <!-- Go back to admin.php -->
-        <button class="back-button" onclick="window.location.href='admin.php';">Back to Admin</button>
+        <button class="back-button" onclick="window.location.href='assignment.php';">Back to Admin</button>
     </form>
 
 </body>

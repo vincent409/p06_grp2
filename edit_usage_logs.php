@@ -17,8 +17,11 @@ if (!$connect) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Handle DELETE request
-if (isset($_GET['delete_id'])) {
+// Initialize error message variable
+$error_message = '';
+
+// Handle DELETE request (only if the user is an Admin)
+if (isset($_GET['delete_id']) && $_SESSION['role'] === "Admin") {
     $delete_id = $_GET['delete_id'];
     $delete_query = "DELETE FROM usage_log WHERE id = '$delete_id'";
 
@@ -27,6 +30,9 @@ if (isset($_GET['delete_id'])) {
     } else {
         echo "<div style='color:red;'>Error: " . mysqli_error($connect) . "</div>";
     }
+} elseif (isset($_GET['delete_id']) && $_SESSION['role'] === "Facility Manager") {
+    // If the user is a Facility Manager, do not allow deletion
+    echo "<div style='color:red;'>Error: You do not have permission to delete usage logs.</div>";
 }
 
 // Handle UPDATE request
@@ -54,8 +60,8 @@ $result = mysqli_query($connect, $sql);
 if (!$result) {
     die("Query failed: " . mysqli_error($connect));
 }
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -196,7 +202,9 @@ if (!$result) {
                         <!-- Button Container for Update and Delete -->
                         <div class="button-container">
                             <button type="submit" class="update-button">Update</button>
-                            <a href="edit_usage_logs.php?delete_id=<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure you want to delete this log?')">Delete</a>
+                            <?php if ($_SESSION['role'] === "Admin"): ?>
+                                <a href="edit_usage_logs.php?delete_id=<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure you want to delete this log?')">Delete</a>
+                            <?php endif; ?>
                         </div>
                     </form>
                 </td>
