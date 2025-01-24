@@ -17,10 +17,6 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['rol
 }
 
 
-
-
-
-
 // Fetch only student profiles from the database
 $sql = "
     SELECT Profile.id, Profile.name, Profile.email, Profile.phone_number, Profile.department 

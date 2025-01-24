@@ -1,5 +1,4 @@
 <?php
-// Start the session at the very beginning of the script
 session_start();
 
 // Check if the student is logged in
@@ -71,18 +70,26 @@ mysqli_close($connect);
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
             padding: 0;
             background-color: #f9f9f9;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
         }
-        .logout-btn {
-            position: absolute;
-            top: 10px;
-            right: 20px;
+        header {
+            width: 100%;
+            background-color: white;
+            border-bottom: 2px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
         }
-        .logout-btn form {
-            margin: 0;
+        .logo img {
+            width: 150px;
         }
         .logout-btn button {
             padding: 8px 12px;
@@ -96,23 +103,15 @@ mysqli_close($connect);
         .logout-btn button:hover {
             background-color: #FF4500;
         }
-        .change-password-btn {
-            margin-top: 20px;
-        }
-        .change-password-btn button {
-            padding: 10px 15px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        .change-password-btn button:hover {
-            background-color: #0056b3;
-        }
-        h1, h2 {
+        h1 {
             color: #333;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .inventory-section {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
         }
         table {
             width: 100%;
@@ -129,19 +128,21 @@ mysqli_close($connect);
         th {
             background-color: #f4f4f4;
         }
-        button {
-            padding: 8px 12px;
-            background-color: #4CAF50;
+        .profile-btn, .change-password-btn {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .profile-btn button, .change-password-btn button {
+            padding: 10px 15px;
+            background-color: #007BFF;
             color: white;
             border: none;
             cursor: pointer;
             border-radius: 4px;
+            font-size: 16px;
         }
-        button:hover {
-            background-color: #45a049;
-        }
-        .profile-btn {
-            margin-bottom: 20px;
+        .profile-btn button:hover, .change-password-btn button:hover {
+            background-color: #0056b3;
         }
         .details-section {
             margin-top: 20px;
@@ -166,9 +167,14 @@ mysqli_close($connect);
     </script>
 </head>
 <body>
-    <div class="logout-btn">
-        <button onclick="window.location.href='../../logout.php';">Logout</button>
-    </div>
+    <header>
+        <div class="logo">
+            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo">
+        </div>
+        <div class="logout-btn">
+            <button onclick="window.location.href='../../logout.php';">Logout</button>
+        </div>
+    </header>
 
     <h1>Welcome to Your Dashboard, <?php echo htmlspecialchars($name); ?>!</h1>
 
@@ -178,7 +184,7 @@ mysqli_close($connect);
             <button>View Your Profile</button>
         </a>
     </div>
-
+    
     <!-- Inventory Section -->
     <div class="inventory-section">
         <h2>Your Inventory Records</h2>

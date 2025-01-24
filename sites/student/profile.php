@@ -37,24 +37,86 @@ mysqli_close($connect);
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
+        header {
+            width: 100%;
+            background-color: white;
+            border-bottom: 2px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        .logo img {
+            width: 150px;
+        }
+        .logout-btn button {
+            padding: 8px 12px;
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .logout-btn button:hover {
+            background-color: #FF4500;
         }
         h1 {
             color: #333;
+            margin: 20px 0;
+            text-align: center;
         }
         .profile-info {
             border: 1px solid #ddd;
             padding: 20px;
-            background-color: #f9f9f9;
-            width: 50%;
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: left;
         }
-        .back-btn {
+        .btn-container {
             margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 
 <body>
+    <header>
+        <div class="logo">
+            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo">
+        </div>
+        <div class="logout-btn">
+            <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
+        </div>
+    </header>
+
     <h1>Your Profile</h1>
     <div class="profile-info">
         <p><strong>Name:</strong> <?php echo htmlspecialchars($name); ?></p>
@@ -62,16 +124,14 @@ mysqli_close($connect);
         <p><strong>Phone Number:</strong> <?php echo htmlspecialchars($phone_number); ?></p>
         <p><strong>Department:</strong> <?php echo htmlspecialchars($department); ?></p>
     </div>
-    <div class="back-btn">
+
+    <div class="btn-container">
         <a href="student-dashboard.php">
             <button>Back to Dashboard</button>
         </a>
-    </div>
-</body>
-    <!-- Change Password Button -->
-    <div class="change-password-btn">
-        <a href='/p06_grp2/sites/change_password.php'>
+        <a href="/p06_grp2/sites/change_password.php">
             <button>Change Password</button>
         </a>
     </div>
+</body>
 </html>
