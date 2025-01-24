@@ -53,6 +53,7 @@ mysqli_close($connect);
         }
     </style>
 </head>
+
 <body>
     <h1>Your Profile</h1>
     <div class="profile-info">
@@ -67,4 +68,10 @@ mysqli_close($connect);
         </a>
     </div>
 </body>
+    <!-- Change Password Button -->
+    <div class="change-password-btn">
+        <a href='/p06_grp2/sites/change_password.php'>
+            <button>Change Password</button>
+        </a>
+    </div>
 </html>

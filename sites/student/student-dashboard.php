@@ -17,7 +17,22 @@ if (!$connect) {
 
 // Get the student's profile ID from the session
 $profile_id = $_SESSION['profile_id'];
-$email = $_SESSION['email'];
+
+// Check if the name is already stored in the session; if not, fetch it from the database
+if (!isset($_SESSION['name'])) {
+    $query = "SELECT name FROM Profile WHERE id = ?";
+    $stmt = $connect->prepare($query);
+    $stmt->bind_param("i", $profile_id);
+    $stmt->execute();
+    $stmt->bind_result($name);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Store the name in the session for future use
+    $_SESSION['name'] = $name;
+} else {
+    $name = $_SESSION['name'];
+}
 
 // Initialize inventory records as an empty array
 $inventory_records = [];
@@ -155,19 +170,12 @@ mysqli_close($connect);
         <button onclick="window.location.href='../../logout.php';">Logout</button>
     </div>
 
-    <h1>Welcome to Your Dashboard, <?php echo htmlspecialchars($email); ?>!</h1>
+    <h1>Welcome to Your Dashboard, <?php echo htmlspecialchars($name); ?>!</h1>
 
     <!-- Profile Button -->
     <div class="profile-btn">
         <a href="profile.php">
             <button>View Your Profile</button>
-        </a>
-    </div>
-
-    <!-- Change Password Button -->
-    <div class="change-password-btn">
-        <a href='/p06_grp2/sites/change_password.php'>
-            <button>Change Password</button>
         </a>
     </div>
 
