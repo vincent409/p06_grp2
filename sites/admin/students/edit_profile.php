@@ -11,6 +11,8 @@ if (!$connect) {
 if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
     die("You do not have permission to edit or delete profiles.");
 }
+include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 // Fetch the profile to edit
 if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['id'])) {

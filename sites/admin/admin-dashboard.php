@@ -12,6 +12,10 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
     exit(); // Stop further execution
 }
 
+include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+manageCookieAndRedirect("/p06_grp2/sites/index.php");
+
+
 // SQL query to get the counts of equipment in each status
 $sql = "
     SELECT 
@@ -204,7 +208,7 @@ mysqli_close($connect);
         </div>
         <div class="dashboard-title">Dashboard</div>
         <div class="logout-btn">
-            <button onclick="window.location.href='/xampp/p06_grp2/logout.php';">Logout</button>
+            <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
         </div>
     </header>
 

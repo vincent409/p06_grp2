@@ -13,6 +13,8 @@ $connect = mysqli_connect("localhost", "root", "", "amc");
 if (!$connect) {
     die("Connection failed: " . mysqli_connect_error());
 }
+include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 // Handle form submission
 if (isset($_POST['add-button'])) {

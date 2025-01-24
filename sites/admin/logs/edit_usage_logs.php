@@ -8,6 +8,8 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
     header("Location: /xampp/p06_grp2/sites/index.php");
     exit(); // Stop further execution
 }
+include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 // Connect to the database
 $connect = mysqli_connect("localhost", "root", "", "amc");

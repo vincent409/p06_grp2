@@ -1,6 +1,5 @@
 <?php
 session_start();
-include 'cookie.php';
 $connect = mysqli_connect("localhost", "root", "", "amc");
 
 // Check connection
@@ -8,16 +7,16 @@ if (!$connect) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
+include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+manageCookieAndRedirect("/p06_grp2/sites/index.php");
+
+
 // Check if the user is an Admin or Facility Manager
 if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager')) {
     die("You do not have permission to view this page.");
 }
 
-manageCookieAndRedirect(
-    "index.php",
-    "You have been idle for 5 seconds. Click OK to stay logged in.",
-    "You have been idle for 10 seconds. Logging you out."
-);
+
 
 
 
@@ -103,11 +102,11 @@ if (!$result) {
     </header>
 
     <nav>
-        <a href="/xampp/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
-        <a href="/xampp/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
-        <a href="/xampp/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
-        <a href="/xampp/p06_grp2/sites/admin/students/profile.php">Students</a>
-        <a href="/xampp/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+        <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+        <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+        <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
+        <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
+        <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
     </nav>
 
     <h1>Manage Student Profiles</h1>

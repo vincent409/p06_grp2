@@ -9,7 +9,7 @@
 <body>
 
     <div class="login-container">
-        <img src="/xampp/p06_grp2/img/TP-logo.png" alt="TP Logo" width="325" height="120">
+        <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="325" height="120">
         <h1>AMC Login</h1>
 
         <?php

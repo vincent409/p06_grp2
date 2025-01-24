@@ -10,6 +10,10 @@ if (!$connect) {
 if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
     die("You do not have permission to create profiles.");
 }
+
+include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+manageCookieAndRedirect("/p06_grp2/sites/index.php");
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Collect form data
     $name = $_POST['name'];

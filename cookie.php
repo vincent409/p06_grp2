@@ -1,5 +1,5 @@
 <?php
-function manageCookieAndRedirect($redirectURL = "/p06_grp2/sites/index.php", $warningMessage = "You have been idle for 5 seconds. Click OK to stay logged in.", $logoutMessage = "You have been idle for 10 seconds. Click OK to log out.") {
+function manageCookieAndRedirect($redirectURL = "/p06_grp2/index.php", $warningMessage = "You have been idle for 5 seconds. Click OK to stay logged in.", $logoutMessage = "You have been idle for 10 seconds. Click OK to log out.") {
     // Start the session if it's not already started
     if (session_status() === PHP_SESSION_NONE) {
         session_start();

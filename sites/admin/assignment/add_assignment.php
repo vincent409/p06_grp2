@@ -2,6 +2,10 @@
 // Include database connection
 $connect = mysqli_connect("localhost", "root", "", "amc");
 
+include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+manageCookieAndRedirect("/p06_grp2/sites/index.php");
+
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']); // Get the email from the form, removing any leading/trailing spaces
     $equipment_id = $_POST['equipment_id'];
