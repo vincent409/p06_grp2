@@ -87,7 +87,7 @@ if (isset($_POST['email'])) {
     mysqli_close($connect);
 } else {
     // If email is not set, redirect to forgot password page
-    header("Location: forgot_password.php");
+    header("Location: sites/forgot_password.php");
     exit();
 }
 

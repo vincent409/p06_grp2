@@ -3,7 +3,7 @@ session_start();
 
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
     // Redirect the user to login page or show an error message
-    header("Location: login.php");
+    header("Location: /xampp/p06_grp2/sites/index.php");
     exit(); // Stop further execution
 }
 // Connect to the database
@@ -15,7 +15,7 @@ if (!$connect) {
 }
 
 // Handle form submission
-if (isset($_POST['login-button'])) {
+if (isset($_POST['add-button'])) {
     // Retrieve form inputs
     $equipment_name = $_POST['equipment_name'];
     $equipment_type = $_POST['equipment_type'];
@@ -50,8 +50,46 @@ mysqli_close($connect);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Equipment</title>
+    <style>
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            color: black;
+            padding: 10px 20px;
+        }
+        nav {
+            display: flex;
+            gap: 15px;
+            background-color: #f4f4f4;
+            padding: 10px 20px;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
+<header>
+        <div class="logo">
+            <img src="/xampp/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+        </div>
+        <div class="dashboard-title">Dashboard</div>
+        <div class="logout-btn">
+            <button onclick="window.location.href='/xampp/p06_grp2/logout.php';">Logout</button>
+        </div>
+    </header>
+
+    <nav>
+        <a href="/xampp/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+        <a href="/xampp/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+        <a href="/xampp/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
+        <a href="/xampp/p06_grp2/sites/admin/students/profile.php">Students</a>
+        <a href="/xampp/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+    </nav>
     <h1>Add New Equipment</h1>
     <form method="POST" action="add-equipment.php">
         <label for="equipment_name">Equipment Name:</label><br>
@@ -66,7 +104,7 @@ mysqli_close($connect);
         <label for="model_number">Model Number:</label><br>
         <input type="text" id="model_number" name="model_number" required><br><br>
 
-        <button type="submit" name="login-button">Add Equipment</button>
+        <button type="submit" name="add-button">Add Equipment</button>
         <button onclick="window.location.href='equipment.php';">View All Equipment</button>
     </form>
 </body>

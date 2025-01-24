@@ -19,7 +19,7 @@
         }
         ?>
 
-        <form name="form1" method="post" action="auth.php">
+        <form name="form1" method="post" action="../auth.php">
             <input name="email" type="email" id="email" class="input-field" placeholder="Email" required><br>
             <input name="password" type="password" id="password" class="input-field" placeholder="Password" required><br>
             <input type="submit" name="Submit" value="Login" class="btn">

@@ -3,7 +3,7 @@ session_start();
 
 // Check if user is logged in
 if (!isset($_SESSION['email']) || $_SESSION['role'] != "Student") {
-    header("Location: login.php");
+    header("Location: /xampp/p06_grp2/sites/index.php");
     exit();
 }
 

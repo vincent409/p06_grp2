@@ -8,7 +8,7 @@ if (!$connect) {
 
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
     // Redirect the user to login page or show an error message
-    header("Location: login.php");
+    header("Location: /xampp/p06_grp2/sites/index.php");
     exit(); // Stop further execution
 }
 
@@ -200,20 +200,20 @@ mysqli_close($connect);
 <body>
     <header>
         <div class="logo">
-            <img src="img/TP-logo.png" alt="TP Logo" width="135" height="50">
+            <img src="/xampp/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
         </div>
         <div class="dashboard-title">Dashboard</div>
         <div class="logout-btn">
-            <button onclick="window.location.href='logout.php';">Logout</button>
+            <button onclick="window.location.href='/xampp/p06_grp2/logout.php';">Logout</button>
         </div>
     </header>
 
     <nav>
-        <a href="admin-dashboard.php">Home</a>
-        <a href="equipment.php">Equipment</a>
-        <a href="assignment.php">Loans</a>
-        <a href="#">Students</a>
-        <a herf="#">Logs</a>
+        <a href="/xampp/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+        <a href="/xampp/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+        <a href="/xampp/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
+        <a href="/xampp/p06_grp2/sites/admin/students/profile.php">Students</a>
+        <a href="/xampp/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
     </nav>
     
     <h1>Welcome, User!</h1>
@@ -247,15 +247,15 @@ mysqli_close($connect);
                     <div class="status-text">Unassigned: <?php echo $unassignedCount; ?></div>
                 </div>
             </div>
-            <button onclick="window.location.href='total_students_details.php';">More Details</button>
+            <button onclick="window.location.href='assignment/assignment.php';">More Details</button>
         </div>
 
         <div class="quick-stats">
             <h3>Quick Stats</h3>
             <p><strong>Total Equipment:</strong> <?php echo $totalEquipmentCount; ?></p>
-            <button onclick="window.location.href='total_equipment_details.php';">More Details</button>
+            <button onclick="window.location.href='equipment/equipment.php';">More Details</button>
             <p><strong>Total Students:</strong> <?php echo $totalStudents; ?></p>
-            <button onclick="window.location.href='total_students_details.php';">More Details</button>
+            <button onclick="window.location.href='students/student.php';">More Details</button>
         </div>
     </div>
 </body>

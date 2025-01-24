@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->execute();
 
     // Redirect after successful creation
-    header("Location: manage_profile.php");
+    header("Location: profile.php");
     exit;
 }
 ?>
@@ -35,10 +35,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Create Profile</title>
+    <style>
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            color: black;
+            padding: 10px 20px;
+        }
+        nav {
+            display: flex;
+            gap: 15px;
+            background-color: #f4f4f4;
+            padding: 10px 20px;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
+<header>
+        <div class="logo">
+            <img src="/xampp/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+        </div>
+        <div class="dashboard-title">Dashboard</div>
+        <div class="logout-btn">
+            <button onclick="window.location.href='/xampp/p06_grp2/logout.php';">Logout</button>
+        </div>
+    </header>
+
+    <nav>
+        <a href="/xampp/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+        <a href="/xampp/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+        <a href="/xampp/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
+        <a href="/xampp/p06_grp2/sites/admin/students/profile.php">Students</a>
+        <a href="/xampp/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+    </nav>
     <h1>Create New Student Profile</h1>
-    <form action="create_profile.php" method="POST">
+    <form action="add_profile.php" method="POST">
         <label for="name">Name:</label>
         <input type="text" name="name" id="name" required><br><br>
 

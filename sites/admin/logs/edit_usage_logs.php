@@ -5,7 +5,7 @@ session_start();
 // Check user role
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
     // Redirect the user to login page or show an error message
-    header("Location: login.php");
+    header("Location: /xampp/p06_grp2/sites/index.php");
     exit(); // Stop further execution
 }
 
@@ -162,11 +162,46 @@ if (!$result) {
         .back-button:hover {
             background-color: #0056b3;
         }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            color: black;
+            padding: 10px 20px;
+        }
+        nav {
+            display: flex;
+            gap: 15px;
+            background-color: #f4f4f4;
+            padding: 10px 20px;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
 
     </style>
 </head>
 <body>
+<header>
+        <div class="logo">
+            <img src="/xampp/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+        </div>
+        <div class="dashboard-title">Dashboard</div>
+        <div class="logout-btn">
+            <button onclick="window.location.href='/xampp/p06_grp2/logout.php';">Logout</button>
+        </div>
+    </header>
 
+    <nav>
+        <a href="/xampp/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+        <a href="/xampp/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+        <a href="/xampp/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
+        <a href="/xampp/p06_grp2/sites/admin/students/profile.php">Students</a>
+        <a href="/xampp/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+    </nav>
     <h1>Manage Usage Logs</h1>
 
     <table>

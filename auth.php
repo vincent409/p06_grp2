@@ -48,26 +48,26 @@ function authenticate($myemail, $mypassword)
             // If it's the first login, redirect to student.php for password reset
             if ($has_logged_in == 0 && $role == "Student") {
                 // Redirect to the student password reset page
-                header("Location: change_password.php");
+                header("Location: sites/change_password.php");
                 exit();
             }
 
             // Redirect based on the role
             if ($role == "Student") {
-                header("Location: student-dashboard.php");  // Redirect to student dashboard
+                header("Location: sites/student/student-dashboard.php");  // Redirect to student dashboard
                 exit();
             } else if ($role == "Facility Manager" || $role == "Admin") {
-                header("Location: admin-dashboard.php");  // Redirect to admin page
+                header("Location: sites/admin/admin-dashboard.php");  // Redirect to admin page
                 exit();
             }
         } else {
             // Password does not match
-            header("Location: login.php?error=1");  // Redirect back with error message
+            header("Location: sites/index.php?error=1");  // Redirect back with error message
             exit();
         }
     } else {
         // If no matching email is found
-        header("Location: login.php?error=1");  // Redirect back with error message
+        header("Location: sites/index.php?error=1");  // Redirect back with error message
         exit();
     }
 
@@ -85,7 +85,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     authenticate($myemail, $mypassword);
 } else {
     // If the form is not submitted properly, redirect to login page
-    header("Location: login.php");  // Redirect to login page
+    header("Location: sites/index.php");  // Redirect to login page
     exit();
 }
 ?>

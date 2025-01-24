@@ -3,7 +3,7 @@ session_start();
 
 // Check if the student is logged in
 if (!isset($_SESSION['email']) || $_SESSION['role'] != "Student") {
-    header("Location: login.php");
+    header("Location: /xampp/p06_grp2/sites/index.php");
     exit();
 }
 
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (strlen($new_password) < 6) {
             echo "<p style='color: red;'>New password must be at least 6 characters long!</p>";
         } else {
-            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+            $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
             $update_password_query = "UPDATE User_Credentials SET password = ? WHERE profile_id = ?";
             $stmt_update = $connect->prepare($update_password_query);
             $stmt_update->bind_param("si", $hashed_password, $profile_id);
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             echo "<script>
                 alert('Password changed successfully!');
-                window.location.href = 'student-dashboard.php';
+                window.location.href = 'student/student-dashboard.php';
             </script>";
             exit();
         }
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (strlen($new_password) < 6) {
             echo "<p style='color: red;'>New password must be at least 6 characters long!</p>";
         } else {
-            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+            $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
             $update_password_query = "UPDATE User_Credentials SET password = ? WHERE profile_id = ?";
             $stmt_update = $connect->prepare($update_password_query);
             $stmt_update->bind_param("si", $hashed_password, $profile_id);
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             echo "<script>
                 alert('Password set successfully!');
-                window.location.href = 'student-dashboard.php';
+                window.location.href = 'sites/student/student-dashboard.php';
             </script>";
             exit();
         }

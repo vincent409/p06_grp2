@@ -60,7 +60,7 @@ if (isset($_GET['token'])) {
                         $delete_token_stmt->execute();
 
                         // Redirect to the login page
-                        header("Location: login.php?message=success");
+                        header("Location: /xampp/p06_grp2/sites/index.php?message=success");
                         exit();
                     } else {
                         echo "There was an error resetting your password. Please try again.";

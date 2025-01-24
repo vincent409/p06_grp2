@@ -73,3 +73,23 @@ body {
 .logout-btn button:hover {
     background-color: #FF4500;
 }
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    color: black;
+    padding: 10px 20px;
+}
+nav {
+    display: flex;
+    gap: 15px;
+    background-color: #f4f4f4;
+    padding: 10px 20px;
+}
+nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
