@@ -3,7 +3,7 @@ session_start();
 
 // Check if the student is logged in
 if (!isset($_SESSION['email']) || $_SESSION['role'] != "Student") {
-    header("Location: /xampp/p06_grp2/sites/index.php");
+    header("Location: /p06_grp2/sites/index.php");
     exit();
 }
 
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             echo "<script>
                 alert('Password changed successfully!');
-                window.location.href = 'student/student-dashboard.php';
+                window.location.href = '/p06_grp2/sites/student/student-dashboard.php';
             </script>";
             exit();
         }
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             echo "<script>
                 alert('Password set successfully!');
-                window.location.href = 'sites/student/student-dashboard.php';
+                window.location.href = '/p06_grp2/sites/student/student-dashboard.php';
             </script>";
             exit();
         }

@@ -281,20 +281,20 @@ if (mysqli_num_rows($result) > 0):
 <body>
 <header>
         <div class="logo">
-            <img src="/xampp/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
         </div>
         <div class="dashboard-title">Dashboard</div>
         <div class="logout-btn">
-            <button onclick="window.location.href='/xampp/p06_grp2/logout.php';">Logout</button>
+            <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
         </div>
     </header>
 
     <nav>
-        <a href="/xampp/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
-        <a href="/xampp/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
-        <a href="/xampp/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
-        <a href="/xampp/p06_grp2/sites/admin/students/profile.php">Students</a>
-        <a href="/xampp/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+        <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+        <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+        <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
+        <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
+        <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
     </nav>
     <h1>Manage Inventory Assignments</h1>
 

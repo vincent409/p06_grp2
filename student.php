@@ -27,7 +27,7 @@ $stmt->fetch();
 
 // If it's not the first login, redirect to dashboard
 if ($has_logged_in == 1) {
-    header("Location: student-dashboard.php");
+    header("Location: /p06_grp2/sites/student/student-dashboard.php");
     exit();
 }
 

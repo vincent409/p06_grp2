@@ -5,7 +5,7 @@ session_start();
 // Check if user is logged in as Admin or Facility Manager
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
     // Redirect to login page if user is not authorized
-    header("Location: login.php");
+    header("Location: /p06_grp2/sites/index.php");
     exit();
 }
 
@@ -232,7 +232,7 @@ if (mysqli_num_rows($result) > 0):
         </tbody>
     </table>
 
-    <a href="admin-dashboard.php" class="back-button">Back</a>
+    <a href="/p06_grp2/sites/admin/admin-dashboard.php" class="back-button">Back</a>
 
 </body>
 </html>

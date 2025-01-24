@@ -4,7 +4,7 @@ session_start();
 
 // Check if the student is logged in
 if (!isset($_SESSION['email']) || $_SESSION['role'] != "Student") {
-    header("Location: /xampp/p06_grp2/sites/index.php");
+    header("Location: /p06_grp2/sites/index.php");
     exit();
 }
 
@@ -166,7 +166,7 @@ mysqli_close($connect);
 
     <!-- Change Password Button -->
     <div class="change-password-btn">
-        <a href='../change_password.php'>
+        <a href='/p06_grp2/sites/change_password.php'>
             <button>Change Password</button>
         </a>
     </div>

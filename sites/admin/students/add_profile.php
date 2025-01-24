@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
 <header>
         <div class="logo">
-            <img src="/xampp/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
         </div>
         <div class="dashboard-title">Dashboard</div>
         <div class="logout-btn">
@@ -73,11 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </header>
 
     <nav>
-        <a href="/xampp/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
-        <a href="/xampp/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
-        <a href="/xampp/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
-        <a href="/xampp/p06_grp2/sites/admin/students/profile.php">Students</a>
-        <a href="/xampp/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+        <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+        <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+        <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
+        <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
+        <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
     </nav>
     <h1>Create New Student Profile</h1>
     <form action="add_profile.php" method="POST">
