@@ -43,14 +43,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
     $new_log_details = $_POST['log_details']; // New details
     $new_assigned_date = $_POST['assigned_date'];
     $new_returned_date = $_POST['returned_date'];
+    
 
     // Update the usage log details
-    $update_query = "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = '$new_returned_date' WHERE id = '$update_id'";
-
-    if (mysqli_query($connect, $update_query)) {
-        echo "<div style='color:green;'>Usage log updated successfully!</div>";
+    if (!empty($new_returned_date) && $new_returned_date < $new_assigned_date) {
+        echo "<div style='color:red;'>Error: Returned date cannot be earlier than the assigned date.</div>";
     } else {
-        echo "<div style='color:red;'>Error: " . mysqli_error($connect) . "</div>";
+        $update_query = "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = '$new_returned_date' WHERE id = '$update_id'";
+        if (mysqli_query($connect, $update_query)) {
+            echo "<div style='color:green;'>Usage log updated successfully!</div>";
+        } else {
+            echo "<div style='color:red;'>Error updating usage log: " . mysqli_error($connect) . "</div>";
+        }
     }
 }
 
@@ -185,6 +189,19 @@ if (!$result) {
         }
 
     </style>
+        <script>
+        // JavaScript validation for returned_date and assigned_date
+        function validateDates(form) {
+            const assignedDate = new Date(form.assigned_date.value);
+            const returnedDate = new Date(form.returned_date.value);
+
+            if (returnedDate && returnedDate < assignedDate) {
+                alert("Returned date cannot be earlier than the assigned date.");
+                return false; // Prevent form submission
+            }
+            return true; // Allow form submission
+        }
+    </script>
 </head>
 <body>
 <header>
