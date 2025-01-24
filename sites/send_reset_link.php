@@ -2,9 +2,9 @@
 session_start();
 
 // Manually include PHPMailer files
-require 'C:\xampp\htdocs\xampp\p06_grp2\PHPMailer-master\src\PHPMailer.php';   // Path to PHPMailer.php file
-require 'C:\xampp\htdocs\xampp\p06_grp2\PHPMailer-master\src\Exception.php';   // Path to Exception.php file
-require 'C:\xampp\htdocs\xampp\p06_grp2\PHPMailer-master\src\SMTP.php';         // Path to SMTP.php file
+require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\PHPMailer.php';   // Path to PHPMailer.php file
+require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\Exception.php';   // Path to Exception.php file
+require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\SMTP.php';         // Path to SMTP.php file
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -46,7 +46,7 @@ if (isset($_POST['email'])) {
         $stmt_insert->execute();
 
         // Send the password reset link to the user's email using PHPMailer
-        $reset_link = "http://localhost/xampp/p06_grp2/reset_password.php?token=" . $token;
+        $reset_link = "http://localhost/p06_grp2/sites/reset_password.php?token=" . $token;
         $message = "Click the link to reset your password: <a href='" . $reset_link . "'>Reset Password</a>";
         $subject = "Password Reset Request";
 
