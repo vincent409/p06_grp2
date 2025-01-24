@@ -1,5 +1,6 @@
 <?php
 session_start();
+include 'cookie.php';
 $connect = mysqli_connect("localhost", "root", "", "amc");
 
 // Check connection
@@ -11,6 +12,15 @@ if (!$connect) {
 if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager')) {
     die("You do not have permission to view this page.");
 }
+
+manageCookieAndRedirect(
+    "index.php",
+    "You have been idle for 5 seconds. Click OK to stay logged in.",
+    "You have been idle for 10 seconds. Logging you out."
+);
+
+
+
 
 // Fetch only student profiles from the database
 $sql = "
@@ -84,11 +94,11 @@ if (!$result) {
 <body>
 <header>
         <div class="logo">
-            <img src="/xampp/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
         </div>
         <div class="dashboard-title">Dashboard</div>
         <div class="logout-btn">
-            <button onclick="window.location.href='/xampp/p06_grp2/logout.php';">Logout</button>
+            <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
         </div>
     </header>
 
