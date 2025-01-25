@@ -165,9 +165,6 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
         <label for="assigned_date">Assigned Date:</label>
         <input type="date" id="assigned_date" name="assigned_date" required>
 
-        <label for="returned_date">Returned Date:</label>
-        <input type="date" id="returned_date" name="returned_date">
-
         <button type="submit">Submit Usage Log</button>
 
         <!-- View Usage Logs Button -->
