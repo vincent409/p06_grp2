@@ -17,7 +17,7 @@ if (!$connect) {
 // Get the student's profile ID from the session
 $profile_id = $_SESSION['profile_id'];
 
-// Check if the name is already stored in the session; if not, fetch it from the database
+// Fetch the student's name if not already in session
 if (!isset($_SESSION['name'])) {
     $query = "SELECT name FROM Profile WHERE id = ?";
     $stmt = $connect->prepare($query);
@@ -26,37 +26,40 @@ if (!isset($_SESSION['name'])) {
     $stmt->bind_result($name);
     $stmt->fetch();
     $stmt->close();
-
-    // Store the name in the session for future use
     $_SESSION['name'] = $name;
 } else {
     $name = $_SESSION['name'];
 }
 
-// Initialize inventory records as an empty array
-$inventory_records = [];
-
-try {
-    // Fetch inventory records
-    $inventory_query = "SELECT Equipment.id AS equipment_id, Equipment.name, Equipment.model_number, Equipment.purchase_date, Status.name AS status
-                        FROM Loan
-                        JOIN Equipment ON Loan.equipment_id = Equipment.id
-                        JOIN Status ON Loan.status_id = Status.id
-                        WHERE Loan.profile_id = ?";
-    $stmt = $connect->prepare($inventory_query);
-    $stmt->bind_param("i", $profile_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    // Fetch data and populate the $inventory_records array
-    while ($row = $result->fetch_assoc()) {
-        $inventory_records[] = $row;
+// Handle return request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['return_equipment_id'])) {
+    $equipment_id = $_POST['return_equipment_id'];
+    $update_query = "UPDATE Loan SET status_id = 3 WHERE profile_id = ? AND equipment_id = ?";
+    $stmt = $connect->prepare($update_query);
+    $stmt->bind_param("ii", $profile_id, $equipment_id);
+    if ($stmt->execute()) {
+        echo "<script>alert('Equipment returned successfully!'); window.location.href = 'student-dashboard.php';</script>";
+    } else {
+        echo "<script>alert('Failed to return equipment. Please try again.');</script>";
     }
     $stmt->close();
-} catch (Exception $e) {
-    // Handle any query or connection errors
-    error_log("Error fetching inventory records: " . $e->getMessage());
 }
+
+// Fetch inventory records
+$inventory_records = [];
+$inventory_query = "SELECT Equipment.id AS equipment_id, Equipment.name, Equipment.model_number, Equipment.purchase_date, Status.name AS status
+                    FROM Loan
+                    JOIN Equipment ON Loan.equipment_id = Equipment.id
+                    JOIN Status ON Loan.status_id = Status.id
+                    WHERE Loan.profile_id = ?";
+$stmt = $connect->prepare($inventory_query);
+$stmt->bind_param("i", $profile_id);
+$stmt->execute();
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $inventory_records[] = $row;
+}
+$stmt->close();
 
 mysqli_close($connect);
 ?>
@@ -73,24 +76,34 @@ mysqli_close($connect);
             margin: 0;
             padding: 0;
             background-color: #f9f9f9;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            min-height: 100vh;
         }
         header {
-            width: 100%;
-            background-color: white;
-            border-bottom: 2px solid #ddd;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background-color: white;
+            color: black;
             padding: 10px 20px;
         }
-        .logo img {
-            width: 150px;
+        .welcome-text {
+            flex: 1; /* Take the remaining space between logo and logout */
+            text-align: center;
+            font-size: 18px; /* Adjust font size */
+            color: #333;
+            font-weight: bold;
         }
+        nav {
+            display: flex;
+            gap: 15px;
+            background-color: #f4f4f4;
+            padding: 10px 20px;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
         .logout-btn button {
             padding: 8px 12px;
             background-color: #FF6347;
@@ -103,89 +116,116 @@ mysqli_close($connect);
         .logout-btn button:hover {
             background-color: #FF4500;
         }
+
         h1 {
-            color: #333;
             margin: 20px 0;
             text-align: center;
+            color: #333;
         }
+
         .inventory-section {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             margin: 20px auto;
+            text-align: center;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
+
         th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        .profile-btn, .change-password-btn {
-            margin: 20px 0;
+            border: 1px solid #ddd;
+            padding: 15px;
             text-align: center;
         }
-        .profile-btn button, .change-password-btn button {
-            padding: 10px 15px;
+
+        th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        .actions button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .actions .details-btn {
             background-color: #007BFF;
             color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 16px;
         }
-        .profile-btn button:hover, .change-password-btn button:hover {
+
+        .actions .details-btn:hover {
             background-color: #0056b3;
         }
+
+        .actions .return-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .actions .return-btn:hover {
+            background-color: #218838;
+        }
+
         .details-section {
-            margin-top: 20px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            background-color: #f4f4f4;
-        }
-        .hidden {
             display: none;
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
         }
+
+        
     </style>
     <script>
-        // Function to toggle the visibility of details
-        function toggleDetails(id) {
-            const detailsRow = document.getElementById(`details-${id}`);
-            if (detailsRow.classList.contains('hidden')) {
-                detailsRow.classList.remove('hidden');
-            } else {
-                detailsRow.classList.add('hidden');
+        function confirmReturn(equipmentId) {
+            if (confirm("Are you sure you want to return this equipment?")) {
+                const form = document.createElement("form");
+                form.method = "POST";
+                form.action = "";
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "return_equipment_id";
+                input.value = equipmentId;
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
             }
+        }
+
+        function toggleDetails(equipmentId) {
+            const detailsRow = document.getElementById(`details-${equipmentId}`);
+            detailsRow.style.display = detailsRow.style.display === "table-row" ? "none" : "table-row";
         }
     </script>
 </head>
 <body>
     <header>
         <div class="logo">
-            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo">
+            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+        </div>
+        <div class="dashboard-title">
+            Welcome to Your Dashboard, <?php echo htmlspecialchars($name); ?>!
         </div>
         <div class="logout-btn">
-            <button onclick="window.location.href='../../logout.php';">Logout</button>
+            <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
         </div>
     </header>
 
-    <h1>Welcome to Your Dashboard, <?php echo htmlspecialchars($name); ?>!</h1>
+    <nav>
+        <a href="/p06_grp2/sites/student/student-dashboard.php">Home</a>
+        <a href="/p06_grp2/sites/student/profile.php">Profile</a>
+    </nav>
 
-    <!-- Profile Button -->
-    <div class="profile-btn">
-        <a href="profile.php">
-            <button>View Your Profile</button>
-        </a>
-    </div>
-    
-    <!-- Inventory Section -->
     <div class="inventory-section">
         <h2>Your Inventory Records</h2>
         <?php if (count($inventory_records) > 0): ?>
@@ -195,7 +235,7 @@ mysqli_close($connect);
                         <th>Equipment Name</th>
                         <th>Model Number</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -204,25 +244,26 @@ mysqli_close($connect);
                             <td><?php echo htmlspecialchars($record['name']); ?></td>
                             <td><?php echo htmlspecialchars($record['model_number']); ?></td>
                             <td><?php echo htmlspecialchars($record['status']); ?></td>
-                            <td>
-                                <button onclick="toggleDetails(<?php echo $record['equipment_id']; ?>)">View Details</button>
+                            <td class="actions">
+                                <button class="details-btn" onclick="toggleDetails(<?php echo $record['equipment_id']; ?>)">More Details</button>
+                                <?php if ($record['status'] !== 'Returned'): ?>
+                                    <button class="return-btn" onclick="confirmReturn(<?php echo $record['equipment_id']; ?>)">Return</button>
+                                <?php endif; ?>
                             </td>
                         </tr>
-                        <tr id="details-<?php echo $record['equipment_id']; ?>" class="hidden">
+                        <tr id="details-<?php echo $record['equipment_id']; ?>" class="details-section">
                             <td colspan="4">
-                                <div class="details-section">
-                                    <p><strong>Equipment Name:</strong> <?php echo htmlspecialchars($record['name']); ?></p>
-                                    <p><strong>Model Number:</strong> <?php echo htmlspecialchars($record['model_number']); ?></p>
-                                    <p><strong>Purchase Date:</strong> <?php echo htmlspecialchars($record['purchase_date']); ?></p>
-                                    <p><strong>Status:</strong> <?php echo htmlspecialchars($record['status']); ?></p>
-                                </div>
+                                <strong>Equipment Name:</strong> <?php echo htmlspecialchars($record['name']); ?><br>
+                                <strong>Model Number:</strong> <?php echo htmlspecialchars($record['model_number']); ?><br>
+                                <strong>Purchase Date:</strong> <?php echo htmlspecialchars($record['purchase_date']); ?><br>
+                                <strong>Status:</strong> <?php echo htmlspecialchars($record['status']); ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
         <?php else: ?>
-            <p>You have no inventory records assigned.</p>
+            <p>No inventory records found.</p>
         <?php endif; ?>
     </div>
 </body>

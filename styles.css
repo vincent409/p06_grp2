@@ -80,6 +80,7 @@ header {
     background-color: white;
     color: black;
     padding: 10px 20px;
+    position: relative;
 }
 nav {
     display: flex;
@@ -92,4 +93,5 @@ nav a {
     color: #333;
     font-weight: bold;
 }
+
 
