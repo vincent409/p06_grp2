@@ -118,6 +118,7 @@ mysqli_close($connect);
         <label for="confirm_password">Confirm New Password:</label><br>
         <input type="password" id="confirm_password" name="confirm_password" required><br><br>
 
+        <a href="/p06_grp2/sites/student/student-dashboard.php"><button type="button">Back to Dashboard</button></a>
         <button type="submit">Change Password</button>
     </form>
 </body>

@@ -40,23 +40,25 @@ mysqli_close($connect);
             margin: 0;
             padding: 0;
             background-color: #f9f9f9;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            min-height: 100vh;
         }
         header {
-            width: 100%;
-            background-color: white;
-            border-bottom: 2px solid #ddd;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background-color: white;
+            color: black;
             padding: 10px 20px;
         }
         .logo img {
-            width: 150px;
+            width: 135px;
+            height: 50px;
+        }
+        .welcome-text {
+            flex: 1;
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
         }
         .logout-btn button {
             padding: 8px 12px;
@@ -69,6 +71,17 @@ mysqli_close($connect);
         }
         .logout-btn button:hover {
             background-color: #FF4500;
+        }
+        nav {
+            display: flex;
+            gap: 15px;
+            background-color: #f4f4f4;
+            padding: 10px 20px;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
         }
         h1 {
             color: #333;
@@ -116,6 +129,11 @@ mysqli_close($connect);
             <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
         </div>
     </header>
+
+    <nav>
+        <a href="/p06_grp2/sites/student/student-dashboard.php">Home</a>
+        <a href="/p06_grp2/sites/student/profile.php">Profile</a>
+    </nav>
 
     <h1>Your Profile</h1>
     <div class="profile-info">
