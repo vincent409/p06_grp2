@@ -13,7 +13,8 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
 }
 
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
-manageCookieAndRedirect("/p06_grp2/sites/index.php");
+manageCookieAndRedirect("/p06_grp2/logout.php");
+
 
 
 // SQL query to get the counts of equipment in each status
