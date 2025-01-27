@@ -29,11 +29,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->close();
 
     if (!password_verify($current_password, $stored_password)) {
-        echo "<p style='color: red;'>Your current password is incorrect!</p>";
+        echo "<script>
+            alert('Your current password is incorrect!');
+            window.history.back();
+        </script>";
+        exit();
     } elseif ($new_password !== $confirm_password) {
-        echo "<p style='color: red;'>New password and confirmation password do not match!</p>";
+        echo "<script>
+            alert('New password and confirmation password do not match!');
+            window.history.back();
+        </script>";
+        exit();
     } elseif (strlen($new_password) < 6) {
-        echo "<p style='color: red;'>New password must be at least 6 characters long!</p>";
+        echo "<script>
+            alert('New password must be at least 6 characters long!');
+            window.history.back();
+        </script>";
+        exit();
     } else {
         $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
         $update_password_query = "UPDATE User_Credentials SET password = ? WHERE profile_id = ?";
