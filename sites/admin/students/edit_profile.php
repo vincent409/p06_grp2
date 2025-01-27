@@ -5,7 +5,7 @@ session_start();
 if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager')) {
     die("You do not have permission to edit or delete profiles.");
 }
-
+include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
@@ -52,19 +52,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update'])) {
     $phone_number = trim($_POST['phone_number']);
     $department = trim($_POST['department']);
 
-    // Validation patterns
-    $namePattern = "/^[a-zA-Z0-9\s]+$/"; // Allow alphanumeric and spaces
-    $emailPattern = "/^[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}$/"; // Email format
-    $phonePattern = "/^[0-9]{8}$/"; // Phone number (8)
 
     // Validate the name
-    if (!preg_match($namePattern, $name)) {
+    if (!preg_match($alphanumeric_pattern, $name)) {
         $inputErrors[] = "Name must contain only alphanumeric characters and spaces.";
     }
 
-    // Validate the email
-    if (!preg_match($emailPattern, $email)) {
-        $inputErrors[] = "Please enter a valid email address.";
+    // Validate email using the function from validation.php
+    $emailValidationResult = validateEmail($email);
+
+    if ($emailValidationResult !== true) {
+        $inputErrors[] = $emailValidationResult; // Add the validation error to the inputErrors array
     }
 
     // Validate the phone number (optional field)
@@ -73,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update'])) {
     }
 
     // Validate the department
-    if (!preg_match($namePattern, $department)) {
+    if (!preg_match($alphanumeric_pattern, $department)) {
         $inputErrors[] = "Department must contain only alphanumeric characters and spaces.";
     }
 

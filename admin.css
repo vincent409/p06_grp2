@@ -3,31 +3,31 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-  }
-  
-  header {
+}
+
+header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background-color: white;
     color: black;
     padding: 10px 20px;
-  }
-  
-  nav {
+}
+
+nav {
     display: flex;
     gap: 15px;
     background-color: #f4f4f4;
     padding: 10px 20px;
-  }
-  
-  nav a {
+}
+
+nav a {
     text-decoration: none;
     color: #333;
     font-weight: bold;
-  }
-  
-  .logout-btn button {
+}
+
+.logout-btn button {
     padding: 8px 12px;
     background-color: #E53D29;
     color: white;
@@ -35,40 +35,47 @@ body {
     cursor: pointer;
     border-radius: 4px;
     font-size: 14px;
-  }
-  
-  .logout-btn button:hover {
+}
+
+.logout-btn button:hover {
     background-color: #E03C00;
-  }
-  
-  form button {
-    color: white;
+}
+
+button, 
+form button, 
+.container-flex form button {
     padding: 10px 20px;
+    background-color: #007bff; /* Dark Blue background */
+    color: white;
     border: none;
     cursor: pointer;
-    font-size: 16px;
     border-radius: 5px;
+    font-size: 16px;
+    margin: 5px; /* Add spacing between buttons */
+}
+
+button:hover, 
+form button:hover, 
+.container-flex form button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+form button {
     width: 100%;
-    background-color: #007bff;
-  }
-  
-  form button:hover {
-    background-color: #0056b3;
-  }
-  
-  .main-container {
+}
+
+.main-container {
     background-color: #FFFFFF; /* White background for the form section */
     width: 60%;
     margin: 40px auto;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Styling for form inputs */
-  form input[type="text"],
-  form input[type="date"],
-  form button {
+}
+
+/* Styling for form inputs */
+form input[type="text"],
+form input[type="date"] {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
@@ -76,101 +83,73 @@ body {
     border: 1px solid #ccc;
     font-size: 16px;
     box-sizing: border-box;
-  }
-  
-  /* Delete button styling */
-  button[type="submit"][name="delete"] {
+}
+
+/* Delete button styling */
+button[type="submit"][name="delete"] {
     background-color: #E53D29;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 5px;
-    width: 100%;
-  }
-  
-  button[type="submit"][name="delete"]:hover {
+}
+
+button[type="submit"][name="delete"]:hover {
     background-color: #E03C00;
-  }
-  
-  /* Update button styling */
-  button[type="submit"][name="update"] {
+}
+
+/* Update button styling */
+button[type="submit"][name="update"] {
     background-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 5px;
-    width: 100%;
-  }
-  
-  button[type="submit"][name="update"]:hover {
+}
+
+button[type="submit"][name="update"]:hover {
     background-color: #0056b3;
-  }
-  
-  .main {
+}
+
+.main {
     display: flex;
     justify-content: space-between;
     padding: 30px;
     gap: 20px;
     flex-wrap: wrap;
-  }
-  
-  .statistics {
+}
+
+.statistics, 
+.quick-stats {
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px 30px;
+    text-align: left;
+}
+
+.statistics {
     flex: 2;
     max-width: 525px;
-    padding: 30px;
-    background-color: #f4f4f4;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .quick-stats {
+}
+
+.quick-stats {
     flex: 1;
     max-width: 300px;
-    padding: 10px;
-    background-color: #f4f4f4;
-    border-radius: 8px;
-    text-align: left;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .quick-stats button {
-    padding: 10px 20px;
-    background-color: #007BFF; /* Dark Blue background */
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .quick-stats button:hover {
-    background-color: #0056b3;
-  }
-  
-  .welcome {
+}
+
+.welcome {
     margin-bottom: 20px;
     font-size: 18px;
-  }
-  
-  .color-box-container {
+}
+
+.color-box-container {
     padding: 10px;
     background-color: #f4f4f4;
     border-radius: 5px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     display: flex;
-    flex: 1;
     flex-direction: column;
     gap: 10px;
     align-items: flex-start;
     justify-content: flex-start;
     padding-top: 140px;
     max-width: 400px;
-  }
-  
-  .color-box {
+}
+
+.color-box {
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -179,97 +158,97 @@ body {
     font-weight: bold;
     display: inline-block;
     margin-right: 10px;
-  }
-  
-  .status-text {
-    font-size: 16px;
-  }
-  
-  .color-box-container div {
+}
+
+.color-box-container div {
     display: flex;
     align-items: center;
     gap: 10px;
-  }
-  
-  h1 {
+}
+
+.status-text {
+    font-size: 16px;
+}
+
+h1, 
+.main-container h1 {
     margin-bottom: 10px;
-    padding-left: 35px;
-  }
-  
-  .main-container h1 {
     padding-left: 5px;
-  }
-  
-  .color-box-container button {
-    padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .color-box-container button:hover {
-    background-color: #0056b3;
-  }
-  
-  .container {
+}
+
+.container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-  }
-  
-  .box {
+}
+
+.box {
     background-color: #FFFFFF;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 30px;
-  }
-  
-  table {
+}
+
+table {
     border-collapse: collapse;
     width: 100%;
     margin: 20px 0;
-  }
-  
-  th, td {
+}
+
+th, td {
     background-color: white;
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
-  }
-  
-  th {
+}
+
+th {
     background-color: #f2f2f2;
-  }
-  
-  .success-message {
+}
+
+.success-message {
     color: green;
     margin-bottom: 20px;
-  }
-  
-  button {
-    padding: 10px 20px;
-    background-color: #007BFF; /* Dark Blue background */
-    color: white;
-    border: none;
-    cursor: pointer;
+}
+
+.container-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.container-flex h1 {
+    margin: 0;
+    padding-left: 5px; /* Add padding to the left of the H1 */
+}
+
+.container-flex form {
+    display: flex;
+    align-items: center;
+}
+
+.container-flex form input[type="text"] {
+    width: 250px;
+    padding: 10px;
+    border: 1px solid #ccc;
     border-radius: 5px;
-  }
-  
-  button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-  }
-  
-  /* Make the table responsive on smaller screens */
-  @media screen and (max-width: 600px) {
+    margin-right: 10px;
+}
+
+.error-message {
+    color: red;
+    font-weight: bold;
+}
+
+/* Responsive table styling */
+@media screen and (max-width: 600px) {
     table, th, td {
-      width: 100%;
-      font-size: 14px;
+        width: 100%;
+        font-size: 14px;
     }
     th, td {
-      padding: 5px;
+        padding: 5px;
     }
-  }
-  
+}

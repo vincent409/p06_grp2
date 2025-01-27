@@ -1,51 +1,76 @@
 <?php
+session_start();
 
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
+// CSRF Protection
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Initialize variables
 $assignment_created = false; // Variable to track if the assignment was created
 $error_message = ''; // Variable to store error messages
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = trim($_POST['email']); // Get the email from the form, removing any leading/trailing spaces
-    $equipment_id = $_POST['equipment_id'];
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("CSRF validation failed.");
+    }
 
-    // Check if the equipment_id is already assigned to someone else
-    $check_equipment_query = "SELECT * FROM loan WHERE equipment_id = '$equipment_id' AND status_id = 1"; // Assuming 1 represents 'Assigned' status
-    $check_equipment_result = mysqli_query($connect, $check_equipment_query);
+    // Regenerate CSRF token after validation to prevent replay attacks
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
-    if (mysqli_num_rows($check_equipment_result) > 0) {
+    // Form data
+    $email = trim($_POST['email']); // Get the email from the form
+    $equipment_id = trim($_POST['equipment_id']); // Hidden field for equipment_id
+
+    // Check if the equipment is already assigned
+    $check_equipment_query = "SELECT * FROM loan WHERE equipment_id = ? AND status_id = 1"; // Assuming 1 represents 'Assigned'
+    $stmt = $connect->prepare($check_equipment_query);
+    $stmt->bind_param("s", $equipment_id);
+    $stmt->execute();
+    $check_equipment_result = $stmt->get_result();
+
+    if ($check_equipment_result->num_rows > 0) {
         $error_message = "Error: This equipment ID is already assigned to another user.";
     } else {
         // Fetch the profile_id from the Profile table using the provided email
-        $profile_query = "SELECT id FROM profile WHERE LOWER(email) = LOWER('$email') LIMIT 1"; // Case-insensitive comparison
-        $profile_result = mysqli_query($connect, $profile_query);
+        $profile_query = "SELECT id FROM profile WHERE LOWER(email) = LOWER(?) LIMIT 1"; // Case-insensitive comparison
+        $stmt = $connect->prepare($profile_query);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $profile_result = $stmt->get_result();
 
-        // Check if the profile exists
-        if (mysqli_num_rows($profile_result) > 0) {
-            // Retrieve the profile_id from the result
-            $profile_row = mysqli_fetch_assoc($profile_result);
+        if ($profile_result->num_rows > 0) {
+            // Retrieve the profile_id
+            $profile_row = $profile_result->fetch_assoc();
             $profile_id = $profile_row['id'];
 
-            // Check if the profile already has an existing assignment for this equipment_id
-            $check_duplicate_query = "SELECT * FROM loan WHERE profile_id = '$profile_id' AND equipment_id = '$equipment_id'";
-            $check_duplicate_result = mysqli_query($connect, $check_duplicate_query);
+            // Check if the profile already has this equipment assigned
+            $check_duplicate_query = "SELECT * FROM loan WHERE profile_id = ? AND equipment_id = ?";
+            $stmt = $connect->prepare($check_duplicate_query);
+            $stmt->bind_param("ss", $profile_id, $equipment_id);
+            $stmt->execute();
+            $check_duplicate_result = $stmt->get_result();
 
-            if (mysqli_num_rows($check_duplicate_result) > 0) {
+            if ($check_duplicate_result->num_rows > 0) {
                 $error_message = "Error: This profile already has this equipment assigned.";
             } else {
-                $status_id = 1;  // Default status_id for "Assigned"
+                $status_id = 1; // Default status_id for "Assigned"
 
                 // Insert the assignment into the loan table
-                $insert_query = "INSERT INTO loan (profile_id, equipment_id, status_id) 
-                                 VALUES ('$profile_id', '$equipment_id', '$status_id')";
+                $insert_query = "INSERT INTO loan (profile_id, equipment_id, status_id) VALUES (?, ?, ?)";
+                $stmt = $connect->prepare($insert_query);
+                $stmt->bind_param("ssi", $profile_id, $equipment_id, $status_id);
 
-                if (mysqli_query($connect, $insert_query)) {
-                    $assignment_created = true; // Set the flag to true when an assignment is created
+                if ($stmt->execute()) {
+                    $assignment_created = true; // Assignment created successfully
                 } else {
-                    $error_message = "Error: " . mysqli_error($connect);
+                    $error_message = "Error: " . $stmt->error;
                 }
             }
         } else {
@@ -54,8 +79,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Get the equipment_id from the URL
-$equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // Use an empty string if not set
+// Get the equipment_id from the URL or initialize it
+$equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -202,6 +227,12 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
 <div class="container">
     <h1>Add New Assignment</h1>
     <form method="POST">
+        <!-- CSRF Token -->
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+
+        <!-- Hidden Equipment ID -->
+        <input type="hidden" id="equipment_id" name="equipment_id" value="<?php echo htmlspecialchars($equipment_id); ?>">
+
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
 
