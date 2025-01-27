@@ -19,7 +19,7 @@
         }
         ?>
 
-        <form action="send_reset_link.php" method="POST">
+        <form action="/p06_grp2/send_reset_link.php" method="POST">
             <input type="email" name="email" id="email" class="input-field" placeholder="Enter your email" required><br>
             <input type="submit" name="Submit" value="Send Reset Link" class="btn">
         </form>

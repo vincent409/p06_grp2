@@ -50,6 +50,7 @@ if (isset($_GET['token'])) {
                     $update_stmt->bind_param("si", $hashed_password, $profile_id);
                     if ($update_stmt->execute()) {
                         // Delete the token from the PasswordReset table after password reset
+                        $connect->query("UPDATE Profile SET has_logged_in = 1 WHERE id = $profile_id");
                         $delete_token_sql = "DELETE FROM PasswordReset WHERE profile_id = ?";
                         $delete_token_stmt = $connect->prepare($delete_token_sql);
                         $delete_token_stmt->bind_param("i", $profile_id);
@@ -59,13 +60,21 @@ if (isset($_GET['token'])) {
                         header("Location: /p06_grp2/sites/index.php?message=success");
                         exit();
                     } else {
-                        echo "There was an error resetting your password. Please try again.";
+                        echo "<script>
+                        alert('There was an error resetting your password. Please try again.');
+                        window.history.back();
+                        </script>";
+                        exit();
                     }
 
                     $update_stmt->close();
                     $delete_token_stmt->close();
                 } else {
-                    echo "The passwords do not match. Please try again.";
+                    echo "<script>
+                    alert('The passwords do not match. Please try again.');
+                    window.history.back();
+                    </script>";
+                    exit();
                 }
             }
             ?>
@@ -73,19 +82,24 @@ if (isset($_GET['token'])) {
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Reset Password</title>
+                <link rel="stylesheet" href="/p06_grp2/styles.css">
             </head>
             <body>
-                <h1>Reset Your Password</h1>
-                <form action="reset_password.php?token=<?php echo $token; ?>" method="POST">
-                    <label for="new_password">New Password:</label>
-                    <input type="password" name="new_password" id="new_password" required><br><br>
 
-                    <label for="confirm_password">Confirm Password:</label>
-                    <input type="password" name="confirm_password" id="confirm_password" required><br><br>
+                <div class="login-container">
+                    <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="325" height="120">
+                    <h1>Reset Your Password</h1>
+                    <form action="reset_password.php?token=<?php echo $token; ?>" method="POST">
+                        <input type="password" name="new_password" id="new_password" class="input-field" placeholder="New Password" required><br>
+                        <input type="password" name="confirm_password" id="confirm_password" class="input-field" placeholder="Confirm Password" required><br>
+                        <input type="submit" value="Reset Password" class="btn">
+                    </form>
 
-                    <input type="submit" value="Reset Password">
-                </form>
+                    <a href="/p06_grp2/sites/index.php" class="forgot-password">Return to Login</a>
+                </div>
+
             </body>
             </html>
             <?php

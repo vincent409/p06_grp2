@@ -49,14 +49,21 @@ function authenticate($myemail, $mypassword)
                 $_SESSION['profile_id'] = $profile_id;
                 $_SESSION['role'] = $role;
                 $_SESSION['email'] = $myemail;
-
-                // If it's the first login, redirect to student.php for password reset
-                if ($has_logged_in == 0 && $role == "Student") {
-                    // Redirect to the student password reset page
-                    header("Location: sites/change_password.php");
+            
+                // If it's the first login
+                if ($has_logged_in == 0) {
+                    // Call send_reset_link.php to send the reset email
+                    $_POST['email'] = $myemail; // Pass the email to the script
+                    session_destroy();
+                    include 'C:/xampp/htdocs/p06_grp2/send_reset_link.php';
+                    // Show alert and redirect back to login page
+                    echo "<script>
+                        alert('A password reset link has been sent to your email. Please reset your password.');
+                        window.location.href = '/p06_grp2/logout.php';
+                    </script>";
                     exit();
                 }
-
+            
                 // Redirect based on the role
                 if ($role == "Student") {
                     header("Location: sites/student/student-dashboard.php");  // Redirect to student dashboard
@@ -69,6 +76,7 @@ function authenticate($myemail, $mypassword)
                 // Password does not match
                 throw new Exception("Email and password do not match.");
             }
+            
         } else {
             // If no matching email is found
             throw new Exception("No user found with that email.");
