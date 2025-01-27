@@ -10,12 +10,7 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
 }
 
 // Connect to the database
-$connect = mysqli_connect("localhost", "root", "", "amc");
-
-// Check the connection
-if (!$connect) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 
 // Handle DELETE request for Admin users
 if (isset($_GET['delete_id']) && $_SESSION['role'] === "Admin") {

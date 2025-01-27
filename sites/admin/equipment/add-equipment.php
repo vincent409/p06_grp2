@@ -7,16 +7,11 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
     exit(); // Stop further execution
 }
 
-// Connect to the database
-$connect = mysqli_connect("localhost", "root", "", "amc");
-
-// Check connection
-if (!$connect) {
-    die("Connection failed: " . mysqli_connect_error());
-}
-
+include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
+
+$inputErrors = [];
 
 // Handle form submission
 if (isset($_POST['add-button'])) {
@@ -26,26 +21,41 @@ if (isset($_POST['add-button'])) {
     $purchase_date = $_POST['purchase_date'];
     $model_number = $_POST['model_number'];
 
-    // Insert new equipment into the database
-    $query = $connect->prepare("INSERT INTO Equipment (name, type, purchase_date, model_number) VALUES (?, ?, ?, ?)");
+    // Define regex patterns for validation
+    $equipment_name_pattern = "/^[a-zA-Z0-9\s]+$/"; // Allows letters and single spaces only between words
+    $equipment_type_pattern = "/^[a-zA-Z]+(?: [a-zA-Z]+)*$/"; // Allows letters and single spaces only between words
+    $model_number_pattern = "/^[a-zA-Z0-9-_]+$/"; // Alphanumeric, dashes, and underscores
 
-    // Bind parameters: "ssss" means:
-    // s = string, s = string, s = string, s = string
-    $query->bind_param("ssss", $equipment_name, $equipment_type, $purchase_date, $model_number);
-
-    // Execute the query
-    if ($query->execute()) {
-        echo "New equipment added successfully!";
-    } else {
-        echo "Error: " . $query->error;
+    // Validate the equipment name
+    if (!preg_match($equipment_name_pattern, $equipment_name)) {
+        $inputErrors[] = "Equipment name must contain only alphanumeric characters and spaces.";
     }
+    // Validate the equipment type
+    if (!preg_match($equipment_type_pattern, $equipment_type)) {
+        $inputErrors[] = "Equipment type must contain only letters and spaces.";
+    }
+    // Validate the model number
+    if (!preg_match($model_number_pattern, $model_number)) {
+        $inputErrors[] = "Model number must be alphanumeric, with dashes or underscores allowed.";
+    } 
+    if (empty($inputErrors)) {
+        // Insert new equipment into the database
+        $query = $connect->prepare("INSERT INTO Equipment (name, type, purchase_date, model_number) VALUES (?, ?, ?, ?)");
 
-    // Close the statement
-    $query->close();
+        // Bind parameters: "ssss" means:
+        // s = string, s = string, s = string, s = string
+        $query->bind_param("ssss", $equipment_name, $equipment_type, $purchase_date, $model_number);
+
+        // Execute the query
+        if ($query->execute()) {
+            $success_message = "New equipment added successfully!";
+        }
+
+        // Close the statement
+        $query->close();
+    }
 }
 
-// Close the database connection
-mysqli_close($connect);
 ?>
 
 <!DOCTYPE html>
@@ -86,12 +96,12 @@ mysqli_close($connect);
 
         /* Main container for centered content */
         .main-container {
-            background-color: #FFFFFF; /* White background for the form section */
-            width: 60%; /* Set the width of the form container */
-            margin: 40px auto; /* Center the form container horizontally with margin on top */
-            padding: 20px; /* Add padding inside the form container */
-            border-radius: 8px; /* Round the corners */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+            background-color: #FFFFFF;
+            width: 60%;
+            margin: 40px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         /* Style for the logout button */
@@ -154,9 +164,27 @@ mysqli_close($connect);
     <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
 </nav>
 
-<!-- Main content container with centered form -->
 <div class="main-container">
     <h1>Add New Equipment</h1>
+
+    <!-- Display success or error messages -->
+    <?php if (isset($success_message)) { ?>
+        <div style="color:green;"><?php echo $success_message; ?></div>
+    <?php } ?>
+
+    <?php if (isset($error_message)) { ?>
+        <div style="color:red;"><?php echo $error_message; ?></div>
+    <?php } ?>
+
+    <!-- Display input validation errors -->
+    <?php if (!empty($inputErrors)) { ?>
+        <ul style="color: red; font-weight: bold;">
+            <?php foreach ($inputErrors as $error) { ?>
+                <li><?php echo $error; ?></li>
+            <?php } ?>
+        </ul>
+    <?php } ?>
+
     <form method="POST" action="add-equipment.php">
         <label for="equipment_name">Equipment Name:</label><br>
         <input type="text" id="equipment_name" name="equipment_name" required><br><br>

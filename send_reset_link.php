@@ -13,12 +13,7 @@ use PHPMailer\PHPMailer\Exception;
 date_default_timezone_set('Asia/Singapore');
 
 // Connect to the database
-$connect = mysqli_connect("localhost", "root", "", "amc");
-
-if (!$connect) {
-    die("Connection failed: " . mysqli_connect_error());
-}
-
+include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 // Check if email is provided
 if (isset($_POST['email'])) {
     $email = $_POST['email'];

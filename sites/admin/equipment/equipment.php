@@ -8,11 +8,9 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
     exit(); // Stop further execution
 }
 
+include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
-
-// Establish a database connection
-$connect = mysqli_connect("localhost", "root", "", "amc") or die("Cannot connect to database");
 
 // SQL query to fetch all equipment data from the Equipment table
 $sql = "SELECT id, name, type, purchase_date, model_number FROM Equipment";

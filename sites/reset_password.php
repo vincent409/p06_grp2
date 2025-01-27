@@ -3,11 +3,7 @@ session_start();
 // Check if the token is passed as a query parameter
 if (isset($_GET['token'])) {
     $token = $_GET['token'];
-    $connect = mysqli_connect("localhost", "root", "", "amc");
-
-    if (!$connect) {
-        die("Connection failed: " . mysqli_connect_error());
-    }
+    include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 
     // Query the PasswordReset table for the token and its timestamp
     $sql = "SELECT reset_token_time, profile_id FROM PasswordReset WHERE reset_token = ?";

@@ -12,14 +12,12 @@ if (!isset($_GET['id'])) {
     die("No equipment ID specified.");
 }
 
+include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 // Get the equipment ID from the URL parameter
 $equipment_id = $_GET['id'];
-
-// Establish a database connection
-$connect = mysqli_connect("localhost", "root", "", "amc") or die("Cannot connect to database");
 
 // Fetch the equipment data from the database based on the ID using prepared statement
 $stmt = $connect->prepare("SELECT * FROM Equipment WHERE id = ?");
@@ -34,12 +32,11 @@ if ($result->num_rows === 0) {
 // Fetch the row of equipment data
 $equipment = $result->fetch_assoc();
 
-// Initialize message variables
-$successMessage = '';
-$errorMessage = '';
+// Initialize input error messages
+$inputErrors = [];
 
 // Check if form is submitted to update data
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete'])) {
         // Handle deletion of equipment
         $delete_stmt = $connect->prepare("DELETE FROM Equipment WHERE id = ?");
@@ -48,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
         if ($delete_stmt->execute()) {
             // Redirect to equipment list with a success message
             header("Location: equipment.php?deleted=1");
-            exit();
+            exit(); // Stop further execution to ensure the redirect works properly
         } else {
             $errorMessage = "Error deleting equipment: " . mysqli_error($connect);
         }
@@ -59,13 +56,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
         $purchase_date = $_POST['purchase_date'];
         $model_number = $_POST['model_number'];
 
-        $update_stmt = $connect->prepare("UPDATE Equipment SET name = ?, type = ?, purchase_date = ?, model_number = ? WHERE id = ?");
-        $update_stmt->bind_param("ssssi", $name, $type, $purchase_date, $model_number, $equipment_id);
+        // Define regex patterns for validation
+        $equipment_name_pattern = "/^[a-zA-Z0-9\s]+$/"; // Allows letters and single spaces only between words
+        $equipment_type_pattern = "/^[a-zA-Z]+(?: [a-zA-Z]+)*$/"; // Allows letters and single spaces only between words
+        $model_number_pattern = "/^[a-zA-Z0-9-_]+$/"; // Alphanumeric, dashes, and underscores
 
-        if ($update_stmt->execute()) {
-            $successMessage = "Equipment updated successfully!";
-        } else {
-            $errorMessage = "Error updating equipment: " . mysqli_error($connect);
+        // Validate the equipment name
+        if (!preg_match($equipment_name_pattern, $name)) {
+            $inputErrors[] = "Equipment name must contain only alphanumeric characters and spaces.";
+        }
+
+        // Validate the equipment type
+        if (!preg_match($equipment_type_pattern, $type)) {
+            $inputErrors[] = "Equipment type must contain only letters and spaces.";
+        }
+
+        // Validate the model number
+        if (!preg_match($model_number_pattern, $model_number)) {
+            $inputErrors[] = "Model number must be alphanumeric, with dashes or underscores allowed.";
+        }
+
+        // If there are no validation errors, proceed with the update
+        if (empty($inputErrors)) {
+            $update_stmt = $connect->prepare("UPDATE Equipment SET name = ?, type = ?, purchase_date = ?, model_number = ? WHERE id = ?");
+            $update_stmt->bind_param("ssssi", $name, $type, $purchase_date, $model_number, $equipment_id);
+
+            if ($update_stmt->execute()) {
+                $successMessage = "Equipment updated successfully!";
+                // After updating, refetch the equipment data from the database to show the updated values
+                $stmt = $connect->prepare("SELECT * FROM Equipment WHERE id = ?");
+                $stmt->bind_param("i", $equipment_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $equipment = $result->fetch_assoc();  // Fetch the updated data
+            }
         }
     }
 }
@@ -221,6 +245,15 @@ mysqli_close($connect);
 
     <?php if (!empty($errorMessage)) { ?>
         <p style="color: red; font-weight: bold;"><?php echo $errorMessage; ?></p>
+    <?php } ?>
+
+    <!-- Display input validation errors -->
+    <?php if (!empty($inputErrors)) { ?>
+        <ul style="color: red; font-weight: bold;">
+            <?php foreach ($inputErrors as $error) { ?>
+                <li><?php echo $error; ?></li>
+            <?php } ?>
+        </ul>
     <?php } ?>
 
     <form action="update-equipment.php?id=<?php echo $equipment['id']; ?>" method="POST">

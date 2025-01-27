@@ -8,11 +8,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] != "Student") {
 }
 
 // Connect to the database
-$connect = mysqli_connect("localhost", "root", "", "amc");
-
-if (!$connect) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 
 // Get the student's profile ID from the session
 $profile_id = $_SESSION['profile_id'];

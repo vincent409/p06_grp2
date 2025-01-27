@@ -7,11 +7,7 @@ if (!isset($_SESSION['email'])) {
     exit();
 }
 
-$connect = mysqli_connect("localhost", "root", "", "amc");
-
-if (!$connect) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 
 // Retrieve the user's profile ID from the session
 $profile_id = $_SESSION['profile_id'];

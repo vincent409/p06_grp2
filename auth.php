@@ -9,11 +9,7 @@ function authenticate($myemail, $mypassword)
     }
 
     // Establish a database connection
-    $connect = mysqli_connect("localhost", "root", "", "amc");
-
-    if (!$connect) {
-        die("Connection failed: " . mysqli_connect_error());
-    }
+    include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 
     // Prepare SQL query to join Profile, User_Credentials, and Role tables
     $sql = $connect->prepare("SELECT Profile.id, Profile.email, Profile.has_logged_in, 
