@@ -11,6 +11,10 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['rol
     die("You do not have permission to view this page.");
 }
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 
 // Fetch only student profiles from the database
 $sql = "
@@ -192,9 +196,16 @@ if (!$result) {
                         <td>" . htmlspecialchars($row['email']) . "</td>
                         <td>" . htmlspecialchars($row['phone_number']) . "</td>
                         <td>" . htmlspecialchars($row['department']) . "</td>
-                        <td><a href='edit_profile.php?id=" . $row['id'] . "'>Edit</a></td>
+                        <td>
+                            <form action='edit_profile.php' method='POST' style='display:inline;'>
+                                <input type='hidden' name='id' value='" . htmlspecialchars($row['id']) . "'>
+                                <input type='hidden' name='csrf_token' value='" . htmlspecialchars($_SESSION['csrf_token']) . "'>
+                                <button type='submit'>Edit</button>
+                            </form>
+                        </td>
                       </tr>";
             }
+            
 
             echo "</tbody>";
             echo "</table>";

@@ -11,28 +11,39 @@ include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 // Initialize variables
+$name = $email = $phone_number = $department = "";
 $inputErrors = [];
 $successMessage = "";
 $errorMessage = "";
-
 // Fetch the profile to edit
-if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['id'])) {
-    $id = $_GET['id'];
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id'])) {
+    $id = $_POST['id'];
+    
+    // CSRF Token validation
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("CSRF validation failed.");
+    }
+
+    // Regenerate CSRF token after validation to prevent replay attacks
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+    // Fetch profile data from the database
     $sql = "SELECT id, name, email, phone_number, department FROM Profile WHERE id = ?";
     $stmt = $connect->prepare($sql);
     $stmt->bind_param("i", $id);
     $stmt->execute();
-    $stmt->store_result();
+    $result = $stmt->get_result();
 
-    if ($stmt->num_rows === 0) {
+    if ($result->num_rows > 0) {
+        $profile = $result->fetch_assoc();
+        $name = $profile['name'];
+        $email = $profile['email'];
+        $phone_number = $profile['phone_number'];
+        $department = $profile['department'];
+    } else {
         die("Profile not found.");
     }
-
-    $stmt->bind_result($id, $name, $email, $phone_number, $department);
-    $stmt->fetch();
-    $stmt->close();
 }
-
 // Handle profile update
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update'])) {
     $id = $_POST['id'];
@@ -44,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update'])) {
     // Validation patterns
     $namePattern = "/^[a-zA-Z0-9\s]+$/"; // Allow alphanumeric and spaces
     $emailPattern = "/^[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}$/"; // Email format
-    $phonePattern = "/^[0-9]{8,15}$/"; // Phone number (8-15 digits)
+    $phonePattern = "/^[0-9]{8}$/"; // Phone number (8)
 
     // Validate the name
     if (!preg_match($namePattern, $name)) {
@@ -58,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update'])) {
 
     // Validate the phone number (optional field)
     if (!empty($phone_number) && !preg_match($phonePattern, $phone_number)) {
-        $inputErrors[] = "Phone number must contain only digits and be between 8 to 15 characters.";
+        $inputErrors[] = "Phone number must contain only 8 digits ";
     }
 
     // Validate the department
@@ -123,6 +134,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
         die("You do not have permission to delete profiles.");
     }
 
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("CSRF validation failed.");
+    }
+
     $id = $_POST['id'];
 
     // Temporarily disable foreign key checks
@@ -144,9 +160,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
         // Re-enable foreign key checks even if an error occurs
         $connect->query("SET FOREIGN_KEY_CHECKS=1");
     }
-
+    
     $stmt->close();
 }
+
 
 ?>
 
@@ -278,7 +295,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
     <?php } ?>
 
     <form action="edit_profile.php" method="POST">
-        <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
+        <input type="hidden" name="id" value="<?php echo htmlspecialchars($_POST['id']); ?>">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
         <label for="name">Name:</label>
         <input type="text" name="name" value="<?php echo htmlspecialchars($name); ?>" required>
         <label for="email">Email:</label>
@@ -291,11 +309,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
     </form>
 
     <?php if ($_SESSION['role'] == 'Admin') { ?>
-        <form action="edit_profile.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this profile?');">
-            <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
-            <button type="submit" name="delete">Delete Profile</button>
-        </form>
-    <?php } ?>
+    <form action="edit_profile.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this profile?');">
+        <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+        <button type="submit" name="delete">Delete Profile</button>
+    </form>
+<?php } ?>
+
 </div>
 </body>
 </html>

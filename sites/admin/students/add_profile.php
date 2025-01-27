@@ -12,11 +12,23 @@ manageCookieAndRedirect("/p06_grp2/sites/index.php");
 $inputErrors = [];
 $success_message = '';
 
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("CSRF validation failed.");
+    }
+
+    // Regenerate CSRF token after validation to prevent replay attacks
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
     // Validation patterns
     $alphanumeric_pattern = "/^[a-zA-Z0-9\s]+$/"; // Alphanumeric with spaces
     $email_pattern = "/^[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}$/"; // Valid email format
-    $phone_pattern = "/^\d{8}$/"; // Phone number (8)
+    $phonePattern = "/^[0-9]{8}$/"; // Phone number (8)
 
     // Collect form data
     $name = trim($_POST['name']);
@@ -24,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $phone_number = trim($_POST['phone_number']);
     $department = trim($_POST['department']);
     $role_id = 3; // Assuming '3' corresponds to the Student role
+
 
     // Validate name
     if (!preg_match($alphanumeric_pattern, $name)) {
@@ -37,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Validate phone number (optional field)
     if (!empty($phone_number) && !preg_match($phone_pattern, $phone_number)) {
-        $inputErrors[] = "Phone number must be 8 digits.";
+        $inputErrors[] = "Phone number must be 8.";
     }
 
     // Validate department
@@ -231,6 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php } ?>
 
     <form method="POST" action="add_profile.php">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
         <label for="name">Name:</label><br>
         <input type="text" id="name" name="name" required><br><br>
 
