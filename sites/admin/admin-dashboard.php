@@ -69,71 +69,8 @@ mysqli_close($connect);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <link rel="stylesheet" href="/p06_grp2/admin.css">
     <style>
-        body {
-            background-color: #E5D9B6; /* Soft beige background for the page */
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            color: black;
-            padding: 10px 20px;
-        }
-        nav {
-            display: flex;
-            gap: 15px;
-            background-color: #f4f4f4;
-            padding: 10px 20px;
-        }
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-        }
-        .main {
-            display: flex;
-            justify-content: space-between;
-            padding: 30px;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .statistics {
-            flex: 2;
-            max-width: 525px;
-            padding: 30px;
-            background-color: #f4f4f4;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .quick-stats {
-            flex: 1;
-            max-width: 300px;
-            padding: 10px;
-            background-color: #f4f4f4;
-            border-radius: 8px;
-            text-align: left;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .quick-stats button {
-            padding: 10px 20px;
-            background-color: #007BFF; /* Dark Blue background */
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .quick-stats button:hover {
-            background-color: #0056b3;
-        }
-        .welcome {
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
         .pie-chart {
             width: 500px;
             height: 500px;
@@ -144,70 +81,6 @@ mysqli_close($connect);
                 #3F51B5 <?php echo ($assignedCount + $inUseCount) / $totalEquipmentCount * 100; ?>% <?php echo ($assignedCount + $inUseCount + $returnedCount) / $totalEquipmentCount * 100; ?>%,   
                 #9E9E9E <?php echo ($assignedCount + $inUseCount + $returnedCount) / $totalEquipmentCount * 100; ?>% 100%  
             );
-        }
-        .logout-btn button {
-            padding: 8px 12px;
-            background-color: #E53D29;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .logout-btn button:hover {
-            background-color: #E03C00;
-        }
-        .color-box-container {
-            padding: 10px;
-            background-color: #f4f4f4;
-            border-radius: 5px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            display: flex;  
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: flex-start;
-            justify-content: flex-start;
-            padding-top: 140px; /* Adjusted to bring legend down */
-            max-width: 400px;
-        }
-        .color-box {
-            width: 20px;  /* Reduced box size */
-            height: 20px;  /* Reduced box size */
-            border-radius: 50%;  /* Makes the boxes circular */
-            text-align: center;
-            color: white;
-            font-weight: bold;
-            display: inline-block;
-            margin-right: 10px;  /* Spacing between color box and text */
-        }
-        .status-text {
-            font-size: 16px;
-        }
-        .color-box-container div {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        h1 {
-            margin-bottom: 10px;  /* Reduced gap between Welcome User and Equipment Status */
-            padding-left: 35px;
-        }
-
-        /* Styling for the More Details buttons */
-        .color-box-container button  {
-            padding: 10px 20px;
-            background-color: #007BFF; /* Dark Blue background */
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .color-box-container button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
         }
     </style>
 </head>
