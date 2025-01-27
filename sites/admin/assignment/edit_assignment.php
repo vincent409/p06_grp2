@@ -1,20 +1,34 @@
 <?php
+session_start();
+
 // Include database connection
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
+// CSRF Protection
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 $error_message = ''; // Initialize error message variable
 $success_message = ''; // Initialize success message variable
 
 // Handle DELETE request
-if (isset($_GET['delete_id'])) {
-    $delete_id = intval($_GET['delete_id']); // Sanitize delete_id to ensure it's an integer
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("CSRF validation failed.");
+    }
+
+    $delete_id = intval($_POST['delete_id']); // Sanitize delete_id to ensure it's an integer
 
     if ($delete_id > 0) {
-        $delete_query = "DELETE FROM loan WHERE id = '$delete_id'";
-        if (mysqli_query($connect, $delete_query)) {
+        $delete_query = "DELETE FROM loan WHERE id = ?";
+        $stmt = $connect->prepare($delete_query);
+        $stmt->bind_param("i", $delete_id);
+        if ($stmt->execute()) {
             $success_message = "Assignment deleted successfully.";
         } else {
             $error_message = "Error: Unable to delete assignment.";
@@ -25,39 +39,55 @@ if (isset($_GET['delete_id'])) {
 }
 
 // Handle UPDATE request
-if (isset($_POST['update_id'])) {
-    $update_id = $_POST['update_id']; // The update_id comes from the hidden input
-    $new_email = $_POST['email'];  // Get the email from the form
-    $new_equipment_id = $_POST['equipment_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_id'])) {
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("CSRF validation failed.");
+    }
+
+    $update_id = intval($_POST['update_id']); // The update_id comes from the hidden input
+    $new_email = trim($_POST['email']);  // Get the email from the form
+    $new_equipment_id = trim($_POST['equipment_id']); // Get the equipment ID from the form
 
     // Check if the email exists in the Profile table
-    $check_email_query = "SELECT * FROM profile WHERE LOWER(email) = LOWER('$new_email')";
-    $check_email_result = mysqli_query($connect, $check_email_query);
+    $check_email_query = "SELECT * FROM profile WHERE LOWER(email) = LOWER(?)";
+    $stmt = $connect->prepare($check_email_query);
+    $stmt->bind_param("s", $new_email);
+    $stmt->execute();
+    $check_email_result = $stmt->get_result();
 
-    if (mysqli_num_rows($check_email_result) == 0) {
+    if ($check_email_result->num_rows == 0) {
         $error_message = "Error: The entered email does not exist.";
     } else {
         // Check if the equipment_id exists in the Equipment table
-        $check_equipment_query = "SELECT * FROM equipment WHERE id = '$new_equipment_id'";
-        $check_equipment_result = mysqli_query($connect, $check_equipment_query);
+        $check_equipment_query = "SELECT * FROM equipment WHERE id = ?";
+        $stmt = $connect->prepare($check_equipment_query);
+        $stmt->bind_param("i", $new_equipment_id);
+        $stmt->execute();
+        $check_equipment_result = $stmt->get_result();
 
-        if (mysqli_num_rows($check_equipment_result) == 0) {
+        if ($check_equipment_result->num_rows == 0) {
             $error_message = "Error: The entered equipment ID does not exist.";
         } else {
             // Check if the equipment_id is already assigned to another user
-            $check_assignment_query = "SELECT * FROM loan WHERE equipment_id = '$new_equipment_id' AND id != '$update_id'";
-            $check_assignment_result = mysqli_query($connect, $check_assignment_query);
+            $check_assignment_query = "SELECT * FROM loan WHERE equipment_id = ? AND id != ?";
+            $stmt = $connect->prepare($check_assignment_query);
+            $stmt->bind_param("ii", $new_equipment_id, $update_id);
+            $stmt->execute();
+            $check_assignment_result = $stmt->get_result();
 
-            if (mysqli_num_rows($check_assignment_result) > 0) {
+            if ($check_assignment_result->num_rows > 0) {
                 $error_message = "Error: This equipment ID is already assigned to another user.";
             } else {
-                $profile_row = mysqli_fetch_assoc($check_email_result);
+                $profile_row = $check_email_result->fetch_assoc();
                 $profile_id = $profile_row['id'];
 
                 // Update the loan table (profile_id and equipment_id)
-                $update_query = "UPDATE loan SET profile_id = '$profile_id', equipment_id = '$new_equipment_id' WHERE id = '$update_id'";
+                $update_query = "UPDATE loan SET profile_id = ?, equipment_id = ? WHERE id = ?";
+                $stmt = $connect->prepare($update_query);
+                $stmt->bind_param("iii", $profile_id, $new_equipment_id, $update_id);
 
-                if (mysqli_query($connect, $update_query)) {
+                if ($stmt->execute()) {
                     $success_message = "Assignment updated successfully.";
                 } else {
                     $error_message = "Error: Unable to update assignment.";
