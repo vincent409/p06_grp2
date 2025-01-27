@@ -1,4 +1,5 @@
 <?php
+session_start();
 // Check if the user is an Admin or Facility Manager
 if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
     die("You do not have permission to create profiles.");
