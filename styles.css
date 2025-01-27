@@ -94,4 +94,10 @@ nav a {
     font-weight: bold;
 }
 
-
+.reset-password {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: none;
+}
