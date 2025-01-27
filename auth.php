@@ -2,7 +2,7 @@
 session_start();
 
 // Include the validation and database connection files
-include 'C:/xampp/htdocs/p06_grp2/vaildation.php';
+include 'C:/xampp/htdocs/p06_grp2/validation.php';
 
 function authenticate($myemail, $mypassword)
 {

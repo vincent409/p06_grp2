@@ -4,7 +4,7 @@ session_start();
 if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
     die("You do not have permission to create profiles.");
 }
-
+include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
@@ -25,10 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Regenerate CSRF token after validation to prevent replay attacks
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
-    // Validation patterns
-    $alphanumeric_pattern = "/^[a-zA-Z0-9\s]+$/"; // Alphanumeric with spaces
-    $email_pattern = "/^[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}$/"; // Valid email format
-    $phonePattern = "/^[0-9]{8}$/"; // Phone number (8)
+
 
     // Collect form data
     $name = trim($_POST['name']);
@@ -43,13 +40,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $inputErrors[] = "Name must contain only alphanumeric characters and spaces.";
     }
 
-    // Validate email
-    if (!preg_match($email_pattern, $email)) {
-        $inputErrors[] = "Please enter a valid email address.";
+
+    // Validate email using the function from validation.php
+    $emailValidationResult = validateEmail($email);
+
+    if ($emailValidationResult !== true) {
+        $inputErrors[] = $emailValidationResult; // Add the validation error to the inputErrors array
     }
 
+
     // Validate phone number (optional field)
-    if (!empty($phone_number) && !preg_match($phone_pattern, $phone_number)) {
+    if (!empty($phone_number) && !preg_match($phonePattern, $phone_number)) {
         $inputErrors[] = "Phone number must be 8.";
     }
 
