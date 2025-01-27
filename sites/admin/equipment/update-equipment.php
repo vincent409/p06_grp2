@@ -6,8 +6,8 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
     exit();
 }
 
-if (!isset($_GET['id'])) {
-    die("No equipment ID specified.");
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id'])) {
+    die("No equipment ID provided.");
 }
 
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
@@ -15,7 +15,7 @@ include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
-$equipment_id = $_GET['id'];
+$equipment_id = $_POST['id'];
 
 $stmt = $connect->prepare("SELECT * FROM Equipment WHERE id = ?");
 $stmt->bind_param("i", $equipment_id);
@@ -28,6 +28,8 @@ if ($result->num_rows === 0) {
 
 $equipment = $result->fetch_assoc();
 $inputErrors = [];
+$successMessage = "";
+$errorMessage = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete'])) {
@@ -140,7 +142,8 @@ mysqli_close($connect);
         </ul>
     <?php } ?>
 
-    <form action="update-equipment.php?id=<?php echo $equipment['id']; ?>" method="POST">
+    <form action="update-equipment.php" method="POST">
+        <input type="hidden" name="id" value="<?php echo htmlspecialchars($equipment['id']); ?>">
         <label for="name">Name:</label>
         <input type="text" name="name" value="<?php echo htmlspecialchars($equipment['name']); ?>" required><br><br>
 
