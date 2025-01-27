@@ -7,20 +7,15 @@ include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
-// CSRF Protection
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
 $error_message = ''; // Initialize error message variable
 $success_message = ''; // Initialize success message variable
 
+// Remove assignments where status is NULL or blank
+$cleanup_query = "DELETE FROM loan WHERE status_id IS NULL OR TRIM(status_id) = ''";
+mysqli_query($connect, $cleanup_query);
+
 // Handle DELETE request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
-    // Validate CSRF token
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-        die("CSRF validation failed.");
-    }
 
     $delete_id = intval($_POST['delete_id']); // Sanitize delete_id to ensure it's an integer
 
@@ -40,10 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
 
 // Handle UPDATE request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_id'])) {
-    // Validate CSRF token
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-        die("CSRF validation failed.");
-    }
 
     $update_id = intval($_POST['update_id']); // The update_id comes from the hidden input
     $new_email = trim($_POST['email']);  // Get the email from the form

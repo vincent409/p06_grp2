@@ -245,7 +245,7 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
         <button type="button" class="view-button" onclick="window.location.href='edit_assignment.php';">View Assignments</button>
 
         <!-- Go back to admin.php -->
-        <button type="button" class="back-button" onclick="window.location.href='assignment.php';">Back to Admin</button>
+        <button type="button" class="back-button" onclick="window.location.href='assignment.php';">Back to Equipment</button>
     </form>
 </div>
 
