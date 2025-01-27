@@ -43,13 +43,13 @@ function manageCookieAndRedirect($redirectURL = "/p06_grp2/index.php", $warningM
         const checkInactivity = setInterval(() => {
             inactivityTime++;
 
-            if (inactivityTime === 5 && !warningShown) {
+            if (inactivityTime === 3000 && !warningShown) {
                 // Show the warning dialog at 5 seconds
                 warningShown = true;
                 showDialog('warningDialog', '$warningMessage');
             }
 
-            if (inactivityTime >= 10 && !logoutShown) {
+            if (inactivityTime >= 3600 && !logoutShown) {
                 // Hide the warning dialog and show the logout dialog at 10 seconds
                 hideDialog('warningDialog'); // Ensure warning dialog is hidden
                 logoutShown = true;

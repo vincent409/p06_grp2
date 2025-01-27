@@ -6,6 +6,7 @@ if (!$connect) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
+// Ensure the user is logged in and has a valid role
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
     // Redirect the user to login page or show an error message
     header("Location: /p06_grp2/sites/index.php");
@@ -15,7 +16,17 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/logout.php");
 
+// Fetch the logged-in user's name
+$user_id = $_SESSION['profile_id']; // Assuming this session variable holds the logged-in user's profile ID
 
+$sql_user = "SELECT name FROM Profile WHERE id = ?";
+$stmt = $connect->prepare($sql_user);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user_data = $result->fetch_assoc();
+
+$user_name = $user_data['name']; // Store the user's name
 
 // SQL query to get the counts of equipment in each status
 $sql = "
@@ -64,6 +75,7 @@ mysqli_close($connect);
     <title>Dashboard</title>
     <style>
         body {
+            background-color: #E5D9B6; /* Soft beige background for the page */
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -96,7 +108,11 @@ mysqli_close($connect);
         }
         .statistics {
             flex: 2;
-            max-width: 600px;
+            max-width: 525px;
+            padding: 30px;
+            background-color: #f4f4f4;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .quick-stats {
             flex: 1;
@@ -108,14 +124,12 @@ mysqli_close($connect);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .quick-stats button {
-            padding: 5px 10px;
-            margin-top: 5px;
-            background-color: #007BFF;
+            padding: 10px 20px;
+            background-color: #007BFF; /* Dark Blue background */
             color: white;
             border: none;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            border-radius: 5px;
         }
         .quick-stats button:hover {
             background-color: #0056b3;
@@ -137,7 +151,7 @@ mysqli_close($connect);
         }
         .logout-btn button {
             padding: 8px 12px;
-            background-color: #FF6347;
+            background-color: #E53D29;
             color: white;
             border: none;
             cursor: pointer;
@@ -145,14 +159,22 @@ mysqli_close($connect);
             font-size: 14px;
         }
         .logout-btn button:hover {
-            background-color: #FF4500;
+            background-color: #E03C00;
         }
         .color-box-container {
+            padding: 10px;
+            background-color: #f4f4f4;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;  
+            flex: 1;
             display: flex;
             flex-direction: column;
             gap: 10px;
             align-items: flex-start;
-            padding-top: 40px; /* Adjusted to bring legend down */
+            justify-content: flex-start;
+            padding-top: 140px; /* Adjusted to bring legend down */
+            max-width: 400px;
         }
         .color-box {
             width: 20px;  /* Reduced box size */
@@ -167,15 +189,6 @@ mysqli_close($connect);
         .status-text {
             font-size: 16px;
         }
-        .color-box-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: flex-start;
-            justify-content: flex-start;
-            margin-top: 20px;  /* To align the legend with the pie chart */
-        }
         .color-box-container div {
             display: flex;
             align-items: center;
@@ -184,21 +197,21 @@ mysqli_close($connect);
 
         h1 {
             margin-bottom: 10px;  /* Reduced gap between Welcome User and Equipment Status */
+            padding-left: 35px;
         }
 
         /* Styling for the More Details buttons */
-        .color-box-container button {
-            padding: 5px 10px;
-            margin-top: 5px;
-            background-color: #007BFF;
+        .color-box-container button  {
+            padding: 10px 20px;
+            background-color: #007BFF; /* Dark Blue background */
             color: white;
             border: none;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            border-radius: 5px;
         }
+
         .color-box-container button:hover {
-            background-color: #0056b3;
+            background-color: #0056b3; /* Darker blue on hover */
         }
     </style>
 </head>
@@ -221,10 +234,10 @@ mysqli_close($connect);
         <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
     </nav>
     
-    <h1>Welcome, User!</h1>
+    <h1>Welcome, <?php echo htmlspecialchars($user_name); ?>!</h1> <!-- Display the user's name -->
     <div class="main">
         <div class="statistics">
-            <h1>Equipment status</h1>
+            <h2>Equipment status</h2>
             <div class="pie-chart"></div>
         </div>
         <div class="color-box-container">
@@ -256,7 +269,7 @@ mysqli_close($connect);
         </div>
 
         <div class="quick-stats">
-            <h3>Quick Stats</h3>
+            <h2>Quick Stats</h2>
             <p><strong>Total Equipment:</strong> <?php echo $totalEquipmentCount; ?></p>
             <button onclick="window.location.href='/p06_grp2/sites/admin/equipment/equipment.php';">More Details</button>
             <p><strong>Total Students:</strong> <?php echo $totalStudents; ?></p>
