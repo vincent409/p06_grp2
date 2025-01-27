@@ -142,19 +142,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
 
             // Execute the update query
             if (mysqli_query($connect, $update_query)) {
-                // Update returned_date in usage_log if status is "Returned"
-                if ($new_status == 3 && !empty($returned_date)) {
+                // Update returned_date in usage_log
+                if ($new_status == 3 && !empty($returned_date)) { // If status is "Returned"
                     $update_usage_log_query = "UPDATE usage_log 
                                                SET returned_date = '$returned_date' 
                                                WHERE equipment_id = (SELECT equipment_id FROM loan WHERE id = '$update_id' LIMIT 1)";
-                    if (!mysqli_query($connect, $update_usage_log_query)) {
-                        echo "<script>
-                            alert('Error updating returned date: " . mysqli_error($connect) . "');
-                            window.location.href = 'status.php';
-                        </script>";
-                        exit();
-                    }
+                } else { // Set returned_date to NULL for "Assigned" or "In-Use"
+                    $update_usage_log_query = "UPDATE usage_log 
+                                               SET returned_date = NULL 
+                                               WHERE equipment_id = (SELECT equipment_id FROM loan WHERE id = '$update_id' LIMIT 1)";
                 }
+
+                if (!mysqli_query($connect, $update_usage_log_query)) {
+                    echo "<script>
+                        alert('Error updating returned date: " . mysqli_error($connect) . "');
+                        window.location.href = 'status.php';
+                    </script>";
+                    exit();
+                }
+
                 echo "<script>
                     alert('Assignment updated successfully.');
                     window.location.href = 'status.php';
@@ -197,6 +203,7 @@ if (!$result) {
     die("Query failed: " . mysqli_error($connect));
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

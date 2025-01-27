@@ -12,21 +12,45 @@ include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
+// Initialize variables for messages
+$error_message = '';
+$success_message = '';
+
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $equipment_id = $_POST['equipment_id'];
-    $log_details = $_POST['log_details']; // Usage or maintenance details
+    $equipment_id = trim($_POST['equipment_id']);
+    $log_details = trim($_POST['log_details']); // Usage or maintenance details
     $assigned_date = $_POST['assigned_date']; // Date when the equipment was assigned
-    $returned_date = $_POST['returned_date']; // Date when the equipment was returned
 
-    // Insert usage log into the database
-    $insert_query = "INSERT INTO usage_log (equipment_id, log_details, assigned_date, returned_date) 
-                     VALUES ('$equipment_id', '$log_details', '$assigned_date', '$returned_date')";
-
-    if (mysqli_query($connect, $insert_query)) {
-        echo "<div style='color:green;'>Usage log added successfully!</div>";
+    // Validate inputs
+    if (empty($equipment_id) || empty($log_details) || empty($assigned_date)) {
+        $error_message = "All fields are required.";
     } else {
-        echo "<div style='color:red;'>Error: " . mysqli_error($connect) . "</div>";
+        // Check if the equipment_id exists in the equipment table
+        $check_equipment_query = "SELECT * FROM equipment WHERE id = '$equipment_id'";
+        $check_equipment_result = mysqli_query($connect, $check_equipment_query);
+
+        if (mysqli_num_rows($check_equipment_result) == 0) {
+            $error_message = "Error: The provided equipment ID does not exist.";
+        } else {
+            // Check if the equipment_id already exists in the usage_log table
+            $check_duplicate_query = "SELECT * FROM usage_log WHERE equipment_id = '$equipment_id'";
+            $check_duplicate_result = mysqli_query($connect, $check_duplicate_query);
+
+            if (mysqli_num_rows($check_duplicate_result) > 0) {
+                $error_message = "Error: A usage log for this equipment ID already exists.";
+            } else {
+                // Insert usage log into the database
+                $insert_query = "INSERT INTO usage_log (equipment_id, log_details, assigned_date) 
+                                 VALUES ('$equipment_id', '$log_details', '$assigned_date')";
+
+                if (mysqli_query($connect, $insert_query)) {
+                    $success_message = "Usage log added successfully!";
+                } else {
+                    $error_message = "Error: " . mysqli_error($connect);
+                }
+            }
+        }
     }
 }
 
@@ -42,7 +66,7 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
     <title>Enter Usage Logs</title>
     <style>
         body {
-            background-color: #E5D9B6; /* Beige background */
+            background-color: #E5D9B6;
             font-family: Arial, sans-serif;
             color: black;
             margin: 0;
@@ -97,14 +121,14 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
         }
 
         .container {
-            background-color: white; /* White container */
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-            border-radius: 8px; /* Rounded corners */
-            padding: 20px; /* Space inside container */
-            margin: 20px auto; /* Space outside container */
-            width: 90%; /* Responsive container width */
-            max-width: 600px; /* Max width for large screens */
-            text-align: left; /* Align text within the container */
+            background-color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            text-align: left;
         }
 
         form {
@@ -124,7 +148,7 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
             font-size: 1em;
             border: 1px solid #ddd;
             border-radius: 5px;
-            box-sizing: border-box; /* Ensures padding does not exceed container */
+            box-sizing: border-box;
         }
 
         button {
@@ -145,7 +169,7 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
             font-size: 1em;
             padding: 12px 20px;
             margin-top: 10px;
-            width: 100%; /* Ensure buttons are not stretched */
+            width: 100%;
             border-radius: 5px;
             box-sizing: border-box;
         }
@@ -197,6 +221,18 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
     </form>
 </div>
 
+<!-- Display success or error messages using JavaScript -->
+<?php if (!empty($success_message)): ?>
+<script>
+    alert("<?php echo $success_message; ?>");
+</script>
+<?php endif; ?>
+
+<?php if (!empty($error_message)): ?>
+<script>
+    alert("<?php echo $error_message; ?>");
+</script>
+<?php endif; ?>
+
 </body>
 </html>
-

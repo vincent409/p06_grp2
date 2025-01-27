@@ -12,8 +12,9 @@ include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
-// Initialize error message variable
+// Initialize variables for messages
 $error_message = '';
+$success_message = '';
 
 // Handle DELETE request (only if the user is an Admin)
 if (isset($_GET['delete_id']) && $_SESSION['role'] === "Admin") {
@@ -21,13 +22,13 @@ if (isset($_GET['delete_id']) && $_SESSION['role'] === "Admin") {
     $delete_query = "DELETE FROM usage_log WHERE id = '$delete_id'";
 
     if (mysqli_query($connect, $delete_query)) {
-        echo "<div style='color:green;'>Usage log deleted successfully.</div>";
+        $success_message = "Usage log deleted successfully.";
     } else {
-        echo "<div style='color:red;'>Error: " . mysqli_error($connect) . "</div>";
+        $error_message = "Error: " . mysqli_error($connect);
     }
 } elseif (isset($_GET['delete_id']) && $_SESSION['role'] === "Facility Manager") {
     // If the user is a Facility Manager, do not allow deletion
-    echo "<div style='color:red;'>Error: You do not have permission to delete usage logs.</div>";
+    $error_message = "Error: You do not have permission to delete usage logs.";
 }
 
 // Handle UPDATE request
@@ -36,17 +37,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
     $new_log_details = $_POST['log_details']; // New details
     $new_assigned_date = $_POST['assigned_date'];
     $new_returned_date = $_POST['returned_date'];
-    
 
-    // Update the usage log details
+    // Validate dates
     if (!empty($new_returned_date) && $new_returned_date < $new_assigned_date) {
-        echo "<div style='color:red;'>Error: Returned date cannot be earlier than the assigned date.</div>";
+        $error_message = "Error: Returned date cannot be earlier than the assigned date.";
     } else {
+        // Update the usage log details
         $update_query = "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = '$new_returned_date' WHERE id = '$update_id'";
         if (mysqli_query($connect, $update_query)) {
-            echo "<div style='color:green;'>Usage log updated successfully!</div>";
+            $success_message = "Usage log updated successfully!";
         } else {
-            echo "<div style='color:red;'>Error updating usage log: " . mysqli_error($connect) . "</div>";
+            $error_message = "Error updating usage log: " . mysqli_error($connect);
         }
     }
 }
@@ -226,19 +227,6 @@ if (!$result) {
             background-color: #cc0000;
         }
     </style>
-    <script>
-        // JavaScript validation for returned_date and assigned_date
-        function validateDates(form) {
-            const assignedDate = new Date(form.assigned_date.value);
-            const returnedDate = new Date(form.returned_date.value);
-
-            if (returnedDate && returnedDate < assignedDate) {
-                alert("Returned date cannot be earlier than the assigned date.");
-                return false; // Prevent form submission
-            }
-            return true; // Allow form submission
-        }
-    </script>
 </head>
 <body>
 <header>
@@ -309,6 +297,20 @@ if (!$result) {
         </tbody>
     </table>
 </div>
+
+<!-- Display success or error messages as popups -->
+<?php if (!empty($success_message)): ?>
+<script>
+    alert("<?php echo $success_message; ?>");
+</script>
+<?php endif; ?>
+
+<?php if (!empty($error_message)): ?>
+<script>
+    alert("<?php echo $error_message; ?>");
+</script>
+<?php endif; ?>
+
 </body>
 </html>
 
