@@ -8,8 +8,16 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
     exit();
 }
 
-// Connect to the database
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
+include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+manageCookieAndRedirect("/p06_grp2/logout.php");
+
+// Connect to the database
+$connect = mysqli_connect("localhost", "root", "", "amc");
+
+if (!$connect) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
 
 // Handle DELETE request for Admins and Facility Managers
 if (isset($_GET['delete_id'])) {
@@ -197,26 +205,72 @@ if (!$result) {
     <title>Manage Assignments</title>
     <style>
         body {
-            background-color: white;
+            background-color: #E5D9B6; /* Beige background */
             font-family: Arial, sans-serif;
             color: black;
             margin: 0;
             padding: 0;
-            text-align: center;
         }
 
-        h1 {
-            color: black;
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             background-color: white;
-            padding: 20px;
-            margin: 0;
-            font-size: 2em;
+            color: black;
+            padding: 10px 20px;
+        }
+
+        nav {
+            display: flex;
+            gap: 15px;
+            background-color: #f4f4f4;
+            padding: 10px 20px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .logout-btn button {
+            padding: 8px 12px;
+            background-color: #E53D29;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .logout-btn button:hover {
+            background-color: #E03C00;
+        }
+
+        .container {
+            background-color: #ffffff; /* White container */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            border-radius: 8px; /* Rounded corners */
+            padding: 20px; /* Space inside container */
+            margin: 20px auto; /* Space outside container */
+            width: 90%; /* Responsive container width */
+            max-width: 1200px; /* Max width for large screens */
+            text-align: left; /* Align text to the left */
+        }
+
+        .container h1 {
+            margin-top: 0;
+            font-size: 1.5em; /* Slightly smaller font size for the title */
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px auto;
+            margin: 20px 0;
+            background-color: #ffffff; /* Ensure table matches container */
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         th, td {
@@ -224,17 +278,26 @@ if (!$result) {
             padding: 12px;
             text-align: left;
             font-size: 1em;
+            background-color: #F9F9F9; /* Light background for cells */
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #F1F1F1; /* Slightly darker for header */
         }
 
         td input, td button, td select {
-            width: 100%;
+            width: 90%; /* Adjust to prevent overflow */
             max-width: 250px;
             padding: 8px;
             font-size: 0.9em;
+            background-color: #ffffff; /* White input background */
+            border: 1px solid #ccc; /* Subtle border for inputs */
+            border-radius: 4px;
+        }
+
+        td input:focus, td select:focus {
+            border-color: #007BFF; /* Highlight on focus */
+            outline: none;
         }
 
         .button-container {
@@ -252,6 +315,8 @@ if (!$result) {
             padding: 12px 20px;
             width: 48%;
             text-align: center;
+            border: none;
+            border-radius: 4px;
         }
 
         .update-button:hover {
@@ -266,6 +331,8 @@ if (!$result) {
             padding: 12px 20px;
             width: 48%;
             text-align: center;
+            border: none;
+            border-radius: 4px;
         }
 
         .delete-button:hover {
@@ -280,6 +347,8 @@ if (!$result) {
             margin-top: 20px;
             font-size: 1.2em;
             text-decoration: none;
+            display: inline-block;
+            border-radius: 4px;
         }
 
         .back-button:hover {
@@ -289,6 +358,7 @@ if (!$result) {
         .returned-date {
             display: none;
         }
+
         td label {
             display: block;
             margin-bottom: 5px;
@@ -302,41 +372,10 @@ if (!$result) {
             padding: 8px;
             margin-bottom: 10px;
             font-size: 0.9em;
+            background-color: #ffffff; /* Match the table cell background */
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
-
-        td .update-button,
-        td .delete-button {
-            display: inline-block;
-            padding: 10px 15px;
-            font-size: 0.9em;
-            cursor: pointer;
-            text-align: center;
-            border: none;
-            border-radius: 5px;
-        }
-
-        td .update-button {
-            background-color: #007BFF;
-            color: white;
-        }
-
-        td .update-button:hover {
-            background-color: #0056b3;
-        }
-
-        td .delete-button {
-            background-color: #FF0000;
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            font-size: 0.9em;
-            border-radius: 5px;
-        }
-
-        td .delete-button:hover {
-            background-color: #cc0000;
-        }
-
     </style>
     <script>
     // Function to toggle the visibility of the Returned Date field
@@ -351,69 +390,86 @@ if (!$result) {
     </script>
 </head>
 <body>
-    <h1>Manage Status</h1>
+    <header>
+        <div class="logo">
+            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+        </div>
+        <div class="dashboard-title">Dashboard</div>
+        <div class="logout-btn">
+            <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
+        </div>
+    </header>
 
-    <?php
-    if (mysqli_num_rows($result) === 0): ?>
-        <h2>No records found</h2>
-    <?php else: ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>Status</th>
-                    <th>Email</th>
-                    <th>Equipment ID</th>
-                    <th>Assigned Date</th>
-                    <th>Returned Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                <tr>
-                    <td><?php echo $row['status_name']; ?></td>
-                    <td><?php echo $row['profile_email']; ?></td>
-                    <td><?php echo $row['equipment_id']; ?></td>
-                    <td><?php echo $row['assigned_date'] ?: 'NIL'; ?></td>
-                    <td><?php echo $row['returned_date'] ?: 'NIL'; ?></td>
-                    <td>
-                        <form action="status.php" method="POST" style="text-align: left;">
-                            <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
+    <nav>
+        <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+        <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+        <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
+        <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
+        <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+        <a href="/p06_grp2/sites/admin/status.php">Status</a>
+    </nav>
 
-                            <!-- Email Field -->
-                            <label for="email_<?php echo $row['id']; ?>">Email:</label>
-                            <input type="email" id="email_<?php echo $row['id']; ?>" name="email" value="<?php echo $row['profile_email']; ?>" required>
+    <div class="container">
+        <h1>Manage Status</h1>
+        <?php if (mysqli_num_rows($result) === 0): ?>
+            <h2>No records found</h2>
+        <?php else: ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Email</th>
+                        <th>Equipment ID</th>
+                        <th>Assigned Date</th>
+                        <th>Returned Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                    <tr>
+                        <td><?php echo $row['status_name']; ?></td>
+                        <td><?php echo $row['profile_email']; ?></td>
+                        <td><?php echo $row['equipment_id']; ?></td>
+                        <td><?php echo $row['assigned_date'] ?: 'NIL'; ?></td>
+                        <td><?php echo $row['returned_date'] ?: 'NIL'; ?></td>
+                        <td>
+                            <form action="status.php" method="POST" style="text-align: left;">
+                                <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
 
-                            <!-- Status Field -->
-                            <label for="status_<?php echo $row['id']; ?>">Status:</label>
-                            <select id="status_<?php echo $row['id']; ?>" name="status" onchange="toggleReturnedDate(this, 'returned_date_<?php echo $row['id']; ?>')">
-                                <option value="1" <?php echo ($row['status_id'] == 1) ? 'selected' : ''; ?>>Assigned</option>
-                                <option value="2" <?php echo ($row['status_id'] == 2) ? 'selected' : ''; ?>>In-Use</option>
-                                <option value="3" <?php echo ($row['status_id'] == 3) ? 'selected' : ''; ?>>Returned</option>
-                            </select>
+                                <!-- Email Field -->
+                                <label for="email_<?php echo $row['id']; ?>">Email:</label>
+                                <input type="email" id="email_<?php echo $row['id']; ?>" name="email" value="<?php echo $row['profile_email']; ?>" required>
 
-                            <!-- Returned Date Field -->
-                            <div id="returned_date_<?php echo $row['id']; ?>" style="display: <?php echo ($row['status_id'] == 3) ? 'block' : 'none'; ?>;">
-                                <label for="returned_date_input_<?php echo $row['id']; ?>">Returned Date:</label>
-                                <input type="date" id="returned_date_input_<?php echo $row['id']; ?>" name="returned_date" value="<?php echo $row['returned_date']; ?>">
-                            </div>
+                                <!-- Status Field -->
+                                <label for="status_<?php echo $row['id']; ?>">Status:</label>
+                                <select id="status_<?php echo $row['id']; ?>" name="status" onchange="toggleReturnedDate(this, 'returned_date_<?php echo $row['id']; ?>')">
+                                    <option value="1" <?php echo ($row['status_id'] == 1) ? 'selected' : ''; ?>>Assigned</option>
+                                    <option value="2" <?php echo ($row['status_id'] == 2) ? 'selected' : ''; ?>>In-Use</option>
+                                    <option value="3" <?php echo ($row['status_id'] == 3) ? 'selected' : ''; ?>>Returned</option>
+                                </select>
 
-                            <!-- Buttons -->
-                            <div style="margin-top: 10px; display: flex; gap: 10px;">
-                                <button type="submit" class="update-button">Update</button>
-                                <?php if ($_SESSION['role'] === "Admin" || $row['status_id'] === NULL): ?>
-                                    <a href="status.php?delete_id=<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure?')">Delete</a>
-                                <?php endif; ?>
-                            </div>
-                        </form>
-                        
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
-    <a href="/p06_grp2/sites/admin/admin-dashboard.php" class="back-button">Back</a>
+                                <!-- Returned Date Field -->
+                                <div id="returned_date_<?php echo $row['id']; ?>" style="display: <?php echo ($row['status_id'] == 3) ? 'block' : 'none'; ?>;">
+                                    <label for="returned_date_input_<?php echo $row['id']; ?>">Returned Date:</label>
+                                    <input type="date" id="returned_date_input_<?php echo $row['id']; ?>" name="returned_date" value="<?php echo $row['returned_date']; ?>">
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="button-container">
+                                    <button type="submit" class="update-button">Update</button>
+                                    <?php if ($_SESSION['role'] === "Admin" || $row['status_id'] === NULL): ?>
+                                        <a href="status.php?delete_id=<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure?')">Delete</a>
+                                    <?php endif; ?>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
 </body>
 </html>
 

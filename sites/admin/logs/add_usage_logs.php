@@ -42,31 +42,73 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
     <title>Enter Usage Logs</title>
     <style>
         body {
-            background-color: white; /* Page background is white */
+            background-color: #E5D9B6; /* Beige background */
             font-family: Arial, sans-serif;
-            color: black; /* Text color is black */
+            color: black;
             margin: 0;
             padding: 0;
-            text-align: center;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            color: black;
+            padding: 10px 20px;
+        }
+
+        nav {
+            display: flex;
+            gap: 15px;
+            background-color: #f4f4f4;
+            padding: 10px 20px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .logout-btn button {
+            padding: 8px 12px;
+            background-color: #E53D29;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .logout-btn button:hover {
+            background-color: #E03C00;
         }
 
         h1 {
-            color: black; /* Make the "Enter Usage Log" text black */
-            background-color: white; /* The background color around the text is white */
-            padding: 20px;
-            margin: 0;
-            font-size: 2em;
+            text-align: center;
+            margin: 20px auto;
+            font-size: 1.8em;
+            color: black;
+        }
+
+        .container {
+            background-color: white; /* White container */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            border-radius: 8px; /* Rounded corners */
+            padding: 20px; /* Space inside container */
+            margin: 20px auto; /* Space outside container */
+            width: 90%; /* Responsive container width */
+            max-width: 600px; /* Max width for large screens */
+            text-align: left; /* Align text within the container */
         }
 
         form {
-            display: inline-block;
             text-align: left;
-            background-color: white; /* White background for the form */
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-            width: 80%; /* Adjust width to prevent buttons from being stretched */
-            max-width: 400px; /* Max width to keep the form centered */
         }
 
         label {
@@ -79,75 +121,62 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
             width: 100%;
             padding: 12px;
             margin: 10px 0;
-            font-size: 1.2em;
+            font-size: 1em;
             border: 1px solid #ddd;
             border-radius: 5px;
+            box-sizing: border-box; /* Ensures padding does not exceed container */
         }
 
         button {
-            background-color: #007BFF; /* Set all buttons to blue */
+            background-color: #007BFF;
             color: white;
             cursor: pointer;
+            border: none;
         }
 
         button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
+            background-color: #0056b3;
         }
 
         .back-button, .view-button {
-            background-color: #007BFF; /* Blue background for the buttons */
+            background-color: #007BFF;
             border: none;
             cursor: pointer;
-            font-size: 1.2em;
+            font-size: 1em;
             padding: 12px 20px;
             margin-top: 10px;
-            width: 100%; /* Ensure these buttons are not stretched and match the width of the form */
+            width: 100%; /* Ensure buttons are not stretched */
+            border-radius: 5px;
+            box-sizing: border-box;
         }
 
         .back-button:hover, .view-button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            color: black;
-            padding: 10px 20px;
-        }
-        nav {
-            display: flex;
-            gap: 15px;
-            background-color: #f4f4f4;
-            padding: 10px 20px;
-        }
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
 <header>
-        <div class="logo">
-            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
-        </div>
-        <div class="dashboard-title">Dashboard</div>
-        <div class="logout-btn">
-            <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
-        </div>
-    </header>
+    <div class="logo">
+        <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+    </div>
+    <div class="dashboard-title">Dashboard</div>
+    <div class="logout-btn">
+        <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
+    </div>
+</header>
 
-    <nav>
-        <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
-        <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
-        <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
-        <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
-        <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
-    </nav>
+<nav>
+    <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+    <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+    <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
+    <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
+    <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+    <a href="/p06_grp2/sites/admin/status.php">Status</a>
+</nav>
+
+<div class="container">
     <h1>Enter Equipment Usage Log</h1>
-
     <form method="POST">
         <label for="equipment_id">Equipment ID:</label>
         <input type="text" id="equipment_id" name="equipment_id" value="<?php echo $equipment_id; ?>" required>
@@ -161,11 +190,13 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
         <button type="submit">Submit Usage Log</button>
 
         <!-- View Usage Logs Button -->
-        <button class="view-button" onclick="window.location.href='edit_usage_logs.php';">View/Edit</button>
+        <button type="button" class="view-button" onclick="window.location.href='edit_usage_logs.php';">View/Edit</button>
 
         <!-- Go back to admin.php -->
-        <button class="back-button" onclick="window.location.href='assignment.php';">Back to Admin</button>
+        <button type="button" class="back-button" onclick="window.location.href='/p06_grp2/sites/admin/admin-dashboard.php';">Back to Admin</button>
     </form>
+</div>
 
 </body>
 </html>
+

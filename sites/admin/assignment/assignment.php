@@ -49,24 +49,14 @@ if (!$result) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equipment Data</title>
     <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
+        body {
+            background-color: #E5D9B6; /* Beige background */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: black;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        a {
-            text-decoration: none;
-            color: #007BFF;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
+
         header {
             display: flex;
             justify-content: space-between;
@@ -75,16 +65,83 @@ if (!$result) {
             color: black;
             padding: 10px 20px;
         }
+
         nav {
             display: flex;
             gap: 15px;
             background-color: #f4f4f4;
             padding: 10px 20px;
         }
+
         nav a {
             text-decoration: none;
             color: #333;
             font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .logout-btn button {
+            padding: 8px 12px;
+            background-color: #E53D29;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .logout-btn button:hover {
+            background-color: #E03C00;
+        }
+
+        .container {
+            background-color: white; /* White container */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            border-radius: 8px; /* Rounded corners */
+            padding: 20px; /* Space inside container */
+            margin: 20px auto; /* Space outside container */
+            width: 90%; /* Responsive container width */
+            max-width: 1200px; /* Max width for large screens */
+        }
+
+        h1 {
+            text-align: left;
+            margin: 0;
+            font-size: 1.5em;
+            color: black;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: #ffffff; /* Ensure table matches container */
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            font-size: 1em;
+            background-color: #F9F9F9; /* Light background for cells */
+        }
+
+        th {
+            background-color: #F1F1F1; /* Slightly darker for header */
+        }
+
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -105,41 +162,46 @@ if (!$result) {
         <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
         <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
         <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+        <a href="/p06_grp2/sites/admin/status.php">Status</a>
     </nav>
-    <h1>Equipment Details</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Equipment ID</th>
-                <th>Equipment Name</th>
-                <th>Equipment Status</th>
-                <th>Email</th>
-                <th>Assign Equipment</th> <!-- New Column for Assign -->
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            // Fetch and display data in a table
-            if (mysqli_num_rows($result) > 0) {
-                while ($row = mysqli_fetch_assoc($result)) {
-                    // Create the link for assigning the equipment
-                    $assign_link = "add_assignment.php?equipment_id=" . $row['equipment_id'];
-                    echo "<tr>
-                            <td>{$row['equipment_id']}</td>
-                            <td>{$row['equipment_name']}</td>
-                            <td>" . ($row['equipment_status'] ? $row['equipment_status'] : "N/A") . "</td>
-                            <td>" . ($row['email'] ? $row['email'] : "N/A") . "</td>
-                            <td><a href='$assign_link'>Assign</a></td>
-                          </tr>";
-                }
-            } else {
-                echo "<tr><td colspan='5'>No data available</td></tr>";
-            }
 
-            // Close the database connection
-            mysqli_close($connect);
-            ?>
-        </tbody>
-    </table>
+    <div class="container">
+        <h1>Equipment Details</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Equipment ID</th>
+                    <th>Equipment Name</th>
+                    <th>Equipment Status</th>
+                    <th>Email</th>
+                    <th>Assign Equipment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                // Fetch and display data in a table
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        // Create the link for assigning the equipment
+                        $assign_link = "add_assignment.php?equipment_id=" . $row['equipment_id'];
+                        echo "<tr>
+                                <td>{$row['equipment_id']}</td>
+                                <td>{$row['equipment_name']}</td>
+                                <td>" . ($row['equipment_status'] ? $row['equipment_status'] : "N/A") . "</td>
+                                <td>" . ($row['email'] ? $row['email'] : "N/A") . "</td>
+                                <td><a href='$assign_link'>Assign</a></td>
+                              </tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='5'>No data available</td></tr>";
+                }
+
+                // Close the database connection
+                mysqli_close($connect);
+                ?>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
+

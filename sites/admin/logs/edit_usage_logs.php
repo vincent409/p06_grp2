@@ -66,29 +66,98 @@ if (!$result) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Usage Logs</title>
+    <title>Manage Usage Logs</title>
     <style>
         body {
-            background-color: white;
+            background-color: #E5D9B6; /* Beige background */
             font-family: Arial, sans-serif;
             color: black;
             margin: 0;
             padding: 0;
-            text-align: center;
         }
 
-        h1 {
-            color: black;
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             background-color: white;
-            padding: 20px;
+            color: black;
+            padding: 10px 20px;
+        }
+
+        nav {
+            display: flex;
+            gap: 15px;
+            background-color: #f4f4f4;
+            padding: 10px 20px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .logout-btn button {
+            padding: 8px 12px;
+            background-color: #E53D29; /* Red button */
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .logout-btn button:hover {
+            background-color: #E03C00; /* Darker red on hover */
+        }
+
+        .container {
+            background-color: white; /* White container */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            border-radius: 8px; /* Rounded corners */
+            padding: 20px; /* Space inside container */
+            margin: 20px auto; /* Space outside container */
+            width: 90%; /* Responsive container width */
+            max-width: 1200px; /* Max width for large screens */
+            position: relative; /* To position child elements */
+        }
+
+        .container-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .container-header h1 {
+            font-size: 1.8em;
             margin: 0;
-            font-size: 2em;
+            text-align: left; /* Align Manage Usage Logs to the left */
+        }
+
+        .enter-logs-button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 1em;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .enter-logs-button:hover {
+            background-color: #0056b3;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px auto;
+            margin: 20px 0;
         }
 
         th, td {
@@ -96,43 +165,51 @@ if (!$result) {
             padding: 12px;
             text-align: left;
             font-size: 1em;
+            background-color: #F9F9F9; /* Light background for cells */
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #F1F1F1; /* Slightly darker for header */
         }
 
-        td input, td button {
+        td input {
             width: 100%;
             max-width: 250px;
             padding: 8px;
-            font-size: 0.9em; /* Smaller font size */
+            font-size: 0.9em;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
 
-        /* Button Container */
+        td input:focus {
+            border-color: #007BFF; /* Highlight on focus */
+            outline: none;
+        }
+
         .button-container {
             display: flex;
             justify-content: space-between;
-            gap: 10px; /* Add some space between buttons */
+            gap: 10px;
             margin-top: 10px;
         }
 
-        /* Update Button Styling */
         .update-button {
             background-color: #007BFF;
             color: white;
             cursor: pointer;
             font-size: 0.9em;
             padding: 12px 20px;
-            width: 48%; /* Ensures both buttons have the same width */
+            width: 48%;
             text-align: center;
+            border: none;
+            border-radius: 4px;
         }
 
         .update-button:hover {
             background-color: #0056b3;
         }
 
-        /* Delete Button Styling */
         .delete-button {
             background-color: #FF0000;
             color: white;
@@ -142,47 +219,14 @@ if (!$result) {
             width: 48%;
             text-align: center;
             text-decoration: none;
+            border-radius: 4px;
         }
 
         .delete-button:hover {
             background-color: #cc0000;
         }
-
-        .back-button {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-            padding: 12px 20px;
-            margin-top: 20px;
-            font-size: 1.2em;
-            text-decoration: none;
-        }
-
-        .back-button:hover {
-            background-color: #0056b3;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            color: black;
-            padding: 10px 20px;
-        }
-        nav {
-            display: flex;
-            gap: 15px;
-            background-color: #f4f4f4;
-            padding: 10px 20px;
-        }
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-        }
-
     </style>
-        <script>
+    <script>
         // JavaScript validation for returned_date and assigned_date
         function validateDates(form) {
             const assignedDate = new Date(form.assigned_date.value);
@@ -198,23 +242,29 @@ if (!$result) {
 </head>
 <body>
 <header>
-        <div class="logo">
-            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
-        </div>
-        <div class="dashboard-title">Dashboard</div>
-        <div class="logout-btn">
-            <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
-        </div>
-    </header>
+    <div class="logo">
+        <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+    </div>
+    <div class="dashboard-title">Dashboard</div>
+    <div class="logout-btn">
+        <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
+    </div>
+</header>
 
-    <nav>
-        <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
-        <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
-        <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
-        <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
-        <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
-    </nav>
-    <h1>Manage Usage Logs</h1>
+<nav>
+    <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+    <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+    <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
+    <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
+    <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+    <a href="/p06_grp2/sites/admin/status.php">Status</a>
+</nav>
+
+<div class="container">
+    <div class="container-header">
+        <h1>Manage Usage Logs</h1>
+        <a href="add_usage_logs.php" class="enter-logs-button">Enter Usage Logs</a>
+    </div>
 
     <table>
         <thead>
@@ -234,9 +284,9 @@ if (!$result) {
                 <td><?php echo $row['assigned_date']; ?></td>
                 <td><?php echo $row['returned_date']; ?></td>
                 <td>
-                    <!-- Update Form -->
                     <form action="edit_usage_logs.php" method="POST" style="display:inline;">
                         <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
+
                         <label for="log_details">Log Details:</label>
                         <input type="text" name="log_details" value="<?php echo $row['log_details']; ?>" required><br>
 
@@ -246,7 +296,6 @@ if (!$result) {
                         <label for="returned_date">Returned Date:</label>
                         <input type="date" name="returned_date" value="<?php echo $row['returned_date']; ?>"><br>
 
-                        <!-- Button Container for Update and Delete -->
                         <div class="button-container">
                             <button type="submit" class="update-button">Update</button>
                             <?php if ($_SESSION['role'] === "Admin"): ?>
@@ -259,10 +308,7 @@ if (!$result) {
             <?php endwhile; ?>
         </tbody>
     </table>
-
-    <!-- Back button to admin.php -->
-    <a href="add_usage_logs.php" class="back-button">Back</a>
-
+</div>
 </body>
 </html>
 

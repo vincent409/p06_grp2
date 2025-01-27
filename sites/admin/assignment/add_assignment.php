@@ -4,6 +4,8 @@ include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
+$assignment_created = false; // Variable to track if the assignment was created
+$error_message = ''; // Variable to store error messages
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']); // Get the email from the form, removing any leading/trailing spaces
@@ -14,8 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $check_equipment_result = mysqli_query($connect, $check_equipment_query);
 
     if (mysqli_num_rows($check_equipment_result) > 0) {
-        // If the equipment is already assigned, show an error
-        echo "<div style='color:red;'>Error: This equipment ID is already assigned to another user.</div>";
+        $error_message = "Error: This equipment ID is already assigned to another user.";
     } else {
         // Fetch the profile_id from the Profile table using the provided email
         $profile_query = "SELECT id FROM profile WHERE LOWER(email) = LOWER('$email') LIMIT 1"; // Case-insensitive comparison
@@ -32,24 +33,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $check_duplicate_result = mysqli_query($connect, $check_duplicate_query);
 
             if (mysqli_num_rows($check_duplicate_result) > 0) {
-                // If the profile already has this equipment assigned, show an error
-                echo "<div style='color:red;'>Error: This profile already has this equipment assigned.</div>";
+                $error_message = "Error: This profile already has this equipment assigned.";
             } else {
-                // Fetch the status ID for the new loan (this might need adjustment based on logic)
                 $status_id = 1;  // Default status_id for "Assigned"
 
-                // Now insert the assignment into the loan table
+                // Insert the assignment into the loan table
                 $insert_query = "INSERT INTO loan (profile_id, equipment_id, status_id) 
                                  VALUES ('$profile_id', '$equipment_id', '$status_id')";
 
                 if (mysqli_query($connect, $insert_query)) {
-                    echo "<div style='color:green;'>Assignment added successfully!</div>";
+                    $assignment_created = true; // Set the flag to true when an assignment is created
                 } else {
-                    echo "<div style='color:red;'>Error: " . mysqli_error($connect) . "</div>";
+                    $error_message = "Error: " . mysqli_error($connect);
                 }
             }
         } else {
-            echo "<div style='color:red;'>Error: No profile found for the provided email.</div>";
+            $error_message = "Error: No profile found for the provided email.";
         }
     }
 }
@@ -57,7 +56,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Get the equipment_id from the URL
 $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // Use an empty string if not set
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,32 +64,74 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
     <title>Add Assignment</title>
     <style>
         body {
-            background-color: white;
+            background-color: #E5D9B6; /* Beige background */
             font-family: Arial, sans-serif;
             color: black;
             margin: 0;
             padding: 0;
-            text-align: center;
+            text-align: center; /* Center-aligns content */
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            color: black;
+            padding: 10px 20px;
+        }
+
+        nav {
+            display: flex;
+            gap: 15px;
+            background-color: #f4f4f4;
+            padding: 10px 20px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .logout-btn button {
+            padding: 8px 12px;
+            background-color: #E53D29;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .logout-btn button:hover {
+            background-color: #E03C00;
         }
 
         h1 {
+            text-align: center; /* Center-aligns the heading */
+            margin: 20px auto;
+            font-size: 1.8em;
             color: black;
-            background-color: white;
-            padding: 20px;
-            margin: 0;
-            font-size: 2em;
+        }
+
+        .container {
+            background-color: white; /* White container */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            border-radius: 8px; /* Rounded corners */
+            padding: 20px; /* Space inside container */
+            margin: 20px auto; /* Space outside container */
+            width: 90%; /* Responsive container width */
+            max-width: 600px; /* Max width for large screens */
+            text-align: left; /* Align text within the container */
         }
 
         form {
-            display: inline-block;
             text-align: left;
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-            width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;  /* Ensures padding does not exceed container */
         }
 
         label {
@@ -104,16 +144,17 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
             width: 100%;
             padding: 12px;
             margin: 10px 0;
-            font-size: 1.2em;
+            font-size: 1em;
             border: 1px solid #ddd;
             border-radius: 5px;
-            box-sizing: border-box; /* Ensures the input elements fit within the container */
+            box-sizing: border-box; /* Ensures padding does not exceed container */
         }
 
         button {
             background-color: #007BFF;
             color: white;
             cursor: pointer;
+            border: none;
         }
 
         button:hover {
@@ -124,57 +165,41 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
             background-color: #007BFF;
             border: none;
             cursor: pointer;
-            font-size: 1.2em;
+            font-size: 1em;
             padding: 12px 20px;
             margin-top: 10px;
-            width: 100%; /* Ensure buttons are not stretched out */
+            width: 100%; /* Ensure buttons are not stretched */
+            border-radius: 5px;
             box-sizing: border-box;
         }
 
         .back-button:hover, .view-button:hover {
             background-color: #0056b3;
         }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            color: black;
-            padding: 10px 20px;
-        }
-        nav {
-            display: flex;
-            gap: 15px;
-            background-color: #f4f4f4;
-            padding: 10px 20px;
-        }
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
 <header>
-        <div class="logo">
-            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
-        </div>
-        <div class="dashboard-title">Dashboard</div>
-        <div class="logout-btn">
-            <button onclick="window.location.href='/xampp/p06_grp2/logout.php';">Logout</button>
-        </div>
-    </header>
+    <div class="logo">
+        <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+    </div>
+    <div class="dashboard-title">Dashboard</div>
+    <div class="logout-btn">
+        <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
+    </div>
+</header>
 
-    <nav>
-        <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
-        <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
-        <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
-        <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
-        <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
-    </nav>
+<nav>
+    <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+    <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+    <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
+    <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
+    <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+    <a href="/p06_grp2/sites/admin/status.php">Status</a>
+</nav>
+
+<div class="container">
     <h1>Add New Assignment</h1>
-
     <form method="POST">
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
@@ -185,11 +210,22 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
         <button type="submit">Create Assignment</button>
 
         <!-- View Assignments Button -->
-        <button class="view-button" onclick="window.location.href='edit_assignment.php';">View Assignments</button>
+        <button type="button" class="view-button" onclick="window.location.href='edit_assignment.php';">View Assignments</button>
 
         <!-- Go back to admin.php -->
-        <button class="back-button" onclick="window.location.href='assignment.php';">Back to Admin</button>
+        <button type="button" class="back-button" onclick="window.location.href='assignment.php';">Back to Admin</button>
     </form>
+</div>
 
+<!-- JavaScript to handle pop-ups -->
+<?php if ($assignment_created): ?>
+<script>
+    alert("Assignment has been created successfully!");
+</script>
+<?php elseif (!empty($error_message)): ?>
+<script>
+    alert("<?php echo $error_message; ?>");
+</script>
+<?php endif; ?>
 </body>
 </html>
