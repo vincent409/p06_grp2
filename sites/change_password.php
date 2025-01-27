@@ -9,6 +9,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] != "Student") {
 
 // Connect to the database
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
+include 'C:/xampp/htdocs/p06_grp2/validation.php';
 
 // Get the student's profile ID from the session
 $profile_id = $_SESSION['profile_id'];
