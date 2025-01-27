@@ -71,7 +71,7 @@ mysqli_close($connect);
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f9f9f9;
+            background-color: #E5D9B6;
         }
         header {
             display: flex;
@@ -137,6 +137,7 @@ mysqli_close($connect);
             border: 1px solid #ddd;
             padding: 15px;
             text-align: center;
+            background-color: #f4f4f4;
         }
 
         th {
