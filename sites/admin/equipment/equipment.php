@@ -12,15 +12,36 @@ include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
-// SQL query to fetch all equipment data from the Equipment table
-$sql = "SELECT id, name, type, purchase_date, model_number FROM Equipment";
+// Handle search query
+$searchQuery = "";
+$result = null;
 
-// Execute the query
-$result = mysqli_query($connect, $sql);
+if (isset($_GET['search'])) {
+    $searchQuery = $_GET['search'];
 
-// Check if query execution was successful
-if (!$result) {
-    die("Query failed: " . mysqli_error($connect));
+    // Use a prepared statement to execute the search
+    $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number 
+                               FROM Equipment 
+                               WHERE name LIKE ? OR type LIKE ?");
+    
+    // Add wildcards for the LIKE clause
+    $searchParam = "%" . $searchQuery . "%";
+    $stmt->bind_param("ss", $searchParam, $searchParam);
+
+    // Execute the query
+    $stmt->execute();
+
+    // Get the result set
+    $result = $stmt->get_result();
+
+    // Close the statement
+    $stmt->close();
+} else {
+    // Default query to fetch all equipment if no search is performed
+    $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number FROM Equipment");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
 }
 ?>
 
@@ -30,112 +51,44 @@ if (!$result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Equipment</title>
+    <link rel="stylesheet" href="/p06_grp2/admin.css">
     <style>
-        body {
-            background-color: #E5D9B6; /* Soft beige background for the page */
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .box {
-            background-color: #FFFFFF;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 20px 0;
-        }
-
-        th, td {
-            background-color: white;
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .success-message {
-            color: green;
-            margin-bottom: 20px;
-        }
-
-        header {
+        .container-flex {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: white;
-            color: black;
-            padding: 10px 20px;
+            margin-bottom: 20px;
         }
 
-        nav {
+        .container-flex h1 {
+            margin: 0;
+            padding-left: 5px; /* Add padding to the left of the H1 */
+        }
+
+        .container-flex form {
             display: flex;
-            gap: 15px;
-            background-color: #f4f4f4;
-            padding: 10px 20px;
+            align-items: center;
         }
 
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-        }
-
-        .logout-btn button {
-            padding: 8px 12px;
-            background-color: #FF6347;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .logout-btn button:hover {
-            background-color: #FF4500;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #007BFF; /* Dark Blue background */
-            color: white;
-            border: none;
-            cursor: pointer;
+        .container-flex form input[type="text"] {
+            width: 250px;
+            padding: 10px;
+            border: 1px solid #ccc;
             border-radius: 5px;
+            margin-right: 10px;
         }
 
-        button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
+        .container-flex form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
-        h1 {
-            margin-left: 5px;
-        }
-
-        /* Make the table responsive on smaller screens */
-        @media screen and (max-width: 600px) {
-            table, th, td {
-                width: 100%;
-                font-size: 14px;
-            }
-            th, td {
-                padding: 5px;
-            }
+        .container-flex form button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -161,7 +114,14 @@ if (!$result) {
 
 <div class="container">
     <div class="box">
-        <h1>Equipment List</h1>
+        <!-- Title and Search Bar in a Flex Container -->
+        <div class="container-flex">
+            <h1>Equipment List</h1>
+            <form method="GET" action="">
+                <input type="text" name="search" placeholder="Search equipment..." value="<?php echo htmlspecialchars($searchQuery); ?>">
+                <button type="submit">Search</button>
+            </form>
+        </div>
 
         <!-- Success message -->
         <?php if (isset($_GET['deleted']) && $_GET['deleted'] == 1) { ?>
@@ -170,7 +130,7 @@ if (!$result) {
 
         <?php
         // Check if any records were returned
-        if (mysqli_num_rows($result) > 0) {
+        if ($result && mysqli_num_rows($result) > 0) {
             echo "<table>";
             echo "<thead>
                     <tr>
@@ -184,7 +144,7 @@ if (!$result) {
             echo "<tbody>";
 
             // Fetch and display each row of data
-            while ($row = mysqli_fetch_assoc($result)) {
+            while ($row = $result->fetch_assoc()) {
                 echo "<tr>
                         <td>" . $row['name'] . "</td>
                         <td>" . $row['type'] . "</td>
@@ -201,7 +161,7 @@ if (!$result) {
         }
 
         // Close the database connection
-        mysqli_close($connect);
+        $connect->close();
         ?>
 
         <button onclick="window.location.href='add-equipment.php';">Add Equipment</button>

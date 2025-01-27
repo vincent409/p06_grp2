@@ -17,10 +17,10 @@ $inputErrors = [];
 // Handle form submission
 if (isset($_POST['add-button'])) {
     // Retrieve form inputs
-    $equipment_name = $_POST['equipment_name'];
-    $equipment_type = $_POST['equipment_type'];
-    $purchase_date = $_POST['purchase_date'];
-    $model_number = $_POST['model_number'];
+    $equipment_name = trim($_POST['equipment_name']);
+    $equipment_type = trim($_POST['equipment_type']);
+    $purchase_date = trim($_POST['purchase_date']);
+    $model_number = trim($_POST['model_number']);
 
     // Validate the equipment name
     if (!preg_match($alphanumeric_pattern, $equipment_name)) {
@@ -68,82 +68,8 @@ if (isset($_POST['add-button'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Equipment</title>
-    <style>
-        body {
-            background-color: #E5D9B6;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            color: black;
-            padding: 10px 20px;
-        }
-
-        nav {
-            display: flex;
-            gap: 15px;
-            background-color: #f4f4f4;
-            padding: 10px 20px;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-        }
-
-        .main-container {
-            background-color: #FFFFFF;
-            width: 60%;
-            margin: 40px auto;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .logout-btn button {
-            padding: 8px 12px;
-            background-color: #E53D29;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .logout-btn button:hover {
-            background-color: #E03C00;
-        }
-
-        form input[type="text"], form input[type="date"], form button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-
-        form button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px;
-        }
-
-        form button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <link rel="stylesheet" href="/p06_grp2/admin.css">
+    
 </head>
 <body>
 <header>
