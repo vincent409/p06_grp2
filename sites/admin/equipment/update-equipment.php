@@ -12,6 +12,7 @@ if (!isset($_GET['id'])) {
     die("No equipment ID specified.");
 }
 
+include 'C:/xampp/htdocs/p06_grp2/vaildation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
@@ -56,24 +57,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $purchase_date = $_POST['purchase_date'];
         $model_number = $_POST['model_number'];
 
-        // Define regex patterns for validation
-        $equipment_name_pattern = "/^[a-zA-Z0-9\s]+$/"; // Allows letters and single spaces only between words
-        $equipment_type_pattern = "/^[a-zA-Z]+(?: [a-zA-Z]+)*$/"; // Allows letters and single spaces only between words
-        $model_number_pattern = "/^[a-zA-Z0-9-_]+$/"; // Alphanumeric, dashes, and underscores
-
         // Validate the equipment name
-        if (!preg_match($equipment_name_pattern, $name)) {
+        if (!preg_match($alphanumeric_pattern, $name)) {
             $inputErrors[] = "Equipment name must contain only alphanumeric characters and spaces.";
         }
 
         // Validate the equipment type
-        if (!preg_match($equipment_type_pattern, $type)) {
+        if (!preg_match($alphabet_pattern, $type)) {
             $inputErrors[] = "Equipment type must contain only letters and spaces.";
         }
 
         // Validate the model number
         if (!preg_match($model_number_pattern, $model_number)) {
             $inputErrors[] = "Model number must be alphanumeric, with dashes or underscores allowed.";
+        }
+
+        if (validateDate($purchase_date) !== true) {
+            $inputErrors[] = validateDate($purchase_date);  // Get the validation message from validateDate
         }
 
         // If there are no validation errors, proceed with the update

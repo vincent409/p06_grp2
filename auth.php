@@ -1,75 +1,88 @@
 <?php
 session_start();
 
+// Include the validation and database connection files
+include 'C:/xampp/htdocs/p06_grp2/vaildation.php';
+
 function authenticate($myemail, $mypassword)
 {
-    // Check if email and password are provided
-    if (empty($myemail) || empty($mypassword)) {
-        die("Email or password is empty!");
-    }
+    try {
+        // Validate the email before proceeding
+        $emailValidationResult = validateEmail($myemail);
+        if ($emailValidationResult !== true) {
+            throw new Exception("Invalid email format.");
+        }
+        
+        // Check if password is provided
+        if (empty($mypassword)) {
+            throw new Exception("Password is empty!");
+        }
 
-    // Establish a database connection
-    include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
+        include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 
-    // Prepare SQL query to join Profile, User_Credentials, and Role tables
-    $sql = $connect->prepare("SELECT Profile.id, Profile.email, Profile.has_logged_in, 
-                              User_Credentials.password, Role.name AS role
-                              FROM User_Credentials
-                              JOIN Profile ON User_Credentials.profile_id = Profile.id
-                              JOIN Role ON Profile.role_id = Role.id
-                              WHERE Profile.email = ?");
-    
-    // Bind the email parameter
-    $sql->bind_param("s", $myemail);
+        // Prepare SQL query to join Profile, User_Credentials, and Role tables
+        $sql = $connect->prepare("SELECT Profile.id, Profile.email, Profile.has_logged_in, 
+                                  User_Credentials.password, Role.name AS role
+                                  FROM User_Credentials
+                                  JOIN Profile ON User_Credentials.profile_id = Profile.id
+                                  JOIN Role ON Profile.role_id = Role.id
+                                  WHERE Profile.email = ?");
 
-    // Execute the query
-    $sql->execute();
-    $sql->store_result();
+        // Bind the email parameter
+        $sql->bind_param("s", $myemail);
 
-    // If a result is returned
-    if ($sql->num_rows > 0) {
-        // Bind the result to variables
-        $sql->bind_result($profile_id, $email, $has_logged_in, $stored_password, $role);
+        // Execute the query
+        $sql->execute();
+        $sql->store_result();
 
-        // Fetch the result
-        $sql->fetch();
+        // If a result is returned
+        if ($sql->num_rows > 0) {
+            // Bind the result to variables
+            $sql->bind_result($profile_id, $email, $has_logged_in, $stored_password, $role);
 
-        // Verify the password using password_verify
-        if (password_verify($mypassword, $stored_password)) {
-            // Password is correct, start session and register the role, email, and profile id
-            $_SESSION['profile_id'] = $profile_id;
-            $_SESSION['role'] = $role;
-            $_SESSION['email'] = $myemail;
+            // Fetch the result
+            $sql->fetch();
 
-            // If it's the first login, redirect to student.php for password reset
-            if ($has_logged_in == 0 && $role == "Student") {
-                // Redirect to the student password reset page
-                header("Location: sites/change_password.php");
-                exit();
-            }
+            // Verify the password using password_verify
+            if (password_verify($mypassword, $stored_password)) {
+                // Password is correct, start session and register the role, email, and profile id
+                $_SESSION['profile_id'] = $profile_id;
+                $_SESSION['role'] = $role;
+                $_SESSION['email'] = $myemail;
 
-            // Redirect based on the role
-            if ($role == "Student") {
-                header("Location: sites/student/student-dashboard.php");  // Redirect to student dashboard
-                exit();
-            } else if ($role == "Facility Manager" || $role == "Admin") {
-                header("Location: sites/admin/admin-dashboard.php");  // Redirect to admin page
-                exit();
+                // If it's the first login, redirect to student.php for password reset
+                if ($has_logged_in == 0 && $role == "Student") {
+                    // Redirect to the student password reset page
+                    header("Location: sites/change_password.php");
+                    exit();
+                }
+
+                // Redirect based on the role
+                if ($role == "Student") {
+                    header("Location: sites/student/student-dashboard.php");  // Redirect to student dashboard
+                    exit();
+                } else if ($role == "Facility Manager" || $role == "Admin") {
+                    header("Location: sites/admin/admin-dashboard.php");  // Redirect to admin page
+                    exit();
+                }
+            } else {
+                // Password does not match
+                throw new Exception("Email and password do not match.");
             }
         } else {
-            // Password does not match
-            header("Location: sites/index.php?error=1");  // Redirect back with error message
-            exit();
+            // If no matching email is found
+            throw new Exception("No user found with that email.");
         }
-    } else {
-        // If no matching email is found
-        header("Location: sites/index.php?error=1");  // Redirect back with error message
+
+        // Close the statement
+        $sql->close();
+        mysqli_close($connect);
+
+    } catch (Exception $e) {
+        // Catch any exception and pass the error message to the calling function
+        header("Location: sites/index.php?error=" . urlencode($e->getMessage()));  // Redirect back with the error message
         exit();
     }
-
-    // Close the statement
-    $sql->close();
-    mysqli_close($connect);
 }
 
 // Get email and password from form (use POST method)

@@ -14,8 +14,8 @@
 
         <?php
         // Check if there is an error query parameter
-        if (isset($_GET['error']) && $_GET['error'] == 1) {
-            echo "<p style='color: red;'>Email and password do not match!</p>";
+        if (isset($_GET['error'])) {
+            echo "<p style='color: red;'>" . htmlspecialchars($_GET['error']) . "</p>";
         }
         ?>
 
