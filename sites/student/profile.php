@@ -35,7 +35,7 @@ mysqli_close($connect);
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f9f9f9;
+            background-color: #E5D9B6;
         }
         header {
             display: flex;
