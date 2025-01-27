@@ -203,6 +203,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
             font-weight: bold;
         }
 
+        .main-container {
+            background-color: #FFFFFF;
+            width: 60%;
+            margin: 40px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
         .logout-btn button {
             padding: 8px 12px;
             background-color: #E53D29;
@@ -217,16 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
             background-color: #E03C00;
         }
 
-        .main-container {
-            background-color: #FFFFFF;
-            width: 60%;
-            margin: 40px auto;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        form input, form button {
+        form input[type="text"], form input[type="email"], form button {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -236,22 +236,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
             box-sizing: border-box;
         }
 
-        button[type="submit"][name="delete"] {
-            background-color: #E53D29;
-            color: white;
-        }
-
-        button[type="submit"][name="delete"]:hover {
-            background-color: #E03C00;
-        }
-
-        button[type="submit"][name="update"] {
+        form button {
             background-color: #007bff;
             color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-top: 10px;
         }
 
-        button[type="submit"][name="update"]:hover {
+        form button:hover {
             background-color: #0056b3;
+        }
+
+        .delete-button {
+            background-color: #E53D29; /* Red background */
+            color: white;
+        }
+
+        .delete-button:hover {
+            background-color: #C0392B; /* Darker red */
+        }
+
+        .success-message {
+            color: green;
+            margin-bottom: 10px;
+        }
+
+        .error-messages {
+            color: red;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .error-messages li {
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -306,13 +326,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
         <label for="department">Department:</label>
         <input type="text" name="department" value="<?php echo htmlspecialchars($department); ?>" required>
         <button type="submit" name="update">Update Profile</button>
+        <button type="button" onclick="window.location.href='profile.php';">View All Profiles</button>
     </form>
 
     <?php if ($_SESSION['role'] == 'Admin') { ?>
     <form action="edit_profile.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this profile?');">
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-        <button type="submit" name="delete">Delete Profile</button>
+        <button type="submit" name="delete" class="delete-button">Delete Profile</button>
     </form>
 <?php } ?>
 
