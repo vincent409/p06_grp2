@@ -1,41 +1,53 @@
 <?php
-// Start session (optional, depending on your application)
 session_start();
 
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
-    // Redirect the user to login page or show an error message
     header("Location: /p06_grp2/sites/index.php");
-    exit(); // Stop further execution
+    exit();
 }
 
+include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
-// Handle search query
 $searchQuery = "";
 $result = null;
+$inputErrors = []; // Array to store validation errors
+
 
 if (isset($_GET['search'])) {
-    $searchQuery = $_GET['search'];
+    $searchQuery = trim($_GET['search']); // Trim whitespace
 
-    // Use a prepared statement to execute the search
-    $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number 
-                               FROM Equipment 
-                               WHERE name LIKE ? OR type LIKE ?");
-    
-    // Add wildcards for the LIKE clause
-    $searchParam = "%" . $searchQuery . "%";
-    $stmt->bind_param("ss", $searchParam, $searchParam);
+    // Check if search query is not empty
+    if ($searchQuery !== "") {
+        // Validate the search input
+        if (!preg_match($alphanumeric_pattern, $searchQuery)) {
+            $inputErrors[] = "Search input must contain only alphanumeric characters and spaces.";
 
-    // Execute the query
-    $stmt->execute();
-
-    // Get the result set
-    $result = $stmt->get_result();
-
-    // Close the statement
-    $stmt->close();
+            // Default to fetching all records on invalid input
+            $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number FROM Equipment");
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $stmt->close();
+        } else {
+            // Use a prepared statement to execute the search for valid input
+            $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number 
+                                       FROM Equipment 
+                                       WHERE name LIKE ? OR type LIKE ?");
+            $searchParam = "%" . $searchQuery . "%";
+            $stmt->bind_param("ss", $searchParam, $searchParam);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $stmt->close();
+        }
+    } else {
+        // If search query is empty, fetch all records
+        $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number FROM Equipment");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+    }
 } else {
     // Default query to fetch all equipment if no search is performed
     $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number FROM Equipment");
@@ -43,6 +55,8 @@ if (isset($_GET['search'])) {
     $result = $stmt->get_result();
     $stmt->close();
 }
+
+
 ?>
 
 <!DOCTYPE html>
@@ -52,45 +66,6 @@ if (isset($_GET['search'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Equipment</title>
     <link rel="stylesheet" href="/p06_grp2/admin.css">
-    <style>
-        .container-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .container-flex h1 {
-            margin: 0;
-            padding-left: 5px; /* Add padding to the left of the H1 */
-        }
-
-        .container-flex form {
-            display: flex;
-            align-items: center;
-        }
-
-        .container-flex form input[type="text"] {
-            width: 250px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin-right: 10px;
-        }
-
-        .container-flex form button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .container-flex form button:hover {
-            background-color: #0056b3;
-        }
-    </style>
 </head>
 <body>
 <header>
@@ -123,9 +98,13 @@ if (isset($_GET['search'])) {
             </form>
         </div>
 
-        <!-- Success message -->
-        <?php if (isset($_GET['deleted']) && $_GET['deleted'] == 1) { ?>
-            <p class="success-message">Equipment successfully deleted!</p>
+        <!-- Display Validation Errors -->
+        <?php if (!empty($inputErrors)) { ?>
+            <div class="error-message">
+                <?php foreach ($inputErrors as $error) {
+                    echo "<p>$error</p>";
+                } ?>
+            </div>
         <?php } ?>
 
         <?php
