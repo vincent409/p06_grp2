@@ -146,7 +146,7 @@ button[type="submit"][name="update"]:hover {
     align-items: flex-start;
     justify-content: flex-start;
     padding-top: 140px;
-    max-width: 400px;
+    min-width: 400px;
 }
 
 .color-box {
@@ -221,7 +221,7 @@ th {
 
 .container-flex h1 {
     margin: 0;
-    padding-left: 5px; /* Add padding to the left of the H1 */
+    padding-left: 5px;
 }
 
 .container-flex form {

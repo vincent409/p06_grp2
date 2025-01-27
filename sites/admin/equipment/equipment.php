@@ -13,25 +13,18 @@ manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 $searchQuery = "";
 $result = null;
-$inputErrors = []; // Array to store validation errors
-
+$inputErrors = [];
 
 if (isset($_GET['search'])) {
-    $searchQuery = trim($_GET['search']); // Trim whitespace
-
-    // Check if search query is not empty
+    $searchQuery = trim($_GET['search']);
     if ($searchQuery !== "") {
-        // Validate the search input
         if (!preg_match($alphanumeric_pattern, $searchQuery)) {
             $inputErrors[] = "Search input must contain only alphanumeric characters and spaces.";
-
-            // Default to fetching all records on invalid input
             $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number FROM Equipment");
             $stmt->execute();
             $result = $stmt->get_result();
             $stmt->close();
         } else {
-            // Use a prepared statement to execute the search for valid input
             $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number 
                                        FROM Equipment 
                                        WHERE name LIKE ? OR type LIKE ?");
@@ -42,21 +35,17 @@ if (isset($_GET['search'])) {
             $stmt->close();
         }
     } else {
-        // If search query is empty, fetch all records
         $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number FROM Equipment");
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
     }
 } else {
-    // Default query to fetch all equipment if no search is performed
     $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number FROM Equipment");
     $stmt->execute();
     $result = $stmt->get_result();
     $stmt->close();
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -89,7 +78,6 @@ if (isset($_GET['search'])) {
 
 <div class="container">
     <div class="box">
-        <!-- Title and Search Bar in a Flex Container -->
         <div class="container-flex">
             <h1>Equipment List</h1>
             <form method="GET" action="">
@@ -98,52 +86,43 @@ if (isset($_GET['search'])) {
             </form>
         </div>
 
-        <!-- Display Validation Errors -->
         <?php if (!empty($inputErrors)) { ?>
             <div class="error-message">
-                <?php foreach ($inputErrors as $error) {
-                    echo "<p>$error</p>";
-                } ?>
+                <?php foreach ($inputErrors as $error) { echo "<p>$error</p>"; } ?>
             </div>
         <?php } ?>
 
-        <?php
-        // Check if any records were returned
-        if ($result && mysqli_num_rows($result) > 0) {
-            echo "<table>";
-            echo "<thead>
+        <?php if ($result && mysqli_num_rows($result) > 0) { ?>
+            <table>
+                <thead>
                     <tr>
                         <th>Name</th>
                         <th>Type</th>
                         <th>Purchase Date</th>
                         <th>Model Number</th>
-                        <th>Action</th> <!-- New column for Edit -->
+                        <th>Action</th>
                     </tr>
-                  </thead>";
-            echo "<tbody>";
-
-            // Fetch and display each row of data
-            while ($row = $result->fetch_assoc()) {
-                echo "<tr>
-                        <td>" . $row['name'] . "</td>
-                        <td>" . $row['type'] . "</td>
-                        <td>" . $row['purchase_date'] . "</td>
-                        <td>" . $row['model_number'] . "</td>
-                        <td><a href='update-equipment.php?id=" . $row['id'] . "'>Edit</a></td>
-                      </tr>";
-            }
-
-            echo "</tbody>";
-            echo "</table>";
-        } else {
-            echo "<p>No equipment found in the database.</p>";
-        }
-
-        // Close the database connection
-        $connect->close();
-        ?>
-
-        <button onclick="window.location.href='add-equipment.php';">Add Equipment</button>
+                </thead>
+                <tbody>
+                    <?php while ($row = $result->fetch_assoc()) { ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($row['name']); ?></td>
+                            <td><?php echo htmlspecialchars($row['type']); ?></td>
+                            <td><?php echo htmlspecialchars($row['purchase_date']); ?></td>
+                            <td><?php echo htmlspecialchars($row['model_number']); ?></td>
+                            <td>
+                                <form action="update-equipment.php" method="POST" style="display:inline;">
+                                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($row['id']); ?>">
+                                    <button type="submit">Edit</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        <?php } else { ?>
+            <p>No equipment found in the database.</p>
+        <?php } ?>
     </div>
 </div>
 </body>
