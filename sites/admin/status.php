@@ -62,6 +62,7 @@ if (isset($_GET['delete_id'])) {
 }
 
 // Handle UPDATE request
+// Handle UPDATE request
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
     $update_id = $_POST['update_id'];
     $new_status = $_POST['status'];
@@ -109,51 +110,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
             $profile_row = mysqli_fetch_assoc($profile_result);
             $profile_id = $profile_row['id'];
 
-            // Admin: Can always update
-            if ($_SESSION['role'] === "Admin") {
+            // Handle specific "Returned" status with returned date
+            if ($new_status == 3 && !empty($returned_date)) {
+                $update_query = "UPDATE loan 
+                                 SET profile_id = '$profile_id', status_id = NULL 
+                                 WHERE id = '$update_id'";
+
+                $update_usage_log_query = "UPDATE usage_log 
+                                           SET returned_date = '$returned_date' 
+                                           WHERE equipment_id = (SELECT equipment_id FROM loan WHERE id = '$update_id' LIMIT 1)";
+            } else {
+                // General case for updating status
                 $update_query = "UPDATE loan 
                                  SET profile_id = '$profile_id', status_id = '$new_status' 
                                  WHERE id = '$update_id'";
-            }
-            // Facility Manager: Can only update email if status is NULL
-            elseif ($_SESSION['role'] === "Facility Manager") {
-                if ($current_status_id === NULL) {
-                    $update_query = "UPDATE loan 
-                                     SET profile_id = '$profile_id', status_id = '$new_status' 
-                                     WHERE id = '$update_id'";
-                } elseif ($profile_id == $current_profile_id) {
-                    $update_query = "UPDATE loan 
-                                     SET status_id = '$new_status' 
-                                     WHERE id = '$update_id'";
-                } else {
-                    echo "<script>
-                        alert('Error: Facility Managers can only update the email if the status is NULL.');
-                        window.location.href = 'status.php';
-                    </script>";
-                    exit();
-                }
-            } else {
-                echo "<script>
-                    alert('Error: Facility Managers can only update the email if the status is NULL.');
-                    window.location.href = 'status.php';
-                </script>";
-                exit();
-            }
 
-            // Execute the update query
-            if (mysqli_query($connect, $update_query)) {
-                // Update returned_date in usage_log
-                if ($new_status == 3 && !empty($returned_date)) { // If status is "Returned"
-                    $update_usage_log_query = "UPDATE usage_log 
-                                               SET returned_date = '$returned_date' 
-                                               WHERE equipment_id = (SELECT equipment_id FROM loan WHERE id = '$update_id' LIMIT 1)";
-                } else { // Set returned_date to NULL for "Assigned" or "In-Use"
+                if ($new_status != 3) { // Reset returned date for other statuses
                     $update_usage_log_query = "UPDATE usage_log 
                                                SET returned_date = NULL 
                                                WHERE equipment_id = (SELECT equipment_id FROM loan WHERE id = '$update_id' LIMIT 1)";
                 }
+            }
 
-                if (!mysqli_query($connect, $update_usage_log_query)) {
+            // Execute the update query
+            if (mysqli_query($connect, $update_query)) {
+                // Execute the usage log query if it exists
+                if (isset($update_usage_log_query) && !mysqli_query($connect, $update_usage_log_query)) {
                     echo "<script>
                         alert('Error updating returned date: " . mysqli_error($connect) . "');
                         window.location.href = 'status.php';
@@ -340,6 +322,7 @@ if (!$result) {
             text-align: center;
             border: none;
             border-radius: 4px;
+            text-decoration: none
         }
 
         .delete-button:hover {
