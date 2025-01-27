@@ -10,7 +10,6 @@ if (!isset($_GET['id'])) {
     die("No equipment ID specified.");
 }
 
-include 'C:/xampp/htdocs/p06_grp2/vaildation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
