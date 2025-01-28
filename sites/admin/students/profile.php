@@ -126,7 +126,6 @@ if (isset($_GET['search'])) {
                         <td>
                             <form action='edit_profile.php' method='POST' style='display:inline;'>
                                 <input type='hidden' name='id' value='" . htmlspecialchars($row['id']) . "'>
-                                <input type='hidden' name='csrf_token' value='" . htmlspecialchars($_SESSION['csrf_token']) . "'>
                                 <button type='submit'>Edit</button>
                             </form>
                         </td>

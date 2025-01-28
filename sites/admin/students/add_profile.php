@@ -4,6 +4,7 @@ session_start();
 if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
     die("You do not have permission to create profiles.");
 }
+include 'C:/xampp/htdocs/p06_grp2/Function.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
@@ -12,19 +13,13 @@ manageCookieAndRedirect("/p06_grp2/sites/index.php");
 $inputErrors = [];
 $success_message = '';
 
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+$csrf_token = generateCsrfToken();
+
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate CSRF token
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-        die("CSRF validation failed.");
-    }
-
-    // Regenerate CSRF token after validation to prevent replay attacks
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-
+    validateCsrfToken($_POST['csrf_token']);
 
 
     // Collect form data
@@ -245,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php } ?>
 
     <form method="POST" action="add_profile.php">
-        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
         <label for="name">Name:</label><br>
         <input type="text" id="name" name="name" required><br><br>
 
