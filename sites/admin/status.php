@@ -66,16 +66,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['confirm_return'])) {
         $confirm_return_id = $_POST['confirm_return'];
         $returned_date = date('Y-m-d'); // Today's date
-
-        // Update the loan record to set returned_date and reset status
+    
+        // ❌ Fix: Change NULL to 3 (Returned)
         $update_query = "UPDATE loan SET status_id = NULL WHERE id = '$confirm_return_id'";
         $update_usage_log_query = "UPDATE usage_log 
                                    SET returned_date = '$returned_date' 
                                    WHERE equipment_id = (SELECT equipment_id FROM loan WHERE id = '$confirm_return_id' LIMIT 1)";
-
+    
         if (mysqli_query($connect, $update_query) && mysqli_query($connect, $update_usage_log_query)) {
             echo "<script>
-                alert('Return confirmed and status updated.');
+                alert('Return confirmed and status updated to Returned.');
                 window.location.href = 'status.php';
             </script>";
             exit();
@@ -89,7 +89,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (isset($_POST['update_id'])) {
         $update_id = $_POST['update_id'];
         $new_status = $_POST['status'];
-        $email = $_POST['email'];
+        $email = isset($_POST['email']) ? $_POST['email'] : $_POST['hidden_email'];
+
 
         // Existing logic for general updates
         // ...
@@ -172,6 +173,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 }
+
+
 
 // Fetch all assignments from the loan table
 $query = "SELECT loan.id, loan.status_id, loan.profile_id, loan.equipment_id, 
@@ -443,28 +446,29 @@ if (!$result) {
                         <td>
                             <form action="status.php" method="POST" style="text-align: left;">
                                 <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
-
-                                <!-- Email Field -->
+                                <!-- Email Field: Disable when status is "Assigned," "In-Use," or "Returned" -->
                                 <label for="email_<?php echo $row['id']; ?>">Email:</label>
-                                <input type="email" id="email_<?php echo $row['id']; ?>" name="email" value="<?php echo $row['profile_email']; ?>" required>
+                                <input type="email" id="email_<?php echo $row['id']; ?>" name="email" 
+                                    value="<?php echo $row['profile_email']; ?>" 
+                                    <?php echo (in_array($row['status_id'], [1, 2, 3])) ? 'disabled' : ''; ?> required>
+                                <input type="hidden" name="hidden_email" value="<?php echo $row['profile_email']; ?>">
 
-                                <!-- Status Field -->
+                                <!-- Status Field: Always editable -->
                                 <label for="status_<?php echo $row['id']; ?>">Status:</label>
-                                <select id="status_<?php echo $row['id']; ?>" name="status" onchange="toggleReturnedDate(this, 'returned_date_<?php echo $row['id']; ?>')">
+                                <select id="status_<?php echo $row['id']; ?>" name="status">
                                     <option value="1" <?php echo ($row['status_id'] == 1) ? 'selected' : ''; ?>>Assigned</option>
                                     <option value="2" <?php echo ($row['status_id'] == 2) ? 'selected' : ''; ?>>In-Use</option>
                                     <option value="3" <?php echo ($row['status_id'] == 3) ? 'selected' : ''; ?>>Returned</option>
                                 </select>
 
-                                <!-- Returned Date Confirmation Button -->
+                                <!-- Confirm Return Button: Only appears when status is "Returned" -->
                                 <?php if ($row['status_id'] == 3): ?>
-                                    <?php if ($row['status_id'] == 3): ?>
                                     <div id="confirm_return_<?php echo $row['id']; ?>">
                                         <label for="confirm_return_btn_<?php echo $row['id']; ?>">Confirm Return:</label>
                                         <button type="submit" name="confirm_return" value="<?php echo $row['id']; ?>" class="confirm-return-button">Confirm Return</button>
                                     </div>
                                 <?php endif; ?>
-                                <?php endif; ?>
+
                                 <!-- Buttons -->
                                 <div class="button-container">
                                     <button type="submit" class="update-button">Update</button>
