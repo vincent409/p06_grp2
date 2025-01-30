@@ -73,9 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
         $inputErrors[] = "Phone number must contain only 8 digits.";
     }
 
-    if (!preg_match("/^[a-zA-Z0-9\s]+$/", $department)) {
-        $inputErrors[] = "Department must contain only alphanumeric characters and spaces.";
-    }
 
     // Update the profile if no validation errors
     if (empty($inputErrors)) {
@@ -281,7 +278,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
         <label for="phone_number">Phone Number:</label>
         <input type="text" name="phone_number" value="<?php echo htmlspecialchars($phone_number); ?>">
         <label for="department">Department:</label>
-        <input type="text" name="department" value="<?php echo htmlspecialchars($department); ?>" required>
+        <select name="department" id="department" required style="width: 100%; padding: 12px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc;">
+            <option value="School of Informatics & IT" <?php echo ($department == "School of Informatics & IT") ? "selected" : ""; ?>>School of Informatics & IT</option>
+            <option value="School of Humanities & Social Sciences" <?php echo ($department == "School of Humanities & Social Sciences") ? "selected" : ""; ?>>School of Humanities & Social Sciences</option>
+            <option value="School of Business" <?php echo ($department == "School of Business") ? "selected" : ""; ?>>School of Business</option>
+        </select>
         <button type="submit" name="update">Update Profile</button>
         <button type="button" onclick="window.location.href='profile.php';">View All Profiles</button>
     </form>

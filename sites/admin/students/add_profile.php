@@ -49,10 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $inputErrors[] = "Phone number must be 8.";
     }
 
-    // Validate department
-    if (!preg_match($alphanumeric_pattern, $department)) {
-        $inputErrors[] = "Department must contain only alphanumeric characters and spaces.";
-    }
+
 
     // Check for duplicate email
     $check_email_sql = "SELECT id FROM Profile WHERE email = ?";
@@ -239,8 +236,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </ul>
     <?php } ?>
 
-    <form method="POST" action="add_profile.php">
+        <form method="POST" action="add_profile.php">
         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+
         <label for="name">Name:</label><br>
         <input type="text" id="name" name="name" required><br><br>
 
@@ -251,11 +249,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <input type="text" id="phone_number" name="phone_number"><br><br>
 
         <label for="department">Department:</label><br>
-        <input type="text" id="department" name="department" required><br><br>
+        <select id="department" name="department" required style="width: 100%; padding: 12px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc;">
+
+            <option value="">Select a Department</option>
+            <option value="School of Informatics & IT">School of Informatics & IT</option>
+            <option value="School of Humanities & Social Sciences">School of Humanities & Social Sciences</option>
+            <option value="School of Business">School of Business</option>
+        </select><br><br>
 
         <button type="submit">Create Profile</button>
         <button type="button" onclick="window.location.href='profile.php';">View Profiles</button>
     </form>
+
 </div>
 </body>
 </html>
