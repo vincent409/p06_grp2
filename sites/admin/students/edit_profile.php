@@ -81,7 +81,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
         $stmt->bind_param("ssssi", $name, $email, $phone_number, $department, $id);
 
         if ($stmt->execute()) {
-            $successMessage = "Profile updated successfully!";
+            echo "<script>
+                    alert('Profile updated successfully!');
+                    window.location.href = 'profile.php';
+                  </script>";
+            exit;
         } else {
             $errorMessage = "Error updating profile: " . $stmt->error;
         }

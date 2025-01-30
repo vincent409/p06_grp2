@@ -93,7 +93,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bind_param("ssssi", $name, $email, $phone_number, $department, $role_id);
 
         if ($stmt->execute()) {
-            $success_message = "New student profile created successfully!";
+            echo "<script>
+                    alert('Profile updated successfully!');
+                    window.location.href = 'profile.php';
+                  </script>";
+            exit;
         } else {
             $inputErrors[] = "An error occurred while creating the profile. Please try again.";
         }
