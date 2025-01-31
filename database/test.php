@@ -1,9 +1,7 @@
 <?php
-    $en = password_hash("student", PASSWORD_BCRYPT);
-    echo $en;
 
     // Hardcoded encryption key
-    define('ENCRYPTION_KEY', 'your_secret_key'); // Replace with your actual key
+    define('ENCRYPTION_KEY', '$w@pk3Y'); // Replace with your actual key
 
     // AES encryption function
     function aes_encrypt($data) {
@@ -40,4 +38,8 @@
 
         return $decrypted_data;
         }
+        $text = "student@example.com";
+        $en = aes_encrypt($text);
+        echo $en;
+        
     ?>
