@@ -16,20 +16,40 @@ mysqli_query($connect, $cleanup_query);
 
 // Handle DELETE request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
-
-    $delete_id = intval($_POST['delete_id']); // Sanitize delete_id to ensure it's an integer
+    $delete_id = intval($_POST['delete_id']); // Ensure it's an integer
 
     if ($delete_id > 0) {
         $delete_query = "DELETE FROM loan WHERE id = ?";
         $stmt = $connect->prepare($delete_query);
-        $stmt->bind_param("i", $delete_id);
-        if ($stmt->execute()) {
-            $success_message = "Assignment deleted successfully.";
+
+        if ($stmt) {
+            $stmt->bind_param("i", $delete_id);
+            if ($stmt->execute()) {
+                echo "<script>
+                    alert('Assignment deleted successfully.');
+                    window.location.href = 'edit_assignment.php';
+                </script>";
+                exit();
+            } else {
+                echo "<script>
+                    alert('Error: Unable to delete assignment.');
+                    window.location.href = 'edit_assignment.php';
+                </script>";
+                exit();
+            }
         } else {
-            $error_message = "Error: Unable to delete assignment.";
+            echo "<script>
+                alert('Error: Failed to prepare the SQL statement.');
+                window.location.href = 'edit_assignment.php';
+            </script>";
+            exit();
         }
     } else {
-        $error_message = "Invalid delete request.";
+        echo "<script>
+            alert('Invalid delete request.');
+            window.location.href = 'edit_assignment.php';
+        </script>";
+        exit();
     }
 }
 
@@ -290,17 +310,22 @@ $assignments_exist = mysqli_num_rows($result) > 0;
                                 required 
                                 style="width: 100%; max-width: none;">
 
-                            <!-- Update and Delete buttons -->
-                            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
+                            <!-- Buttons container -->
+                            <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                                <!-- Update Button -->
                                 <button 
                                     type="submit" 
-                                    style="background-color: #007BFF; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+                                    name="update" 
+                                    style="background-color: #007BFF; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; flex: 1;">
                                     Update
                                 </button>
-                                <button 
-                                    type="button" 
-                                    onclick="if (confirm('Are you sure you want to delete this assignment?')) window.location.href='edit_assignment.php?delete_id=<?php echo $row['id']; ?>';" 
-                                    style="background-color: #FF0000; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+
+                                <!-- Delete Button (inside same form) -->
+                                <button type="submit" 
+                                        name="delete_id" 
+                                        value="<?php echo $row['id']; ?>"
+                                        onclick="return confirm('Are you sure you want to delete this assignment?');"
+                                        style="background-color: #FF0000; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; flex: 1; margin-left: 10px;">
                                     Delete
                                 </button>
                             </div>
