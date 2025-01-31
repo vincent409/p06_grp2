@@ -11,15 +11,12 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
-include 'C:/xampp/htdocs/p06_grp2/function.php';
+include 'C:/xampp/htdocs/p06_grp2/functions.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 generateCsrfToken();
 $inputErrors = [];
 
-// Initialize variables for messages
-$error_message = '';
-$success_message = '';
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -30,23 +27,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validate inputs
     if (empty($equipment_id) || empty($log_details) || empty($assigned_date)) {
-        $error_message = "All fields are required.";
+        $inputErrors[] = "All fields are required.";
     } elseif (!preg_match($alphanumeric_pattern, $log_details)) {
-        $error_message = "Error: Log details must only contain letters and numbers.";
+        $inputErrors[] = "Error: Log details must only contain letters and numbers.";
     } else {
         // Check if the equipment_id exists in the equipment table
         $check_equipment_query = "SELECT * FROM equipment WHERE id = '$equipment_id'";
         $check_equipment_result = mysqli_query($connect, $check_equipment_query);
 
         if (mysqli_num_rows($check_equipment_result) == 0) {
-            $error_message = "Error: The provided equipment ID does not exist.";
+            $inputErrors[] = "Error: The provided equipment ID does not exist.";
         } else {
             // Check if the equipment_id already exists in the usage_log table
             $check_duplicate_query = "SELECT * FROM usage_log WHERE equipment_id = '$equipment_id'";
             $check_duplicate_result = mysqli_query($connect, $check_duplicate_query);
 
             if (mysqli_num_rows($check_duplicate_result) > 0) {
-                $error_message = "Error: A usage log for this equipment ID already exists.";
+                $inputErrors[] = "Error: A usage log for this equipment ID already exists.";
             } else {
                 // Insert usage log into the database
                 $insert_query = "INSERT INTO usage_log (equipment_id, log_details, assigned_date) 
@@ -55,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if (mysqli_query($connect, $insert_query)) {
                     $success_message = "Usage log added successfully!";
                 } else {
-                    $error_message = "Error: " . mysqli_error($connect);
+                    $inputErrors[] = "Error: " . mysqli_error($connect);
                 }
             }
         }
@@ -210,6 +207,7 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
 <div class="container">
     <h1>Enter Equipment Usage Log</h1>
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <label for="equipment_id">Equipment ID:</label>
         <input type="text" id="equipment_id" name="equipment_id" value="<?php echo $equipment_id; ?>" required>
 
@@ -236,9 +234,9 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
 </script>
 <?php endif; ?>
 
-<?php if (!empty($error_message)): ?>
+<?php if (!empty($inputErrors)): ?>
 <script>
-    alert("<?php echo $error_message; ?>");
+    alert("<?php echo implode('\n', $inputErrors); ?>");
 </script>
 <?php endif; ?>
 

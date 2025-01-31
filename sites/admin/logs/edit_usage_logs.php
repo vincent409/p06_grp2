@@ -11,15 +11,12 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
-include 'C:/xampp/htdocs/p06_grp2/function.php';
+include 'C:/xampp/htdocs/p06_grp2/functions.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 generateCsrfToken();
 $inputErrors = [];
 
-// Initialize variables for messages
-$error_message = '';
-$success_message = '';
 
 // Handle DELETE request (only if the user is an Admin)
 if (isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
@@ -29,11 +26,11 @@ if (isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
     if (mysqli_query($connect, $delete_query)) {
         $success_message = "Usage log deleted successfully.";
     } else {
-        $error_message = "Error: " . mysqli_error($connect);
+        $inputErrors[] = "Error: " . mysqli_error($connect);
     }
 } elseif (isset($_GET['delete_id']) && $_SESSION['role'] === "Facility Manager") {
     // If the user is a Facility Manager, do not allow deletion
-    $error_message = "Error: You do not have permission to delete usage logs.";
+    $inputErrors[] = "Error: You do not have permission to delete usage logs.";
 }
 
 
@@ -47,16 +44,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
 
     // **Log Details Validation** (Ensure only alphanumeric and spaces)
     if (!preg_match($alphanumeric_pattern, $new_log_details)) {
-        $error_message = "Error: Log details must only contain letters and numbers.";
+        $inputErrors[] = "Error: Log details must only contain letters and numbers.";
     }
 
     // **Ensure returned date is not before assigned date**
     if (!empty($new_returned_date) && $new_returned_date < $new_assigned_date) {
-        $error_message = "Error: Returned date cannot be earlier than assigned date.";
+        $inputErrors[] = "Error: Returned date cannot be earlier than assigned date.";
     }
 
     // Only proceed if no validation errors
-    if (empty($error_message)) {
+    if (empty($inputErrors)) {
         if (empty($new_returned_date)) {
             // Handle NULL returned_date
             $update_query = "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = NULL WHERE id = '$update_id'";
@@ -67,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
         if (mysqli_query($connect, $update_query)) {
             $success_message = "Usage log updated successfully!";
         } else {
-            $error_message = "Error updating usage log: " . mysqli_error($connect);
+            $inputErrors[] = "Error updating usage log: " . mysqli_error($connect);
         }
     }
 }
@@ -293,6 +290,7 @@ if (!$result) {
                 <td><?php echo $row['returned_date']; ?></td>
                 <td>
                     <form action="edit_usage_logs.php" method="POST" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                         <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
 
                         <label for="log_details">Log Details:</label>
@@ -327,9 +325,9 @@ if (!$result) {
 </script>
 <?php endif; ?>
 
-<?php if (!empty($error_message)): ?>
+<?php if (!empty($inputErrors)): ?>
 <script>
-    alert("<?php echo $error_message; ?>");
+    alert("<?php echo implode('\n', $inputErrors); ?>");
 </script>
 <?php endif; ?>
 
