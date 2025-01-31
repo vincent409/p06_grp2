@@ -7,7 +7,7 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['rol
 }
 
 // Include necessary files
-include 'C:/xampp/htdocs/p06_grp2/functions.php';
+include_once 'C:/xampp/htdocs/p06_grp2/functions.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
@@ -41,7 +41,7 @@ $result = $stmt->get_result();
 if ($result->num_rows > 0) {
     $profile = $result->fetch_assoc();
     $name = $profile['name'];
-    $email = $profile['email'];
+    $email = aes_decrypt($profile['email']);
     $phone_number = $profile['phone_number'];
     $department = $profile['department'];
 } else {

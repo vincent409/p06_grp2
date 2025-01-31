@@ -9,6 +9,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] != "Student") {
 
 // Connect to the database
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
+include 'C:/xampp/htdocs/p06_grp2/functions.php';
 
 // Get the student's profile ID from the session
 $profile_id = $_SESSION['profile_id'];
@@ -25,6 +26,38 @@ if (!isset($_SESSION['name'])) {
     $_SESSION['name'] = $name;
 } else {
     $name = $_SESSION['name'];
+}
+
+if (isset($_GET['search'])) {
+    $searchQuery = trim($_GET['search']);
+    if ($searchQuery !== "") {
+        if (!preg_match($alphanumeric_pattern, $searchQuery)) {
+            $inputErrors[] = "Search input must contain only alphanumeric characters and spaces.";
+            $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number FROM Equipment");
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $stmt->close();
+        } else {
+            $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number 
+                                       FROM Equipment 
+                                       WHERE name LIKE ? OR type LIKE ?");
+            $searchParam = "%" . $searchQuery . "%";
+            $stmt->bind_param("ss", $searchParam, $searchParam);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $stmt->close();
+        }
+    } else {
+        $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number FROM Equipment");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+    }
+} else {
+    $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number FROM Equipment");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
 }
 
 // Handle return request

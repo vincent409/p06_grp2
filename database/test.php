@@ -38,7 +38,7 @@
 
         return $decrypted_data;
         }
-        $text = "student@example.com";
+        $text = "2304581H@student.tp.edu.sg";
         $en = aes_encrypt($text);
         echo $en;
         

@@ -9,6 +9,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] != "Student") {
 
 // Connect to the database
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
+include 'C:/xampp/htdocs/p06_grp2/functions.php';
 
 // Get the student's profile ID from the session
 $profile_id = $_SESSION['profile_id'];
@@ -18,9 +19,11 @@ $query = "SELECT name, email, phone_number, department FROM Profile WHERE id = ?
 $stmt = $connect->prepare($query);
 $stmt->bind_param("i", $profile_id);
 $stmt->execute();
-$stmt->bind_result($name, $email, $phone_number, $department);
+$stmt->bind_result($name, $encrypted_email, $phone_number, $department);
 $stmt->fetch();
 $stmt->close();
+
+$email = aes_decrypt($encrypted_email);
 mysqli_close($connect);
 ?>
 

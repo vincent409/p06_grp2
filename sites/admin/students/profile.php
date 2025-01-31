@@ -4,6 +4,7 @@ session_start();
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+include 'C:/xampp/htdocs/p06_grp2/functions.php'; // Include encryption functions
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 // Check if the user is an Admin or Facility Manager
@@ -18,37 +19,40 @@ $inputErrors = []; // Array to store validation errors
 if (isset($_GET['search'])) {
     $searchQuery = trim($_GET['search']); // Trim whitespace
 
-    // Check if search query is not empty
     if ($searchQuery !== "") {
-            // Use a prepared statement to execute the search for valid input
-            $stmt = $connect->prepare("
-                SELECT Profile.id, Profile.name, Profile.email, Profile.phone_number, Profile.department 
-                FROM Profile 
-                JOIN Role ON Profile.role_id = Role.id 
-                WHERE Role.name = 'Student' AND 
-                      (Profile.name LIKE ? OR Profile.email LIKE ? OR Profile.department LIKE ?)
-            ");
-            $searchParam = "%" . $searchQuery . "%";
-            $stmt->bind_param("sss", $searchParam, $searchParam, $searchParam);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $stmt->close();
+        // Use a prepared statement to execute the search
+        $stmt = $connect->prepare("
+            SELECT Profile.id, Profile.name, Profile.email, Profile.phone_number, Profile.department 
+            FROM Profile 
+            JOIN Role ON Profile.role_id = Role.id 
+            WHERE Role.name = 'Student' 
+                  AND (Profile.name LIKE ? OR Profile.email LIKE ?)
+        ");
+        $searchParam = "%" . $searchQuery . "%";
+        $stmt->bind_param("ss", $searchParam, $searchParam);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
     } else {
-        // If search query is empty, fetch all student profiles
-        $stmt = $connect->prepare("SELECT Profile.id, Profile.name, Profile.email, Profile.phone_number, Profile.department 
-                                   FROM Profile 
-                                   JOIN Role ON Profile.role_id = Role.id 
-                                   WHERE Role.name = 'Student'");
+        // Fetch all student profiles
+        $stmt = $connect->prepare("
+            SELECT Profile.id, Profile.name, Profile.email, Profile.phone_number, Profile.department 
+            FROM Profile 
+            JOIN Role ON Profile.role_id = Role.id 
+            WHERE Role.name = 'Student'
+        ");
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
     }
 } else {
     // Default query to fetch all student profiles if no search is performed
-    $stmt = $connect->prepare("SELECT Profile.id, Profile.name, Profile.email, Profile.phone_number, Profile.department 
-                               FROM Profile 
-                               JOIN Role ON Profile.role_id = Role.id 
-                               WHERE Role.name = 'Student'");
+    $stmt = $connect->prepare("
+        SELECT Profile.id, Profile.name, Profile.email, Profile.phone_number, Profile.department 
+        FROM Profile 
+        JOIN Role ON Profile.role_id = Role.id 
+        WHERE Role.name = 'Student'
+    ");
     $stmt->execute();
     $result = $stmt->get_result();
     $stmt->close();
@@ -93,17 +97,7 @@ if (isset($_GET['search'])) {
             </form>
         </div>
 
-        <!-- Display Validation Errors -->
-        <?php if (!empty($inputErrors)) { ?>
-            <div class="error-message">
-                <?php foreach ($inputErrors as $error) {
-                    echo "<p>$error</p>";
-                } ?>
-            </div>
-        <?php } ?>
-
         <?php
-        // Display profiles in a table
         if ($result && mysqli_num_rows($result) > 0) {
             echo "<table>";
             echo "<thead>
@@ -118,9 +112,12 @@ if (isset($_GET['search'])) {
             echo "<tbody>";
 
             while ($row = mysqli_fetch_assoc($result)) {
+                // ✅ Decrypt Email Before Displaying
+                $decrypted_email = aes_decrypt($row['email']);
+
                 echo "<tr>
                         <td>" . htmlspecialchars($row['name']) . "</td>
-                        <td>" . htmlspecialchars($row['email']) . "</td>
+                        <td>" . htmlspecialchars($decrypted_email) . "</td> 
                         <td>" . htmlspecialchars($row['phone_number']) . "</td>
                         <td>" . htmlspecialchars($row['department']) . "</td>
                         <td>

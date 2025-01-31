@@ -1,88 +1,91 @@
 <?php
 session_start();
 
-// Manually include PHPMailer files
-require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\PHPMailer.php';   // Path to PHPMailer.php file
-require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\Exception.php';   // Path to Exception.php file
-require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\SMTP.php';         // Path to SMTP.php file
+// Securely Include PHPMailer
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+// Include PHPMailer & Encryption Functions
+require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\PHPMailer.php';
+require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\Exception.php';
+require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\SMTP.php';
+include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
+include_once 'C:/xampp/htdocs/p06_grp2/functions.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Set the default timezone to Singapore Time (SGT)
 date_default_timezone_set('Asia/Singapore');
 
-// Connect to the database
-include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
-// Check if email is provided
 if (isset($_POST['email'])) {
-    $email = $_POST['email'];
+    $input_email = $_POST['email'];
 
-    // Check if the email exists in the database and get the profile_id
-    $sql = "SELECT id FROM Profile WHERE email = ?";
+    // Fetch encrypted emails from the database and decrypt them
+    $sql = "SELECT id, email FROM Profile";
     $stmt = $connect->prepare($sql);
-    $stmt->bind_param("s", $email);
     $stmt->execute();
-    $stmt->store_result();
+    $result = $stmt->get_result();
 
-    if ($stmt->num_rows > 0) {
-        // Fetch the profile ID
-        $stmt->bind_result($profile_id);
-        $stmt->fetch();
+    $profile_id = null;
+    $decrypted_email = null;
 
-        // Generate a unique token for the password reset link
-        $token = bin2hex(random_bytes(50)); // Generate a secure token
-        $current_time = date('Y-m-d H:i:s'); // Current time in Singapore Time
+    while ($row = $result->fetch_assoc()) {
+        $decrypted_email = aes_decrypt($row['email']); // Decrypt email
+        if ($decrypted_email === $input_email) {
+            $profile_id = $row['id'];
+            break;
+        }
+    }
+    $stmt->close();
 
-        // Insert the token into the PasswordReset table
+    if ($profile_id) {
+        // Generate a unique token
+        $token = bin2hex(random_bytes(50));
+        $current_time = date('Y-m-d H:i:s');
+
+        // Insert reset token into the database
         $insert_sql = "INSERT INTO PasswordReset (profile_id, reset_token, reset_token_time) VALUES (?, ?, ?)";
         $stmt_insert = $connect->prepare($insert_sql);
         $stmt_insert->bind_param("iss", $profile_id, $token, $current_time);
         $stmt_insert->execute();
+        $stmt_insert->close();
 
-        // Send the password reset link to the user's email using PHPMailer
+        // Send email
         $reset_link = "http://localhost/p06_grp2/sites/reset_password.php?token=" . $token;
         $message = "Click the link to reset your password: <a href='" . $reset_link . "'>Reset Password</a>";
         $subject = "Password Reset Request";
 
-        // Set up PHPMailer
-        $mail = new PHPMailer(true); // Create a new PHPMailer instance
+        $mail = new PHPMailer(true);
 
         try {
-            // Server settings
-            $mail->isSMTP();                          // Set mailer to use SMTP
-            $mail->Host = 'smtp.gmail.com';           // Gmail SMTP server
-            $mail->SMTPAuth = true;                   // Enable SMTP authentication
-            $mail->Username = 'amctemasek@gmail.com'; // Your Gmail email address
-            $mail->Password = 'itub szoc bbtw mqld';  // Your Gmail email password
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;  // Enable TLS encryption
-            $mail->Port = 587;                        // TCP port for Gmail SMTP server
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'amctemasek@gmail.com';
+            $mail->Password = 'itub szoc bbtw mqld';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
 
-            // Recipients
             $mail->setFrom('amctemasek@gmail.com');
-            $mail->addAddress($email);                // Add recipient's email address
+            $mail->addAddress($decrypted_email); // Use decrypted email
 
-            // Content
-            $mail->isHTML(true);                      // Set email format to HTML
+            $mail->isHTML(true);
             $mail->Subject = $subject;
-            $mail->Body    = nl2br($message);
+            $mail->Body = nl2br($message);
 
-            // Send the email
             $mail->send();
             echo 'Password reset link has been sent to your email.';
         } catch (Exception $e) {
             echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
     } else {
-        echo "No user found with that email address.";
+        echo "<script>alert('No user found with that email address.'); window.location.href='forgot_password.php';</script>";
     }
 
-    $stmt->close();
-    $stmt_insert->close();
     mysqli_close($connect);
 } else {
-    // If email is not set, redirect to forgot password page
     header("Location: sites/forgot_password.php");
     exit();
 }
 
+?>
