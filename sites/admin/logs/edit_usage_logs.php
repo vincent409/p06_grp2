@@ -50,28 +50,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
         $error_message = "Error: Returned date cannot be earlier than assigned date.";
     }
 
-    // **Only proceed if no validation errors**
+    // Only proceed if no validation errors
     if (empty($error_message)) {
         if (empty($new_returned_date)) {
             // Handle NULL returned_date
-            $update_query = "UPDATE usage_log SET log_details = ?, assigned_date = ?, returned_date = NULL WHERE id = ?";
-            $stmt = $connect->prepare($update_query);
-            $stmt->bind_param("ssi", $new_log_details, $new_assigned_date, $update_id);
+            $update_query = "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = NULL WHERE id = '$update_id'";
         } else {
-            $update_query = "UPDATE usage_log SET log_details = ?, assigned_date = ?, returned_date = ? WHERE id = ?";
-            $stmt = $connect->prepare($update_query);
-            $stmt->bind_param("sssi", $new_log_details, $new_assigned_date, $new_returned_date, $update_id);
+            $update_query = "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = '$new_returned_date' WHERE id = '$update_id'";
         }
 
-        if ($stmt->execute()) {
+        if (mysqli_query($connect, $update_query)) {
             $success_message = "Usage log updated successfully!";
         } else {
-            $error_message = "Error updating usage log: " . $stmt->error;
+            $error_message = "Error updating usage log: " . mysqli_error($connect);
         }
-        $stmt->close();
     }
 }
-
 
 // Fetch all usage logs from the database
 $sql = "SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log";
