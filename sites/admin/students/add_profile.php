@@ -4,7 +4,7 @@ session_start();
 if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
     die("You do not have permission to create profiles.");
 }
-include 'C:/xampp/htdocs/p06_grp2/Function.php';
+include 'C:/xampp/htdocs/p06_grp2/function.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
@@ -19,7 +19,7 @@ $csrf_token = generateCsrfToken();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate CSRF token
-    validateCsrfToken($_POST['csrf_token']);
+    validateCsrfToken($_POST['csrf_token'],'profile.php');
 
 
     // Collect form data

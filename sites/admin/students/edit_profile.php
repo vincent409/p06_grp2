@@ -7,7 +7,7 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['rol
 }
 
 // Include necessary files
-include 'C:/xampp/htdocs/p06_grp2/Function.php';
+include 'C:/xampp/htdocs/p06_grp2/function.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
@@ -50,7 +50,7 @@ if ($result->num_rows > 0) {
 
 // Handle profile update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
-    validateCsrfToken($_POST['csrf_token']); // Validate CSRF token
+    validateCsrfToken($_POST['csrf_token'],'profile.php'); // Validate CSRF token
 
     $id = intval($_POST['id']);
     $name = trim($_POST['name']);
