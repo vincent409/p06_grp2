@@ -18,8 +18,8 @@ $error_message = '';
 $success_message = '';
 
 // Handle DELETE request (only if the user is an Admin)
-if (isset($_GET['delete_id']) && $_SESSION['role'] === "Admin") {
-    $delete_id = $_GET['delete_id'];
+if (isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
+    $delete_id = $_POST['delete_id'];
     $delete_query = "DELETE FROM usage_log WHERE id = '$delete_id'";
 
     if (mysqli_query($connect, $delete_query)) {
@@ -32,26 +32,46 @@ if (isset($_GET['delete_id']) && $_SESSION['role'] === "Admin") {
     $error_message = "Error: You do not have permission to delete usage logs.";
 }
 
+
 // Handle UPDATE request
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
     $update_id = $_POST['update_id'];
-    $new_log_details = $_POST['log_details']; // New details
+    $new_log_details = trim($_POST['log_details']); // Trim extra spaces
     $new_assigned_date = $_POST['assigned_date'];
     $new_returned_date = $_POST['returned_date'];
 
-    // Validate dates
+    // **Log Details Validation** (Ensure only alphanumeric and spaces)
+    if (!preg_match($alphanumeric_pattern, $new_log_details)) {
+        $error_message = "Error: Log details must only contain letters and numbers.";
+    }
+
+    // **Ensure returned date is not before assigned date**
     if (!empty($new_returned_date) && $new_returned_date < $new_assigned_date) {
-        $error_message = "Error: Returned date cannot be earlier than the assigned date.";
-    } else {
-        // Update the usage log details
-        $update_query = "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = '$new_returned_date' WHERE id = '$update_id'";
-        if (mysqli_query($connect, $update_query)) {
+        $error_message = "Error: Returned date cannot be earlier than assigned date.";
+    }
+
+    // **Only proceed if no validation errors**
+    if (empty($error_message)) {
+        if (empty($new_returned_date)) {
+            // Handle NULL returned_date
+            $update_query = "UPDATE usage_log SET log_details = ?, assigned_date = ?, returned_date = NULL WHERE id = ?";
+            $stmt = $connect->prepare($update_query);
+            $stmt->bind_param("ssi", $new_log_details, $new_assigned_date, $update_id);
+        } else {
+            $update_query = "UPDATE usage_log SET log_details = ?, assigned_date = ?, returned_date = ? WHERE id = ?";
+            $stmt = $connect->prepare($update_query);
+            $stmt->bind_param("sssi", $new_log_details, $new_assigned_date, $new_returned_date, $update_id);
+        }
+
+        if ($stmt->execute()) {
             $success_message = "Usage log updated successfully!";
         } else {
-            $error_message = "Error updating usage log: " . mysqli_error($connect);
+            $error_message = "Error updating usage log: " . $stmt->error;
         }
+        $stmt->close();
     }
 }
+
 
 // Fetch all usage logs from the database
 $sql = "SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log";
@@ -262,7 +282,7 @@ if (!$result) {
                 <th>Log Details</th>
                 <th>Assigned Date</th>
                 <th>Returned Date</th>
-                <th>Actions</th>
+                <th>Edit</th>
             </tr>
         </thead>
         <tbody>
@@ -285,19 +305,21 @@ if (!$result) {
                         <label for="returned_date">Returned Date:</label>
                         <input type="date" name="returned_date" value="<?php echo $row['returned_date']; ?>"><br>
 
-                        <div class="button-container">
+                        <form action="edit_usage_logs.php" method="POST" class="button-container">
+                            <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
                             <button type="submit" class="update-button">Update</button>
+
                             <?php if ($_SESSION['role'] === "Admin"): ?>
-                                <a href="edit_usage_logs.php?delete_id=<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure you want to delete this log?')">Delete</a>
+                                <button type="submit" name="delete_id" value="<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure you want to delete this log?')"> Delete</button>
                             <?php endif; ?>
-                        </div>
-                    </form>
+                        </form>
                 </td>
             </tr>
             <?php endwhile; ?>
         </tbody>
     </table>
 </div>
+
 
 <!-- Display success or error messages as popups -->
 <?php if (!empty($success_message)): ?>

@@ -26,6 +26,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate inputs
     if (empty($equipment_id) || empty($log_details) || empty($assigned_date)) {
         $error_message = "All fields are required.";
+    } elseif (!preg_match($alphanumeric_pattern, $log_details)) {
+        $error_message = "Error: Log details must only contain letters and numbers.";
     } else {
         // Check if the equipment_id exists in the equipment table
         $check_equipment_query = "SELECT * FROM equipment WHERE id = '$equipment_id'";
@@ -215,10 +217,10 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // U
         <button type="submit">Submit Usage Log</button>
 
         <!-- View Usage Logs Button -->
-        <button type="button" class="view-button" onclick="window.location.href='edit_usage_logs.php';">View/Edit</button>
+        <button type="button" class="view-button" onclick="window.location.href='edit_usage_logs.php';">View Usage Logs</button>
 
         <!-- Go back to admin.php -->
-        <button type="button" class="back-button" onclick="window.location.href='/p06_grp2/sites/admin/admin-dashboard.php';">Back to Admin</button>
+        <button type="button" class="back-button" onclick="window.location.href='/p06_grp2/sites/admin/admin-dashboard.php';">Back to Dashboard</button>
     </form>
 </div>
 
