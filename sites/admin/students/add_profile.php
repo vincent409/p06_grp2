@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     alert('Profile updated successfully!');
                     window.location.href = 'profile.php';
                   </script>";
-            exit;
+            exit;   
         } else {
             $inputErrors[] = "An error occurred while creating the profile. Please try again.";
         }
@@ -241,8 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php } ?>
 
         <form method="POST" action="add_profile.php">
-        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
-
+        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
         <label for="name">Name:</label><br>
         <input type="text" id="name" name="name" required><br><br>
 
