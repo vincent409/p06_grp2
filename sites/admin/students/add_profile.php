@@ -19,65 +19,40 @@ $csrf_token = generateCsrfToken();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate CSRF token
-    validateCsrfToken($_POST['csrf_token'],'profile.php');
-
+    validateCsrfToken($_POST['csrf_token'], 'profile.php');
 
     // Collect form data
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
+    $admin_number = trim($_POST['admin_number']); // ✅ New admin number field
     $phone_number = trim($_POST['phone_number']);
     $department = trim($_POST['department']);
     $role_id = 3; // Assuming '3' corresponds to the Student role
 
-
+    // ✅ Encrypt the email before storing
     $encrypted_email = aes_encrypt($email);
 
+    // Validate admin number (should be 7 digits followed by 1 letter)
+    if (!preg_match("/^[0-9]{7}[a-zA-Z]$/", $admin_number)) {
+        $inputErrors[] = "Admin number must be 7 digits followed by 1 letter (e.g., 1234567A).";
+    }
 
     // Validate name
     if (!preg_match($alphanumeric_pattern, $name)) {
         $inputErrors[] = "Name must contain only alphanumeric characters and spaces.";
     }
 
-
-    // Validate email using the function from validation.php
+    // Validate email
     $emailValidationResult = validateEmail($email);
-
     if ($emailValidationResult !== true) {
-        $inputErrors[] = $emailValidationResult; // Add the validation error to the inputErrors array
+        $inputErrors[] = $emailValidationResult;
     }
 
-
-    $phone_number = trim($_POST['phone_number']);
+    // Validate phone number
     if (!preg_match($phonePattern, $phone_number)) {
         $inputErrors[] = "Phone number must start with 8 or 9 and be exactly 8 digits.";
     }
-
-
-    // Check for duplicate email
-    $check_email_sql = "SELECT id FROM Profile WHERE email = ?";
-    $stmt = $connect->prepare($check_email_sql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->store_result();
-    if ($stmt->num_rows > 0) {
-        $inputErrors[] = "This email address is already registered.";
-    }
-    $stmt->close();
-
-    // Check for duplicate phone number (if provided)
-    if (!empty($phone_number)) {
-        $check_phone_sql = "SELECT id FROM Profile WHERE phone_number = ?";
-        $stmt = $connect->prepare($check_phone_sql);
-        $stmt->bind_param("s", $phone_number);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows > 0) {
-            $inputErrors[] = "This phone number is already registered.";
-        }
-        $stmt->close();
-    }
-
-    // Check for duplicate name
+    //check for duplicate name
     $check_name_sql = "SELECT id FROM Profile WHERE name = ?";
     $stmt = $connect->prepare($check_name_sql);
     $stmt->bind_param("s", $name);
@@ -88,18 +63,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $stmt->close();
 
+    // Check for duplicate admin number
+    $check_admin_sql = "SELECT id FROM Profile WHERE admin_number = ?";
+    $stmt = $connect->prepare($check_admin_sql);
+    $stmt->bind_param("s", $admin_number);
+    $stmt->execute();
+    $stmt->store_result();
+    if ($stmt->num_rows > 0) {
+        $inputErrors[] = "This Admin Number is already registered.";
+    }
+    $stmt->close();
+
+    // Check for duplicate email (encrypted)
+    $check_email_sql = "SELECT id FROM Profile WHERE email = ?";
+    $stmt = $connect->prepare($check_email_sql);
+    $stmt->bind_param("s", $encrypted_email);
+    $stmt->execute();
+    $stmt->store_result();
+    if ($stmt->num_rows > 0) {
+        $inputErrors[] = "This email address is already registered.";
+    }
+    $stmt->close();
+
     // If no errors, insert into the database
     if (empty($inputErrors)) {
-        $insert_sql = "INSERT INTO Profile (name, email, phone_number, department, role_id) VALUES (?, ?, ?, ?, ?)";
+        $insert_sql = "INSERT INTO Profile (name, email, admin_number, phone_number, department, role_id) 
+                       VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $connect->prepare($insert_sql);
-        $stmt->bind_param("ssssi", $name, $encrypted_email, $phone_number, $department, $role_id);
+        $stmt->bind_param("sssssi", $name, $encrypted_email, $admin_number, $phone_number, $department, $role_id);
 
         if ($stmt->execute()) {
             echo "<script>
-                    alert('Profile updated successfully!');
+                    alert('Profile created successfully!');
                     window.location.href = 'profile.php';
                   </script>";
-            exit;   
+            exit;
         } else {
             $inputErrors[] = "An error occurred while creating the profile. Please try again.";
         }
@@ -107,7 +105,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->close();
     }
 }
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -246,6 +246,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
         <label for="name">Name:</label><br>
         <input type="text" id="name" name="name" required><br><br>
+
+        <label for="admin_number">Admin Number:</label><br> <!-- ✅ New field -->
+        <input type="text" id="admin_number" name="admin_number" required><br><br>
+
 
         <label for="email">Email:</label><br>
         <input type="email" id="email" name="email" required><br><br>

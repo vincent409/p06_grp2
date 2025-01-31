@@ -22,7 +22,7 @@ if (isset($_GET['search'])) {
     if ($searchQuery !== "") {
         // Use a prepared statement to execute the search
         $stmt = $connect->prepare("
-            SELECT Profile.id, Profile.name, Profile.email, Profile.phone_number, Profile.department 
+            SELECT Profile.id, Profile.name, Profile.admin_number,Profile.email, Profile.phone_number, Profile.department 
             FROM Profile 
             JOIN Role ON Profile.role_id = Role.id 
             WHERE Role.name = 'Student' 
@@ -36,7 +36,7 @@ if (isset($_GET['search'])) {
     } else {
         // Fetch all student profiles
         $stmt = $connect->prepare("
-            SELECT Profile.id, Profile.name, Profile.email, Profile.phone_number, Profile.department 
+            SELECT Profile.id, Profile.name,profile.admin_number, Profile.email, Profile.phone_number, Profile.department 
             FROM Profile 
             JOIN Role ON Profile.role_id = Role.id 
             WHERE Role.name = 'Student'
@@ -48,7 +48,7 @@ if (isset($_GET['search'])) {
 } else {
     // Default query to fetch all student profiles if no search is performed
     $stmt = $connect->prepare("
-        SELECT Profile.id, Profile.name, Profile.email, Profile.phone_number, Profile.department 
+        SELECT Profile.id, Profile.name,Profile.admin_number,Profile.email, Profile.phone_number, Profile.department 
         FROM Profile 
         JOIN Role ON Profile.role_id = Role.id 
         WHERE Role.name = 'Student'
@@ -103,6 +103,7 @@ if (isset($_GET['search'])) {
             echo "<thead>
                     <tr>
                         <th>Name</th>
+                        <th>admin_number</th>
                         <th>Email</th>
                         <th>Phone Number</th>
                         <th>Department</th>
@@ -117,6 +118,7 @@ if (isset($_GET['search'])) {
 
                 echo "<tr>
                         <td>" . htmlspecialchars($row['name']) . "</td>
+                        <td>" . htmlspecialchars($row['admin_number']) . "</td>
                         <td>" . htmlspecialchars($decrypted_email) . "</td> 
                         <td>" . htmlspecialchars($row['phone_number']) . "</td>
                         <td>" . htmlspecialchars($row['department']) . "</td>
