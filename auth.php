@@ -51,7 +51,7 @@ function authenticate($myemail, $mypassword)
                 $_SESSION['email'] = $myemail;
             
                 // If it's the first login
-                if ($has_logged_in == 0) {
+                if ($has_logged_in == 0 && $role == 3) {
                     // Call send_reset_link.php to send the reset email
                     $_POST['email'] = $myemail; // Pass the email to the script
                     session_destroy();
