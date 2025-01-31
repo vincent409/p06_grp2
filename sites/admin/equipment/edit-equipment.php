@@ -16,6 +16,7 @@ include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
+generateCsrfToken();
 $equipment_id = $_POST['id'];
 
 $stmt = $connect->prepare("SELECT * FROM Equipment WHERE id = ?");
@@ -145,9 +146,9 @@ mysqli_close($connect);
         </ul>
     <?php } ?>
 
-    <form action="update-equipment.php" method="POST">
+    <form action="edit-equipment.php" method="POST">
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($equipment['id']); ?>">
-        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <label for="name">Name:</label>
         <input type="text" name="name" value="<?php echo htmlspecialchars($equipment['name']); ?>" required><br><br>
 

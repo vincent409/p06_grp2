@@ -15,6 +15,9 @@ $searchQuery = "";
 $result = null;
 $inputErrors = [];
 
+if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
+    $message = "Equipment deleted successfully!";
+}
 if (isset($_GET['search'])) {
     $searchQuery = trim($_GET['search']);
     if ($searchQuery !== "") {
@@ -92,6 +95,12 @@ if (isset($_GET['search'])) {
             </div>
         <?php } ?>
 
+        <?php if (!empty($message)) { ?>
+            <div class="success-message">
+                <?php echo $message;  ?>
+            </div>
+        <?php } ?>
+
         <?php if ($result && mysqli_num_rows($result) > 0) { ?>
             <table>
                 <thead>
@@ -111,7 +120,7 @@ if (isset($_GET['search'])) {
                             <td><?php echo htmlspecialchars($row['purchase_date']); ?></td>
                             <td><?php echo htmlspecialchars($row['model_number']); ?></td>
                             <td>
-                                <form action="update-equipment.php" method="POST" style="display:inline;">
+                                <form action="edit-equipment.php" method="POST" style="display:inline;">
                                     <input type="hidden" name="id" value="<?php echo htmlspecialchars($row['id']); ?>">
                                     <button type="submit">Edit</button>
                                 </form>

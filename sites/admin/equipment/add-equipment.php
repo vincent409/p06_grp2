@@ -13,6 +13,7 @@ include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
+generateCsrfToken();
 $inputErrors = [];
 
 // Handle form submission
@@ -109,7 +110,7 @@ if (isset($_POST['add-button'])) {
     <?php } ?>
 
     <form method="POST" action="add-equipment.php">
-        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <label for="equipment_name">Equipment Name:</label><br>
         <input type="text" id="equipment_name" name="equipment_name" required><br><br>
 

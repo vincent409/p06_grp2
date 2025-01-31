@@ -7,17 +7,19 @@ unset($_SESSION['profile_id']);
 unset($_SESSION['role']);
 unset($_SESSION['email']);
 
-// Optionally, unset all session variables (if needed)
-session_unset();
+// Destroy the session and clear session cookie
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
+}
 
-// Destroy the session
-session_destroy();
+session_unset();  // Unset all session variables
+session_destroy();  // Destroy the session
 
 // Clear the 'logout_occurred' cookie if it exists
 if (isset($_COOKIE['logout_occurred'])) {
     setcookie('logout_occurred', '', time() - 3600, '/'); // Clear the cookie
 }
-
 
 // Redirect to the login page
 header("Location: sites/index.php");

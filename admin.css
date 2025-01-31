@@ -209,7 +209,7 @@ th {
 
 .success-message {
     color: green;
-    margin-bottom: 20px;
+    font-weight: bold;
 }
 
 .container-flex {
