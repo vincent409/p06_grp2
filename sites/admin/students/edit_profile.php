@@ -274,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
 
     <form action="edit_profile.php" method="POST">
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($_POST['id']); ?>">
-        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
         <label for="name">Name:</label>
         <input type="text" name="name" value="<?php echo htmlspecialchars($name); ?>" required>
         <label for="email">Email:</label>
