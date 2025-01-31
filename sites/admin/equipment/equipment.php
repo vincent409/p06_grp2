@@ -6,8 +6,8 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
     exit();
 }
 
-include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
+include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
@@ -123,6 +123,7 @@ if (isset($_GET['search'])) {
         <?php } else { ?>
             <p>No equipment found in the database.</p>
         <?php } ?>
+        <button onclick="window.location.href='add-equipment.php';">Add equipment</button>
     </div>
 </div>
 </body>

@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id'])) {
 }
 
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
+include 'C:/xampp/htdocs/p06_grp2/function.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
@@ -33,6 +34,7 @@ $errorMessage = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete'])) {
+        validateCsrfToken($_POST['csrf_token'],'equipment.php');
         try {
             // Check if equipment is currently assigned
             $checkAssignmentStmt = $connect->prepare("SELECT COUNT(*) AS count FROM Loan WHERE equipment_id = ? AND status_id = (SELECT id FROM Status WHERE name = 'Assigned')");
@@ -56,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errorMessage = $e->getMessage();
         }
     } elseif (isset($_POST['update'])) {
+        validateCsrfToken($_POST['csrf_token'],'equipment.php');
         $name = trim($_POST['name']);
         $type = trim($_POST['type']);
         $purchase_date = trim($_POST['purchase_date']);
@@ -125,7 +128,7 @@ mysqli_close($connect);
 
 <div class="main-container">
     <h1>Update Equipment</h1>
-
+    
     <?php if (!empty($successMessage)) { ?>
         <p style="color: green; font-weight: bold;"><?php echo $successMessage; ?></p>
     <?php } ?>
@@ -144,6 +147,7 @@ mysqli_close($connect);
 
     <form action="update-equipment.php" method="POST">
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($equipment['id']); ?>">
+        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
         <label for="name">Name:</label>
         <input type="text" name="name" value="<?php echo htmlspecialchars($equipment['name']); ?>" required><br><br>
 

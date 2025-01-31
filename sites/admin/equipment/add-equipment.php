@@ -7,8 +7,9 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
     exit(); // Stop further execution
 }
 
-include 'C:/xampp/htdocs/p06_grp2/validation.php';  // Assuming validation functions are in this file
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
+include 'C:/xampp/htdocs/p06_grp2/function.php';
+include 'C:/xampp/htdocs/p06_grp2/validation.php'; 
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
@@ -16,6 +17,7 @@ $inputErrors = [];
 
 // Handle form submission
 if (isset($_POST['add-button'])) {
+    validateCsrfToken($_POST['csrf_token'],'equipment.php');
     // Retrieve form inputs
     $equipment_name = trim($_POST['equipment_name']);
     $equipment_type = trim($_POST['equipment_type']);
@@ -107,6 +109,7 @@ if (isset($_POST['add-button'])) {
     <?php } ?>
 
     <form method="POST" action="add-equipment.php">
+        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
         <label for="equipment_name">Equipment Name:</label><br>
         <input type="text" id="equipment_name" name="equipment_name" required><br><br>
 
