@@ -30,6 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $role_id = 3; // Assuming '3' corresponds to the Student role
 
 
+    $encrypted_email = aes_encrypt($email);
+
+
     // Validate name
     if (!preg_match($alphanumeric_pattern, $name)) {
         $inputErrors[] = "Name must contain only alphanumeric characters and spaces.";
@@ -89,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($inputErrors)) {
         $insert_sql = "INSERT INTO Profile (name, email, phone_number, department, role_id) VALUES (?, ?, ?, ?, ?)";
         $stmt = $connect->prepare($insert_sql);
-        $stmt->bind_param("ssssi", $name, $email, $phone_number, $department, $role_id);
+        $stmt->bind_param("ssssi", $name, $encrypted_email, $phone_number, $department, $role_id);
 
         if ($stmt->execute()) {
             echo "<script>
