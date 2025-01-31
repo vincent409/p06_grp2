@@ -11,7 +11,11 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
+include 'C:/xampp/htdocs/p06_grp2/function.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
+
+generateCsrfToken();
+$inputErrors = [];
 
 // Initialize variables for messages
 $error_message = '';
@@ -19,6 +23,7 @@ $success_message = '';
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    validateCsrfToken($_POST['csrf_token'],'equipment.php');
     $equipment_id = trim($_POST['equipment_id']);
     $log_details = trim($_POST['log_details']); // Usage or maintenance details
     $assigned_date = $_POST['assigned_date']; // Date when the equipment was assigned

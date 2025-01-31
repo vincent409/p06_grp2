@@ -11,7 +11,11 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
+include 'C:/xampp/htdocs/p06_grp2/function.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
+
+generateCsrfToken();
+$inputErrors = [];
 
 // Initialize variables for messages
 $error_message = '';
@@ -35,6 +39,7 @@ if (isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
 
 // Handle UPDATE request
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
+    validateCsrfToken($_POST['csrf_token'],'equipment.php');
     $update_id = $_POST['update_id'];
     $new_log_details = trim($_POST['log_details']); // Trim extra spaces
     $new_assigned_date = $_POST['assigned_date'];
