@@ -11,11 +11,16 @@ function authenticate($admin_number, $mypassword)
         if (empty($admin_number)) {
             throw new Exception("Admin number is required.");
         }
+        if (!preg_match("/^[0-9]{7}[a-zA-Z]$/", trim($admin_number))) {
+            throw new Exception("Invalid ID format!");
+        }
 
         // Check if password is provided
         if (empty($mypassword)) {
             throw new Exception("Password is empty!");
         }
+        
+        $admin_number = substr($admin_number, 0, 7) . strtoupper(substr($admin_number, -1));
 
         include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 
