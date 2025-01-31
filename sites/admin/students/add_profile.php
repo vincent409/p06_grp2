@@ -4,7 +4,7 @@ session_start();
 if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
     die("You do not have permission to create profiles.");
 }
-include 'C:/xampp/htdocs/p06_grp2/function.php';
+include 'C:/xampp/htdocs/p06_grp2/functions.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';

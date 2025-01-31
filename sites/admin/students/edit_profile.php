@@ -7,7 +7,7 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['rol
 }
 
 // Include necessary files
-include 'C:/xampp/htdocs/p06_grp2/function.php';
+include 'C:/xampp/htdocs/p06_grp2/functions.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';

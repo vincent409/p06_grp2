@@ -3,10 +3,10 @@ VALUES
     ('Screwdriver', 'Tool', '2025-01-16', 'SD-12345'),
     ('Hammer', 'Tool', '2025-01-15', 'HM-67890');
 
-INSERT INTO Profile (role_id, name, email, phone_number, department, has_logged_in)
+INSERT INTO Profile (role_id, admin_number, name, email, phone_number, department, has_logged_in)
 VALUES
-    (1,'Admin', 'admin@example.com', '51234567', 'Marketing', 1),
-    (3,'Bob Brown', 'student@example.com', '55598765', 'Sales', 0);
+    (1, '1234567A', 'Admin', 'admin@example.com', '51234567', 'Marketing', 1),
+    (3, '1234567B', 'Bob Brown', 'student@example.com', '55598765', 'Sales', 0);
 
 INSERT INTO Loan (status_id, profile_id, equipment_id)
 VALUES
