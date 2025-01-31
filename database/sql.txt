@@ -17,6 +17,7 @@ CREATE TABLE Status (
 CREATE TABLE Profile (
     id INT PRIMARY KEY AUTO_INCREMENT,
     role_id INT NOT NULL,
+    admin_number VARCHAR(255) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     phone_number VARCHAR(8),
