@@ -77,6 +77,23 @@ $result = mysqli_query($connect, $sql);
 if (!$result) {
     die("Query failed: " . mysqli_error($connect));
 }
+
+// Handle SEARCH request for Equipment ID
+$searchQuery = "";
+if (isset($_GET['search'])) {
+    $searchQuery = trim($_GET['search']);
+    if ($searchQuery !== "") {
+        $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log WHERE equipment_id = ?");
+        $stmt->bind_param("i", $searchQuery);
+    } else {
+        $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log");
+    }
+} else {
+    $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log");
+}
+$stmt->execute();
+$result = $stmt->get_result();
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -166,6 +183,7 @@ if (!$result) {
             font-size: 1em;
             text-decoration: none;
             border-radius: 5px;
+            align-items: center;
         }
 
         .enter-logs-button:hover {
@@ -243,6 +261,29 @@ if (!$result) {
         .delete-button:hover {
             background-color: #cc0000;
         }
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 250px;
+        }
+
+        .search-bar button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -266,10 +307,15 @@ if (!$result) {
 </nav>
 
 <div class="container">
-    <div class="container-header">
-        <h1>Manage Usage Logs</h1>
-        <a href="add_usage_logs.php" class="enter-logs-button">Enter Usage Logs</a>
-    </div>
+    <div class="box">
+            <div class = "container-header">
+                <h1>Manage Usage Logs</h1>
+                <a href="add_usage_logs.php" class="enter-logs-button">Enter Usage Logs</a>
+                <form method="GET" action="" class="search-bar">
+                    <input type="text" name="search" placeholder="Search" value="<?php echo htmlspecialchars($searchQuery); ?>">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
 
     <table>
         <thead>
