@@ -44,11 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
 
-    // Validate phone number (optional field)
-    if (!empty($phone_number) && !preg_match($phonePattern, $phone_number)) {
-        $inputErrors[] = "Phone number must be 8.";
+    $phone_number = trim($_POST['phone_number']);
+    if (!preg_match($phonePattern, $phone_number)) {
+        $inputErrors[] = "Phone number must start with 8 or 9 and be exactly 8 digits.";
     }
-
 
 
     // Check for duplicate email
