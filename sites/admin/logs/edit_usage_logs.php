@@ -17,9 +17,8 @@ manageCookieAndRedirect("/p06_grp2/sites/index.php");
 generateCsrfToken();
 $inputErrors = [];
 
-
 // Handle DELETE request (only if the user is an Admin)
-if (isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
     $delete_id = $_POST['delete_id'];
     $delete_query = "DELETE FROM usage_log WHERE id = '$delete_id'";
 
@@ -28,38 +27,29 @@ if (isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
     } else {
         $inputErrors[] = "Error: " . mysqli_error($connect);
     }
-} elseif (isset($_GET['delete_id']) && $_SESSION['role'] === "Facility Manager") {
-    // If the user is a Facility Manager, do not allow deletion
-    $inputErrors[] = "Error: You do not have permission to delete usage logs.";
 }
-
 
 // Handle UPDATE request
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
-    validateCsrfToken($_POST['csrf_token'],'equipment.php');
+    validateCsrfToken($_POST['csrf_token'], 'equipment.php');
     $update_id = $_POST['update_id'];
-    $new_log_details = trim($_POST['log_details']); // Trim extra spaces
+    $new_log_details = trim($_POST['log_details']);
     $new_assigned_date = $_POST['assigned_date'];
     $new_returned_date = $_POST['returned_date'];
 
-    // **Log Details Validation** (Ensure only alphanumeric and spaces)
-    if (!preg_match($alphanumeric_pattern, $new_log_details)) {
+    // Validation
+    if (!preg_match("/^[a-zA-Z0-9 ]+$/", $new_log_details)) {
         $inputErrors[] = "Error: Log details must only contain letters and numbers.";
     }
-
-    // **Ensure returned date is not before assigned date**
     if (!empty($new_returned_date) && $new_returned_date < $new_assigned_date) {
         $inputErrors[] = "Error: Returned date cannot be earlier than assigned date.";
     }
 
     // Only proceed if no validation errors
     if (empty($inputErrors)) {
-        if (empty($new_returned_date)) {
-            // Handle NULL returned_date
-            $update_query = "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = NULL WHERE id = '$update_id'";
-        } else {
-            $update_query = "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = '$new_returned_date' WHERE id = '$update_id'";
-        }
+        $update_query = empty($new_returned_date) 
+            ? "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = NULL WHERE id = '$update_id'"
+            : "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = '$new_returned_date' WHERE id = '$update_id'";
 
         if (mysqli_query($connect, $update_query)) {
             $success_message = "Usage log updated successfully!";
@@ -69,31 +59,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
     }
 }
 
-// Fetch all usage logs from the database
+// Fetch all usage logs
 $sql = "SELECT * FROM usage_log ORDER BY equipment_id ASC";
 $result = mysqli_query($connect, $sql);
 
-// Check if query executed successfully
 if (!$result) {
     die("Query failed: " . mysqli_error($connect));
 }
 
-// Handle SEARCH request for Equipment ID
+// Handle SEARCH request
 $searchQuery = "";
 if (isset($_GET['search'])) {
     $searchQuery = trim($_GET['search']);
-    if ($searchQuery !== "") {
-        $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log WHERE equipment_id = ? ORDER BY equipment_id ASC");
+    $stmt = empty($searchQuery) 
+        ? $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log ORDER BY equipment_id ASC")
+        : $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log WHERE equipment_id = ? ORDER BY equipment_id ASC");
+    
+    if (!empty($searchQuery)) {
         $stmt->bind_param("i", $searchQuery);
-    } else {
-        $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log ORDER BY equipment_id ASC");
     }
-} else {
-    $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log ORDER BY equipment_id ASC");
+
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
 }
-$stmt->execute();
-$result = $stmt->get_result();
-$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -102,189 +91,7 @@ $stmt->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Usage Logs</title>
-    <style>
-        body {
-            background-color: #E5D9B6; /* Beige background */
-            font-family: Arial, sans-serif;
-            color: black;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            color: black;
-            padding: 10px 20px;
-        }
-
-        nav {
-            display: flex;
-            gap: 15px;
-            background-color: #f4f4f4;
-            padding: 10px 20px;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        .logout-btn button {
-            padding: 8px 12px;
-            background-color: #E53D29; /* Red button */
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .logout-btn button:hover {
-            background-color: #E03C00; /* Darker red on hover */
-        }
-
-        .container {
-            background-color: white; /* White container */
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-            border-radius: 8px; /* Rounded corners */
-            padding: 20px; /* Space inside container */
-            margin: 20px auto; /* Space outside container */
-            width: 90%; /* Responsive container width */
-            max-width: 1200px; /* Max width for large screens */
-            position: relative; /* To position child elements */
-        }
-
-        .container-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .container-header h1 {
-            font-size: 1.8em;
-            margin: 0;
-            text-align: left; /* Align Manage Usage Logs to the left */
-        }
-
-        .enter-logs-button {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-            padding: 10px 20px;
-            font-size: 1em;
-            text-decoration: none;
-            border-radius: 5px;
-            align-items: center;
-        }
-
-        .enter-logs-button:hover {
-            background-color: #0056b3;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-            font-size: 1em;
-            background-color: #F9F9F9; /* Light background for cells */
-        }
-
-        th {
-            background-color: #F1F1F1; /* Slightly darker for header */
-        }
-
-        td input {
-            width: 100%;
-            max-width: 250px;
-            padding: 8px;
-            font-size: 0.9em;
-            background-color: #ffffff;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        td input:focus {
-            border-color: #007BFF; /* Highlight on focus */
-            outline: none;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .update-button {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-            font-size: 0.9em;
-            padding: 12px 20px;
-            width: 48%;
-            text-align: center;
-            border: none;
-            border-radius: 4px;
-        }
-
-        .update-button:hover {
-            background-color: #0056b3;
-        }
-
-        .delete-button {
-            background-color: #FF0000;
-            color: white;
-            cursor: pointer;
-            font-size: 0.9em;
-            padding: 12px 20px;
-            width: 48%;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-
-        .delete-button:hover {
-            background-color: #cc0000;
-        }
-        .search-bar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .search-bar input {
-            padding: 10px;
-            font-size: 1em;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 250px;
-        }
-
-        .search-bar button {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-            padding: 10px 20px;
-            font-size: 1em;
-            border: none;
-            border-radius: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="/p06_grp2/admin.css">
 </head>
 <body>
 <header>
@@ -308,79 +115,71 @@ $stmt->close();
 
 <div class="container">
     <div class="box">
-            <div class = "container-header">
-                <h1>Manage Usage Logs</h1>
-                <a href="add_usage_logs.php" class="enter-logs-button">Enter Usage Logs</a>
-                <form method="GET" action="" class="search-bar">
-                    <input type="text" name="search" placeholder="Search ID" value="<?php echo htmlspecialchars($searchQuery); ?>">
-                    <button type="submit">Search</button>
-                </form>
-            </div>
+        <div class="container-flex">
+            <h1>Manage Usage Logs</h1>
+            <form method="GET" action="">
+                <input type="text" name="search" placeholder="Search ID" value="<?php echo htmlspecialchars($searchQuery); ?>">
+                <button type="submit">Search</button>
+            </form>
+        </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Equipment ID</th>
-                <th>Log Details</th>
-                <th>Assigned Date</th>
-                <th>Returned Date</th>
-                <th>Edit</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php while ($row = mysqli_fetch_assoc($result)): ?>
-            <tr>
-                <td><?php echo $row['equipment_id']; ?></td>
-                <td><?php echo $row['log_details']; ?></td>
-                <td><?php echo $row['assigned_date']; ?></td>
-                <td><?php echo $row['returned_date']; ?></td>
-                <td>
-                    <form action="edit_usage_logs.php" method="POST" style="display:inline;">
-                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                        <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
-
-                        <label for="log_details">Log Details:</label>
-                        <input type="text" name="log_details" value="<?php echo $row['log_details']; ?>" required><br>
-
-                        <label for="assigned_date">Assigned Date:</label>
-                        <input type="date" name="assigned_date" value="<?php echo $row['assigned_date']; ?>" required><br>
-
-                        <label for="returned_date">Returned Date:</label>
-                        <input type="date" name="returned_date" value="<?php echo $row['returned_date']; ?>"><br>
-
-                        <form action="edit_usage_logs.php" method="POST" class="button-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Equipment ID</th>
+                    <th>Log Details</th>
+                    <th>Assigned Date</th>
+                    <th>Returned Date</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                <tr>
+                    <td><?php echo $row['equipment_id']; ?></td>
+                    <td><?php echo $row['log_details']; ?></td>
+                    <td><?php echo $row['assigned_date']; ?></td>
+                    <td><?php echo $row['returned_date']; ?></td>
+                    <td>
+                        <form action="edit_usage_logs.php" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                             <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
-                            <button type="submit" class="update-button">Update</button>
 
-                            <?php if ($_SESSION['role'] === "Admin"): ?>
-                                <button type="submit" name="delete_id" value="<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure you want to delete this log?')"> Delete</button>
-                            <?php endif; ?>
+                            <label for="log_details">Log Details:</label>
+                            <input type="text" name="log_details" value="<?php echo $row['log_details']; ?>" required><br>
+
+                            <label for="assigned_date">Assigned Date:</label>
+                            <input type="date" name="assigned_date" value="<?php echo $row['assigned_date']; ?>" required><br>
+
+                            <label for="returned_date">Returned Date:</label>
+                            <input type="date" name="returned_date" value="<?php echo $row['returned_date']; ?>"><br>
+
+                            <div class="button-container">
+                                <button type="submit" name="update-button" class="update-button">Update</button>
+                                <?php if ($_SESSION['role'] === "Admin"): ?>
+                                    <button type="submit" name="delete_id" value="<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure you want to delete this log?')">Delete</button>
+                                <?php endif; ?>
+                            </div>
                         </form>
-                </td>
-            </tr>
-            <?php endwhile; ?>
-        </tbody>
-    </table>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+        <a href="add_usage_logs.php" class="enter-logs-button">Add Usage Logs</a>
+    </div>
 </div>
 
-
-<!-- Display success or error messages as popups -->
 <?php if (!empty($success_message)): ?>
-<script>
-    alert("<?php echo $success_message; ?>");
-</script>
+<script>alert("<?php echo $success_message; ?>");</script>
 <?php endif; ?>
 
 <?php if (!empty($inputErrors)): ?>
-<script>
-    alert("<?php echo implode('\n', $inputErrors); ?>");
-</script>
+<script>alert("<?php echo implode('\n', $inputErrors); ?>");</script>
 <?php endif; ?>
-
 </body>
 </html>
 
 <?php
-// Close the database connection
 mysqli_close($connect);
 ?>

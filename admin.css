@@ -41,6 +41,70 @@ nav a {
     background-color: #E03C00;
 }
 
+.update-button {
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 12px 20px;
+    width: 48%;
+    text-align: center;
+    border: none;
+    border-radius: 4px;
+}
+
+.update-button:hover {
+    background-color: #0056b3;
+}
+
+.delete-button {
+    background-color: #FF0000;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 12px 20px;
+    width: 48%;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.confirm-return-button {
+    background-color: #28a745 !important;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 12px 20px;
+    text-align: center;
+    border: none;
+    border-radius: 4px;
+    width: 50%;
+    margin-top: 15px;
+}
+
+.confirm-return-button:hover {
+    background-color: #218838 !important; /* Darker green on hover */
+    }
+
+.delete-button:hover {
+    background-color: #cc0000;
+}
+
+.enter-logs-button {
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 1em;
+    text-decoration: none;
+    border-radius: 5px;
+    align-items: right;
+}
+
+.enter-logs-button:hover {
+    background-color: #0056b3;
+}
+
 button, 
 form button, 
 .container-flex form button {
@@ -59,6 +123,15 @@ form button:hover,
 .container-flex form button:hover {
     background-color: #0056b3; /* Darker blue on hover */
 }
+
+.button-container {
+    display: flex; /* Ensures buttons are placed inline */
+    justify-content: space-between; /* Even spacing */
+    gap: 10px; /* Adds spacing between buttons */
+    margin-top: 10px;
+}
+
+
 
 form button {
     width: 100%;
@@ -185,6 +258,7 @@ h1,
 .main-container h1 {
     margin-bottom: 10px;
     padding-left: 5px;
+    text-align: center;
 }
 
 .container {
@@ -210,12 +284,20 @@ table {
 th, td {
     background-color: white;
     border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
+    padding: 10px;
+    text-align: center;
 }
 
 th {
     background-color: #f2f2f2;
+}
+
+form select {
+    width: 100%; /* Make it as wide as the input fields */
+    padding: 12px; /* Increase padding for a bigger dropdown */
+    font-size: 16px; /* Increase text size */
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
 .success-message {
@@ -225,32 +307,61 @@ th {
 
 .container-flex {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    justify-content: space-between; /* Spaces out h1 and form */
+    align-items: center; /* Ensures vertical alignment */
+    width: 100%;
+    flex-wrap: wrap; /* Prevents overflow */
 }
 
 .container-flex h1 {
     margin: 0;
     padding-left: 5px;
+    font-size: 1.8em;
 }
 
 .container-flex form {
     display: flex;
-    align-items: center;
+    align-items: center; /* Ensures input and button align */
+    gap: 10px; /* Adds spacing between input and button */
+    margin: 0;
 }
 
 .container-flex form input[type="text"] {
     width: 250px;
-    padding: 10px;
+    padding: 8px 10px;
+    height: 38px; /* Ensures same height as button */
     border: 1px solid #ccc;
     border-radius: 5px;
-    margin-right: 10px;
 }
+
+.container-flex form button {
+    padding: 10px 15px;
+    height: 40px; /* Matches input height */
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.container-flex form button:hover {
+    background-color: #0056b3;
+}
+
 
 .error-message {
     color: red;
     font-weight: bold;
+}
+
+form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0; /* Ensures same margin top and bottom */
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
 }
 
 /* Responsive table styling */
