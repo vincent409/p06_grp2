@@ -12,7 +12,7 @@ include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/functions.php';
 manageCookieAndRedirect("/p06_grp2/logout.php");
-$csrf_token = generateCsrfToken();
+generateCsrfToken();
 
 
 // Connect to the database
@@ -24,6 +24,7 @@ if (!$connect) {
 
 // Handle DELETE request for Admins and Facility Managers
 if (isset($_GET['delete_id'])) {
+    validateCsrfToken($_POST['csrf_token']);
     $delete_id = $_GET['delete_id'];
 
     $check_status_query = "SELECT status_id FROM loan WHERE id = '$delete_id'";
@@ -67,7 +68,7 @@ if (isset($_GET['delete_id'])) {
 // Handle UPDATE request or Confirm Return
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['confirm_return'])) {
-        validateCsrfToken($_POST['csrf_token'], 'status.php');
+        validateCsrfToken($_POST['csrf_token']);
         $confirm_return_id = $_POST['confirm_return'];
         $returned_date = date('Y-m-d'); // Today's date
     
@@ -460,6 +461,7 @@ if (!$result) {
                         <td><?php echo $row['returned_date'] ?: 'NIL'; ?></td>
                         <td>
                         <form action="status.php" method="POST" style="text-align: left;">
+                        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                             <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
                             <!-- Add label for Admin Number -->
                             <label for="admin_number_<?php echo $row['id']; ?>"><strong>Admin Number:</strong></label>
