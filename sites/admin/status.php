@@ -456,12 +456,14 @@ if (!$result) {
                         <td><?php echo $row['assigned_date'] ?: 'NIL'; ?></td>
                         <td><?php echo $row['returned_date'] ?: 'NIL'; ?></td>
                         <td>
-                            <form action="status.php" method="POST" style="text-align: left;">
-                                <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
-                                <!-- Email Field: Disable when status is "Assigned," "In-Use," or "Returned" -->
-                                <input type="text" id="admin_number_<?php echo $row['id']; ?>" name="admin_number" 
-                                    value="<?php echo isset($row['profile_admin_number']) ? htmlspecialchars($row['profile_admin_number']) : ''; ?>" 
-                                    <?php echo ($row['status_id'] === NULL) ? '' : 'readonly'; ?> required>
+                        <form action="status.php" method="POST" style="text-align: left;">
+                            <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
+                            <!-- Add label for Admin Number -->
+                            <label for="admin_number_<?php echo $row['id']; ?>"><strong>Admin Number:</strong></label>
+                            <input type="text" id="admin_number_<?php echo $row['id']; ?>" name="admin_number" 
+                                value="<?php echo isset($row['profile_admin_number']) ? htmlspecialchars($row['profile_admin_number']) : ''; ?>" 
+                                <?php echo ($row['status_id'] === NULL) ? '' : 'readonly'; ?> required>
+
 
 
                                 <!-- Status Field: Always editable -->

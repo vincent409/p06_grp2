@@ -314,10 +314,14 @@ form select {
 
 .container-flex {
     display: flex;
-    justify-content: space-between; /* Spaces out h1 and form */
-    align-items: center; /* Ensures vertical alignment */
+    justify-content: space-between; /* Ensures left and right content are spaced */
+    align-items: center; /* Aligns items vertically */
     width: 100%;
-    flex-wrap: wrap; /* Prevents overflow */
+    flex-wrap: wrap; /* Ensures no overflow */
+}
+
+.left-content {
+    display: flex;
 }
 
 .container-flex h1 {

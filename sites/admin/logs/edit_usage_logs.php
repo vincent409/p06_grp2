@@ -94,30 +94,29 @@ if (isset($_GET['search'])) {
     <link rel="stylesheet" href="/p06_grp2/admin.css">
 </head>
 <body>
-<header>
-    <div class="logo">
-        <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
-    </div>
-    <div class="dashboard-title">Dashboard</div>
-    <div class="logout-btn">
-        <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
-    </div>
-</header>
+    <header>
+        <div class="logo">
+            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+        </div>
+        <div class="dashboard-title">Dashboard</div>
+        <div class="logout-btn">
+            <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
+        </div>
+    </header>
 
-<nav>
-    <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
-    <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
-    <a href="/p06_grp2/sites/admin/assignment/assignment.php">Assignments</a>
-    <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
-    <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
-    <a href="/p06_grp2/sites/admin/status.php">Status</a>
-</nav>
+    <nav>
+        <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
+        <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
+        <a href="/p06_grp2/sites/admin/assignment/assignment.php">Assignments</a>
+        <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
+        <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
+        <a href="/p06_grp2/sites/admin/status.php">Status</a>
+    </nav>
 
 <div class="container">
     <div class="box">
         <div class="container-flex">
             <h1>Manage Usage Logs</h1>
-
             <?php if (isset($success_message)) { ?>
                 <div style="color:green;"><?php echo $success_message; ?></div>
             <?php } ?>
@@ -134,6 +133,10 @@ if (isset($_GET['search'])) {
                 <button type="submit">Search</button>
             </form>
         </div>
+    
+    <div class="left-content">
+        <a href="add_usage_logs.php" class="enter-logs-button">Add Usage Logs</a>
+    </div>
 
         <table>
             <thead>
@@ -178,7 +181,6 @@ if (isset($_GET['search'])) {
                 <?php endwhile; ?>
             </tbody>
         </table>
-        <a href="add_usage_logs.php" class="enter-logs-button">Add Usage Logs</a>
     </div>
 </div>
 
