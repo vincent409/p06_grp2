@@ -56,6 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!preg_match($phonePattern, $phone_number)) {
         $inputErrors[] = "Phone number must start with 8 or 9 and be exactly 8 digits.";
     }
+    
+    $name = aes_encrypt($name);
+    $phone_number = aes_encrypt($phone_number);
 
     // Check for duplicate admin number
     $check_admin_sql = "SELECT id FROM Profile WHERE admin_number = ?";

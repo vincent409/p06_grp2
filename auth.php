@@ -93,6 +93,9 @@ function authenticate($admin_number, $mypassword) {
                 throw new Exception("Admin number and password do not match.");
             }
         }
+        else {
+            throw new Exception("Admin number and password do not match.");
+        }
         // Close the statement
         $sql->close();
         mysqli_close($connect);

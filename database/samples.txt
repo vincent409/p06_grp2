@@ -7,7 +7,7 @@ VALUES
 INSERT INTO Profile (id, role_id, admin_number, name, email, phone_number, department, has_logged_in)
 VALUES
     (1, 1, '1234567A', 'Admin', '6HdGi/RVNMYpcilg08iKxXZkU0tSaVBpK3RJa1h2VnUzOUJUWHRmc044UnpvRnZlNnNuRDR0K2V1MEU9', '51234567', 'Marketing', 1),
-    (2, 3, '1234567B', 'Bob Brown', 'b7IbOedGiwnoSWABqz5Q05PSjF0OGc5akMrbTliWjFtZ1VubFZrTHRiWUROTkRDNzBISWV3V0sveDA9', '55598765', 'Sales', 0);
+    (2, 3, '1234567B', '5Lt6kJadoArbZ1fVxdycPUVqV0V3aytvUHQvNWdQRmcyS2ZMNlE9PQ==', 'b7IbOedGiwnoSWABqz5Q05PSjF0OGc5akMrbTliWjFtZ1VubFZrTHRiWUROTkRDNzBISWV3V0sveDA9', 'NxzAbRYkPoMdZgUl+9e79zJaOERmV2hvS2piSEN3aUVmME5uZXc9PQ==', 'Sales', 0);
     (3, 2, '1234567C', 'Facility Manager', 'facilitymanager@example.com', '81210473', 'Manager', 1)
 
 INSERT INTO Loan (status_id, profile_id, equipment_id)

@@ -27,7 +27,7 @@ if (!isset($_SESSION['name'])) {
 } else {
     $name = $_SESSION['name'];
 }
-
+$name = aes_decrypt($name);
 if (isset($_GET['search'])) {
     $searchQuery = trim($_GET['search']);
     if ($searchQuery !== "") {

@@ -8,6 +8,7 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
 
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+include 'C:/xampp/htdocs/p06_grp2/functions.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 
@@ -184,13 +185,20 @@ if (!$result) {
                     while ($row = mysqli_fetch_assoc($result)) {
                         // Create the link for assigning the equipment
                         $assign_link = "add_assignment.php?equipment_id=" . $row['equipment_id'];
+                        $email = $row['email'];
+                        if (empty($email)) {
+                            $email = "N/A";
+                        }
+                        else {
+                            $email = aes_decrypt($email);
+                        }
                         echo "<tr>
-                                <td>{$row['equipment_id']}</td>
-                                <td>{$row['equipment_name']}</td>
-                                <td>" . ($row['equipment_status'] ? $row['equipment_status'] : "N/A") . "</td>
-                                <td>" . ($row['email'] ? $row['email'] : "N/A") . "</td>
-                                <td><a href='$assign_link'>Assign</a></td>
-                              </tr>";
+                        <td>{$row['equipment_id']}</td>
+                        <td>{$row['equipment_name']}</td>
+                        <td>" . ($row['equipment_status'] ? $row['equipment_status'] : "N/A") . "</td>
+                        <td>" . $email . "</td>
+                        <td><a href='$assign_link'>Assign</a></td>
+                      </tr>";                
                     }
                 } else {
                     echo "<tr><td colspan='5'>No data available</td></tr>";

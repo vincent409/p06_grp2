@@ -10,6 +10,7 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
 
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+include 'C:/xampp/htdocs/p06_grp2/functions.php';
 manageCookieAndRedirect("/p06_grp2/logout.php");
 
 // Connect to the database
@@ -439,7 +440,7 @@ if (!$result) {
                     <?php while ($row = mysqli_fetch_assoc($result)): ?>
                     <tr>
                         <td><?php echo $row['status_name']; ?></td>
-                        <td><?php echo $row['profile_email']; ?></td>
+                        <td><?php echo aes_decrypt($row['profile_email']); ?></td>
                         <td><?php echo $row['equipment_id']; ?></td>
                         <td><?php echo $row['assigned_date'] ?: 'NIL'; ?></td>
                         <td><?php echo $row['returned_date'] ?: 'NIL'; ?></td>
@@ -449,7 +450,7 @@ if (!$result) {
                                 <!-- Email Field: Disable when status is "Assigned," "In-Use," or "Returned" -->
                                 <label for="email_<?php echo $row['id']; ?>">Email:</label>
                                 <input type="email" id="email_<?php echo $row['id']; ?>" name="email" 
-                                    value="<?php echo $row['profile_email']; ?>" 
+                                    value="<?php echo aes_decrypt($row['profile_email']); ?>" 
                                     <?php echo (in_array($row['status_id'], [1, 2, 3])) ? 'disabled' : ''; ?> required>
                                 <input type="hidden" name="hidden_email" value="<?php echo $row['profile_email']; ?>">
 

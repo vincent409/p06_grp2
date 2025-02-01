@@ -26,10 +26,10 @@ if (isset($_GET['search'])) {
             FROM Profile 
             JOIN Role ON Profile.role_id = Role.id 
             WHERE Role.name = 'Student' 
-                  AND (Profile.name LIKE ? OR Profile.email LIKE ?)
+                  AND (Profile.admin_number LIKE ?)
         ");
         $searchParam = "%" . $searchQuery . "%";
-        $stmt->bind_param("ss", $searchParam, $searchParam);
+        $stmt->bind_param("s", $searchParam);
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -103,7 +103,7 @@ if (isset($_GET['search'])) {
             echo "<thead>
                     <tr>
                         <th>Name</th>
-                        <th>admin_number</th>
+                        <th>Admin Number</th>
                         <th>Email</th>
                         <th>Phone Number</th>
                         <th>Department</th>
@@ -115,12 +115,14 @@ if (isset($_GET['search'])) {
             while ($row = mysqli_fetch_assoc($result)) {
                 // ✅ Decrypt Email Before Displaying
                 $decrypted_email = aes_decrypt($row['email']);
+                $decrypted_name = aes_decrypt($row['name']);
+                $decryptrd_phone_number = aes_decrypt($row['phone_number']);
 
                 echo "<tr>
-                        <td>" . htmlspecialchars($row['name']) . "</td>
+                        <td>" . htmlspecialchars($decrypted_name) . "</td>
                         <td>" . htmlspecialchars($row['admin_number']) . "</td>
                         <td>" . htmlspecialchars($decrypted_email) . "</td> 
-                        <td>" . htmlspecialchars($row['phone_number']) . "</td>
+                        <td>" . htmlspecialchars($decryptrd_phone_number) . "</td>
                         <td>" . htmlspecialchars($row['department']) . "</td>
                         <td>
                             <form action='edit_profile.php' method='POST' style='display:inline;'>

@@ -40,10 +40,10 @@
     
     if ($result->num_rows > 0) {
         $profile = $result->fetch_assoc();
-        $name = $profile['name'];
+        $name = aes_decrypt($profile['name']);
         $admin_number = $profile['admin_number'];
         $email = aes_decrypt($profile['email']); // ✅ Decrypt email for display
-        $phone_number = $profile['phone_number'];
+        $phone_number = aes_decrypt($profile['phone_number']);
         $department = $profile['department'];
     } else {
         die("Profile not found.");
@@ -80,7 +80,9 @@
         if (!preg_match("/^[89][0-9]{7}$/", $phone_number)) {
             $inputErrors[] = "Phone number must start with 8 or 9 and be exactly 8 digits.";
         }
-    
+        
+        $name = aes_encrypt($name);
+        $phone_number = aes_encrypt($phone_number);
         // ✅ Check if Name Already Exists (Exclude current ID)
         $check_name_sql = "SELECT id FROM Profile WHERE name = ? AND id != ?";
         $stmt = $connect->prepare($check_name_sql);

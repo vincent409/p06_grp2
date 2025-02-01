@@ -24,6 +24,8 @@ $stmt->fetch();
 $stmt->close();
 
 $email = aes_decrypt($encrypted_email);
+$name = aes_decrypt($name);
+$phone_number = aes_decrypt($phone_number);
 mysqli_close($connect);
 ?>
 
