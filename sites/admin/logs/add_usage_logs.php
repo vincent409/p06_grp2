@@ -38,26 +38,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (mysqli_num_rows($check_equipment_result) == 0) {
             $inputErrors[] = "Error: The provided equipment ID does not exist.";
         } else {
-            // Check if the equipment_id already exists in the usage_log table
-            $check_duplicate_query = "SELECT * FROM usage_log WHERE equipment_id = '$equipment_id'";
-            $check_duplicate_result = mysqli_query($connect, $check_duplicate_query);
+            // Insert usage log into the database without checking for duplicates
+            $insert_query = "INSERT INTO usage_log (equipment_id, log_details, assigned_date) 
+                            VALUES ('$equipment_id', '$log_details', '$assigned_date')";
 
-            if (mysqli_num_rows($check_duplicate_result) > 0) {
-                $inputErrors[] = "Error: A usage log for this equipment ID already exists.";
+            if (mysqli_query($connect, $insert_query)) {
+                $success_message = "Usage log added successfully!";
             } else {
-                // Insert usage log into the database
-                $insert_query = "INSERT INTO usage_log (equipment_id, log_details, assigned_date) 
-                                 VALUES ('$equipment_id', '$log_details', '$assigned_date')";
-
-                if (mysqli_query($connect, $insert_query)) {
-                    $success_message = "Usage log added successfully!";
-                } else {
-                    $inputErrors[] = "Error: " . mysqli_error($connect);
-                }
+                $inputErrors[] = "Error: " . mysqli_error($connect);
+            }
             }
         }
     }
-}
+
 
 // Get the equipment_id from the URL (if available)
 $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';  // Use an empty string if not set

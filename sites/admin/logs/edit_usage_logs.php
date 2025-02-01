@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
 }
 
 // Fetch all usage logs from the database
-$sql = "SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log";
+$sql = "SELECT * FROM usage_log ORDER BY equipment_id ASC";
 $result = mysqli_query($connect, $sql);
 
 // Check if query executed successfully
@@ -83,13 +83,13 @@ $searchQuery = "";
 if (isset($_GET['search'])) {
     $searchQuery = trim($_GET['search']);
     if ($searchQuery !== "") {
-        $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log WHERE equipment_id = ?");
+        $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log WHERE equipment_id = ? ORDER BY equipment_id ASC");
         $stmt->bind_param("i", $searchQuery);
     } else {
-        $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log");
+        $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log ORDER BY equipment_id ASC");
     }
 } else {
-    $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log");
+    $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log ORDER BY equipment_id ASC");
 }
 $stmt->execute();
 $result = $stmt->get_result();
@@ -312,7 +312,7 @@ $stmt->close();
                 <h1>Manage Usage Logs</h1>
                 <a href="add_usage_logs.php" class="enter-logs-button">Enter Usage Logs</a>
                 <form method="GET" action="" class="search-bar">
-                    <input type="text" name="search" placeholder="Search" value="<?php echo htmlspecialchars($searchQuery); ?>">
+                    <input type="text" name="search" placeholder="Search ID" value="<?php echo htmlspecialchars($searchQuery); ?>">
                     <button type="submit">Search</button>
                 </form>
             </div>
