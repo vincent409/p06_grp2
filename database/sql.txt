@@ -46,7 +46,7 @@ CREATE TABLE Equipment (
 -- Create the Loan table
 CREATE TABLE Loan (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    status_id INT NOT NULL,
+    status_id INT NULL,
     profile_id INT NOT NULL,
     equipment_id INT NOT NULL,
     FOREIGN KEY (profile_id) REFERENCES Profile(id),
