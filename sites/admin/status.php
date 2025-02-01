@@ -451,8 +451,8 @@ if (!$result) {
                     <?php while ($row = mysqli_fetch_assoc($result)): ?>
                     <tr>
                         <td><?php echo $row['status_name']; ?></td>
-                        <<td><?php echo isset($row['profile_admin_number']) ? htmlspecialchars($row['profile_admin_number']) : 'N/A'; ?></td>
-                        <td><?php echo $row['equipment_id']; ?></td>
+                        <td><?php echo isset($row['profile_admin_number']) ? htmlspecialchars($row['profile_admin_number']) : 'N/A'; ?></td>
+                        <td><?php echo $row['equipment_id']; ?></td>    
                         <td><?php echo $row['assigned_date'] ?: 'NIL'; ?></td>
                         <td><?php echo $row['returned_date'] ?: 'NIL'; ?></td>
                         <td>
