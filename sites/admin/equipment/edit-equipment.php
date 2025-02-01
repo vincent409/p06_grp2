@@ -35,7 +35,7 @@ $errorMessage = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete'])) {
-        validateCsrfToken($_POST['csrf_token'],'equipment.php');
+        validateCsrfToken($_POST['csrf_token']);
         try {
             // Check if equipment is currently assigned
             $checkAssignmentStmt = $connect->prepare("SELECT COUNT(*) AS count FROM Loan WHERE equipment_id = ? AND status_id = (SELECT id FROM Status WHERE name = 'Assigned')");
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errorMessage = $e->getMessage();
         }
     } elseif (isset($_POST['update'])) {
-        validateCsrfToken($_POST['csrf_token'],'equipment.php');
+        validateCsrfToken($_POST['csrf_token']);
         $name = trim($_POST['name']);
         $type = trim($_POST['type']);
         $purchase_date = trim($_POST['purchase_date']);

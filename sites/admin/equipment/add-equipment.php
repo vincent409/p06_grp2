@@ -18,7 +18,7 @@ $inputErrors = [];
 
 // Handle form submission
 if (isset($_POST['add-button'])) {
-    validateCsrfToken($_POST['csrf_token'],'equipment.php');
+    validateCsrfToken($_POST['csrf_token']);
     // Retrieve form inputs
     $equipment_name = trim($_POST['equipment_name']);
     $equipment_type = trim($_POST['equipment_type']);
