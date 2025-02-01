@@ -2,9 +2,11 @@
 // Start the session
 session_start();
 
-// Check if the user is an Admin or Facility Manager
-if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
-    die("You do not have permission to add usage logs.");
+// Check user role
+if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
+    // Redirect the user to login page 
+    header("Location: /p06_grp2/sites/index.php");
+    exit(); // Stop further execution
 }
 
 include 'C:/xampp/htdocs/p06_grp2/functions.php';
