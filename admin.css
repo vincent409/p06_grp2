@@ -85,6 +85,17 @@ form input[type="date"] {
     box-sizing: border-box;
 }
 
+.input-field, 
+form input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
 /* Delete button styling */
 button[type="submit"][name="delete"] {
     background-color: #E53D29;

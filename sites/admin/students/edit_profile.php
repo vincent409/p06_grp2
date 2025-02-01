@@ -21,6 +21,9 @@
     $inputErrors = [];
     $successMessage = "";
     $errorMessage = "";
+    $name = aes_encrypt($name);
+    $phone_number = aes_encrypt($phone_number);
+
 
     // Fetch profile ID (Supports both POST and GET)
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
@@ -190,110 +193,10 @@
     <!DOCTYPE html>
     <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Edit Profile</title>
-        <style>
-            body {
-                background-color: #E5D9B6;
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-            }
-
-            header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                background-color: white;
-                color: black;
-                padding: 10px 20px;
-            }
-
-            nav {
-                display: flex;
-                gap: 15px;
-                background-color: #f4f4f4;
-                padding: 10px 20px;
-            }
-
-            nav a {
-                text-decoration: none;
-                color: #333;
-                font-weight: bold;
-            }
-
-            .main-container {
-                background-color: #FFFFFF;
-                width: 60%;
-                margin: 40px auto;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
-
-            .logout-btn button {
-                padding: 8px 12px;
-                background-color: #E53D29;
-                color: white;
-                border: none;
-                cursor: pointer;
-                border-radius: 4px;
-                font-size: 14px;
-            }
-
-            .logout-btn button:hover {
-                background-color: #E03C00;
-            }
-
-            form input[type="text"], form input[type="email"], form button {
-                width: 100%;
-                padding: 10px;
-                margin: 10px 0;
-                border-radius: 5px;
-                border: 1px solid #ccc;
-                font-size: 16px;
-                box-sizing: border-box;
-            }
-
-            form button {
-                background-color: #007bff;
-                color: white;
-                border: none;
-                cursor: pointer;
-                font-size: 16px;
-                border-radius: 5px;
-                margin-top: 10px;
-            }
-
-            form button:hover {
-                background-color: #0056b3;
-            }
-
-            .delete-button {
-                background-color: #E53D29; /* Red background */
-                color: white;
-            }
-
-            .delete-button:hover {
-                background-color: #C0392B; /* Darker red */
-            }
-
-            .success-message {
-                color: green;
-                margin-bottom: 10px;
-            }
-
-            .error-messages {
-                color: red;
-                font-weight: bold;
-                margin-bottom: 10px;
-            }
-
-            .error-messages li {
-                margin-bottom: 5px;
-            }
-        </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Profile</title>
+    <link rel="stylesheet" href="/p06_grp2/admin.css">
     </head>
     <body>
     <header>
