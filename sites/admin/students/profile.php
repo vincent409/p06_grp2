@@ -96,6 +96,9 @@ if (isset($_GET['search'])) {
                 <button type="submit">Search</button>
             </form>
         </div>
+    <div class="left-content">
+        <a href="add_profile.php" class="enter-logs-button">Add New Profile</a>
+    </div>
 
         <?php
         if ($result && mysqli_num_rows($result) > 0) {
@@ -142,7 +145,6 @@ if (isset($_GET['search'])) {
         mysqli_close($connect);
         ?>
 
-        <button onclick="window.location.href='add_profile.php';">Add New Profile</button>
     </div>
 </div>
 </body>
