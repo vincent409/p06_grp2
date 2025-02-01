@@ -91,14 +91,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             // Update the status and usage log if the date check passes
-            $update_query = "UPDATE loan SET status_id = 3 WHERE id = '$confirm_return_id'";
+            $update_query = "UPDATE loan SET status_id = NULL WHERE id = '$confirm_return_id'";
             $update_usage_log_query = "UPDATE usage_log 
                                        SET returned_date = '$returned_date' 
                                        WHERE equipment_id = (SELECT equipment_id FROM loan WHERE id = '$confirm_return_id' LIMIT 1)";
 
             if (mysqli_query($connect, $update_query) && mysqli_query($connect, $update_usage_log_query)) {
                 echo "<script>
-                    alert('Return confirmed and status updated to Returned.');
+                    alert('Return confirmed and status has been updated.');
                     window.location.href = 'status.php';
                 </script>";
                 exit();
