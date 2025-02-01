@@ -20,7 +20,7 @@
         ?>
 
         <form name="form1" method="post" action="../auth.php">
-            <input name="admin_number" type="text" id="admin_number" class="input-field" placeholder="ID" required><br>
+            <input name="admin_number" type="text" id="admin_number" class="input-field" placeholder="Admin Number" required><br>
             <input name="password" type="password" id="password" class="input-field" placeholder="Password" required><br>
             <input type="submit" name="Submit" value="Login" class="btn">
         </form>
