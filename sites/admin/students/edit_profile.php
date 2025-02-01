@@ -151,31 +151,40 @@
         if ($_SESSION['role'] != 'Admin') {
             die("You do not have permission to delete profiles.");
         }
-
-        validateCsrfToken($_POST['csrf_token']); // Validate CSRF token
-
+    
+        // Validate CSRF token
+        validateCsrfToken($_POST['csrf_token'], 'profile.php'); 
+    
         $id = intval($_POST['id']);
-
-        // Temporarily disable foreign key checks
-        $connect->query("SET FOREIGN_KEY_CHECKS=0");
-
-        // Delete profile from database
-        $delete_sql = "DELETE FROM Profile WHERE id = ?";
-        $stmt = $connect->prepare($delete_sql);
-        $stmt->bind_param("i", $id);
-
-        if ($stmt->execute()) {
-            $connect->query("SET FOREIGN_KEY_CHECKS=1");
-            header("Location: profile.php?message=deleted");
-            exit;
+    
+        // Ensure the ID is valid before proceeding
+        if ($id > 0) {
+            // Temporarily disable foreign key checks (useful if Profile has dependencies)
+            $connect->query("SET FOREIGN_KEY_CHECKS=0");
+    
+            // Delete profile from database
+            $delete_sql = "DELETE FROM Profile WHERE id = ?";
+            $stmt = $connect->prepare($delete_sql);
+            $stmt->bind_param("i", $id);
+    
+            if ($stmt->execute()) {
+                $connect->query("SET FOREIGN_KEY_CHECKS=1");
+                echo "<script>
+                        alert('Profile deleted successfully.');
+                        window.location.href = 'profile.php';
+                      </script>";
+                exit;
+            } else {
+                $errorMessage = "Error deleting profile: " . $stmt->error;
+                $connect->query("SET FOREIGN_KEY_CHECKS=1");
+            }
+            $stmt->close();
         } else {
-            $errorMessage = "Error deleting profile: " . $stmt->error;
-            $connect->query("SET FOREIGN_KEY_CHECKS=1");
+            echo "<script>alert('Invalid profile ID.');</script>";
         }
-        $stmt->close();
     }
-
-    ?>
+    
+?>
 
 
     <!DOCTYPE html>
