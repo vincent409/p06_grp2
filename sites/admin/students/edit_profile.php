@@ -20,10 +20,7 @@
     $id = $name = $email = $phone_number = $department = "";
     $inputErrors = [];
     $successMessage = "";
-    $errorMessage = "";
-
-
-
+   
     // Fetch profile ID (Supports both POST and GET)
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
         $id = intval($_POST['id']);
@@ -112,9 +109,6 @@
             $inputErrors[] = "This name is already registered.";
         }
         
-        
-        
-    
         // ✅ Check if Admin Number Already Exists (Exclude current ID)
         $check_admin_sql = "SELECT id FROM Profile WHERE admin_number = ? AND id != ?";
         $checkadminstmt = $connect->prepare($check_admin_sql);
@@ -149,8 +143,6 @@
             $inputErrors[] = "This email address is already registered.";
         }
         
-        
-    
         // ✅ Check if Phone Number Already Exists (Exclude current ID)
         $check_phone_sql = "SELECT id, phone_number FROM Profile WHERE id != ?";
         $checkphonestmt = $connect->prepare($check_phone_sql);
@@ -174,9 +166,6 @@
             $inputErrors[] = "This phone number is already registered.";
         }
 
-        
-        
-    
         // ✅ Update the profile if no validation errors
         if (empty($inputErrors)) {
             $updateSql = "UPDATE Profile SET name = ?, admin_number = ?, email = ?, phone_number = ?, department = ? WHERE id = ?";
@@ -192,7 +181,7 @@
                       </script>";
                 exit;
             } else {
-                $errorMessage = "Error updating profile: " . $stmt->error;
+                $inputErrors = "Error updating profile: " . $stmt->error;
 
             }
             $stmt->close();
@@ -228,7 +217,7 @@
                       </script>";
                 exit;
             } else {
-                $errorMessage = "Error deleting profile: " . $deletestmt->error;
+                $inputErrors = "Error deleting profile: " . $deletestmt->error;
                 $connect->query("SET FOREIGN_KEY_CHECKS=1");
             }
             $deletestmt->close();
@@ -238,8 +227,6 @@
     }
     
 ?>
-
-
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -262,7 +249,7 @@
     <nav>
         <a href="/p06_grp2/sites/admin/admin-dashboard.php">Home</a>
         <a href="/p06_grp2/sites/admin/equipment/equipment.php">Equipment</a>
-        <a href="/p06_grp2/sites/admin/assignment/assignment.php">Assignments</a>
+        <a href="/p06_grp2/sites/admin/assignment/assignment.php">Loans</a>
         <a href="/p06_grp2/sites/admin/students/profile.php">Students</a>
         <a href="/p06_grp2/sites/admin/logs/edit_usage_logs.php">Logs</a>
         <a href="/p06_grp2/sites/admin/status.php">Status</a>
@@ -271,20 +258,16 @@
     <div class="main-container">
         <h1>Edit Profile</h1>
 
-        <?php if (!empty($successMessage)) { ?>
-            <p style="color: green; font-weight: bold;"><?php echo $successMessage; ?></p>
+        <?php if (!empty($success_message)) { ?>
+        <div class="success-message"><?php echo $success_message; ?></div>
         <?php } ?>
-
-        <?php if (!empty($errorMessage)) { ?>
-            <p style="color: red; font-weight: bold;"><?php echo $errorMessage; ?></p>
-        <?php } ?>
-
+        
         <?php if (!empty($inputErrors)) { ?>
-            <ul style="color: red; font-weight: bold;">
-                <?php foreach ($inputErrors as $error) { ?>
-                    <li><?php echo $error; ?></li>
-                <?php } ?>
-            </ul>
+        <ul class="error-message">
+            <?php foreach ($inputErrors as $error) { ?>
+                <li><?php echo $error; ?></li>
+            <?php } ?>
+        </ul>
         <?php } ?>
 
         <form action="edit_profile.php" method="POST">

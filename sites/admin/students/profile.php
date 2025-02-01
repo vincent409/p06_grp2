@@ -142,7 +142,7 @@ if (isset($_GET['search'])) {
         mysqli_close($connect);
         ?>
 
-        <button onclick="window.location.href='add_profile.php';">Create New Profile</button>
+        <button onclick="window.location.href='add_profile.php';">Add New Profile</button>
     </div>
 </div>
 </body>

@@ -23,8 +23,6 @@ $success_message = '';
 
 $csrf_token = generateCsrfToken();
 
-
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate CSRF token
     validateCsrfToken($_POST['csrf_token'], 'profile.php');
@@ -247,12 +245,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php } ?>
 
     <?php if (!empty($inputErrors)) { ?>
-        <ul class="error-messages">
-            <?php foreach ($inputErrors as $error) { ?>
-                <li><?php echo $error; ?></li>
-            <?php } ?>
-        </ul>
+    <ul class="error-message">
+        <?php foreach ($inputErrors as $error) { ?>
+            <li><?php echo $error; ?></li>
+        <?php } ?>
+    </ul>
     <?php } ?>
+
 
         <form method="POST" action="add_profile.php">
         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
