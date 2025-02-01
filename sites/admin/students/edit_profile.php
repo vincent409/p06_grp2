@@ -284,7 +284,7 @@
         <?php if ($_SESSION['role'] == 'Admin') { ?>
         <form action="edit_profile.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this profile?');">
             <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
-            <button type="submit" name="delete" class="delete-button">Delete Profile</button>
+            <button type="submit" name="delete">Delete Profile</button>
         </form>
     <?php } ?>
 
