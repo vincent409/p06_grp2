@@ -23,7 +23,7 @@ SELECT
     Equipment.id AS equipment_id,
     Equipment.name AS equipment_name,
     Status.name AS equipment_status,
-    Profile.email AS email
+    Profile.admin_number AS admin_number
 FROM Equipment
 LEFT JOIN Loan
     ON Loan.equipment_id = Equipment.id
@@ -174,7 +174,7 @@ if (!$result) {
                     <th>Equipment ID</th>
                     <th>Equipment Name</th>
                     <th>Equipment Status</th>
-                    <th>Email</th>
+                    <th>admin_number</th>
                     <th>Assign Equipment</th>
                 </tr>
             </thead>
@@ -185,18 +185,12 @@ if (!$result) {
                     while ($row = mysqli_fetch_assoc($result)) {
                         // Create the link for assigning the equipment
                         $assign_link = "add_assignment.php?equipment_id=" . $row['equipment_id'];
-                        $email = $row['email'];
-                        if (empty($email)) {
-                            $email = "N/A";
-                        }
-                        else {
-                            $email = aes_decrypt($email);
-                        }
+                        $admin_number = !empty($row['admin_number']) ? htmlspecialchars($row['admin_number']) : "N/A";
                         echo "<tr>
                         <td>{$row['equipment_id']}</td>
                         <td>{$row['equipment_name']}</td>
                         <td>" . ($row['equipment_status'] ? $row['equipment_status'] : "N/A") . "</td>
-                        <td>" . $email . "</td>
+                        <td>" . $admin_number . "</td>
                         <td><a href='$assign_link'>Assign</a></td>
                       </tr>";                
                     }

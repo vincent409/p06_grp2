@@ -25,11 +25,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
     // Form data
-    $email = trim($_POST['email']); // Get the email from the form
+    $admin_number = trim($_POST['admin_number']); // Get admin number from the form
     $equipment_id = trim($_POST['equipment_id']); // Hidden field for equipment_id
 
-    // Check if the equipment is already assigned
-    $check_equipment_query = "SELECT * FROM loan WHERE equipment_id = ? AND status_id = 1"; // Assuming 1 represents 'Assigned'
+// Check if the equipment is already assigned (Modify status_id condition)
+    $check_equipment_query = "SELECT * FROM loan WHERE equipment_id = ? AND status_id IS NOT NULL";
     $stmt = $connect->prepare($check_equipment_query);
     $stmt->bind_param("s", $equipment_id);
     $stmt->execute();
@@ -38,47 +38,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($check_equipment_result->num_rows > 0) {
         $error_message = "Error: This equipment ID is already assigned to another user.";
     } else {
-        // Fetch the profile_id from the Profile table using the provided email
-        $profile_query = "SELECT id FROM profile WHERE LOWER(email) = LOWER(?) LIMIT 1"; // Case-insensitive comparison
-        $stmt = $connect->prepare($profile_query);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $profile_result = $stmt->get_result();
 
-        if ($profile_result->num_rows > 0) {
-            // Retrieve the profile_id
-            $profile_row = $profile_result->fetch_assoc();
-            $profile_id = $profile_row['id'];
+    $profile_query = "SELECT id, admin_number FROM profile WHERE admin_number = ? LIMIT 1";
+    $stmt = $connect->prepare($profile_query);
+    $stmt->bind_param("s", $admin_number);
+    $stmt->execute();
+    $profile_result = $stmt->get_result();
 
-            // Check if the profile already has this equipment assigned
-            $check_duplicate_query = "SELECT * FROM loan WHERE profile_id = ? AND equipment_id = ?";
-            $stmt = $connect->prepare($check_duplicate_query);
-            $stmt->bind_param("ss", $profile_id, $equipment_id);
-            $stmt->execute();
-            $check_duplicate_result = $stmt->get_result();
+    if ($profile_result->num_rows > 0) {
+        $profile_row = $profile_result->fetch_assoc();
+        $profile_id = $profile_row['id']; // ✅ Get profile_id
+        $admin_number = $profile_row['admin_number']; // ✅ Fetch Admin Number Correctly
+    } else {
+        $error_message = "Error: No profile found for the provided Admin Number.";
+    }
 
-            if ($check_duplicate_result->num_rows > 0) {
-                $error_message = "Error: This profile already has this equipment assigned.";
-            } else {
-                $status_id = 1; // Default status_id for "Assigned"
 
-                // Insert the assignment into the loan table
-                $insert_query = "INSERT INTO loan (profile_id, equipment_id, status_id) VALUES (?, ?, ?)";
-                $stmt = $connect->prepare($insert_query);
-                $stmt->bind_param("ssi", $profile_id, $equipment_id, $status_id);
+    // Check if the same profile has already been assigned the same equipment
+    $check_duplicate_query = "SELECT * FROM loan WHERE profile_id = ? AND equipment_id = ?";
+    $stmt = $connect->prepare($check_duplicate_query);
+    $stmt->bind_param("ss", $profile_id, $equipment_id);
+    $stmt->execute();
+    $check_duplicate_result = $stmt->get_result();
 
-                if ($stmt->execute()) {
-                    $assignment_created = true; // Assignment created successfully
-                } else {
-                    $error_message = "Error: " . $stmt->error;
-                }
-            }
+    if ($check_duplicate_result->num_rows > 0) {
+        $error_message = "Error: This profile already has this equipment assigned.";
+    } else {
+        $status_id = 1; // Default status_id for "Assigned"
+
+        // Insert into loan table
+        $insert_query = "INSERT INTO loan (profile_id, equipment_id, status_id) VALUES (?, ?, ?)";
+        $stmt = $connect->prepare($insert_query);
+        $stmt->bind_param("ssi", $profile_id, $equipment_id, $status_id);
+
+        if ($stmt->execute()) {
+            $assignment_created = true;
         } else {
-            $error_message = "Error: No profile found for the provided email.";
+            $error_message = "Error: " . $stmt->error;
+            }
         }
     }
 }
-
 // Get the equipment_id from the URL or initialize it
 $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
 ?>
@@ -120,10 +120,6 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
             font-weight: bold;
         }
 
-        nav a:hover {
-            text-decoration: underline;
-        }
-
         .logout-btn button {
             padding: 8px 12px;
             background-color: #E53D29;
@@ -134,26 +130,22 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
             font-size: 14px;
         }
 
-        .logout-btn button:hover {
-            background-color: #E03C00;
-        }
-
         h1 {
-            text-align: center; /* Center-aligns the heading */
+            text-align: center;
             margin: 20px auto;
             font-size: 1.8em;
             color: black;
         }
 
         .container {
-            background-color: white; /* White container */
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-            border-radius: 8px; /* Rounded corners */
-            padding: 20px; /* Space inside container */
-            margin: 20px auto; /* Space outside container */
-            width: 90%; /* Responsive container width */
-            max-width: 600px; /* Max width for large screens */
-            text-align: left; /* Align text within the container */
+            background-color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            text-align: left;
         }
 
         form {
@@ -173,7 +165,7 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
             font-size: 1em;
             border: 1px solid #ddd;
             border-radius: 5px;
-            box-sizing: border-box; /* Ensures padding does not exceed container */
+            box-sizing: border-box;
         }
 
         button {
@@ -184,22 +176,6 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
         }
 
         button:hover {
-            background-color: #0056b3;
-        }
-
-        .back-button, .view-button {
-            background-color: #007BFF;
-            border: none;
-            cursor: pointer;
-            font-size: 1em;
-            padding: 12px 20px;
-            margin-top: 10px;
-            width: 100%; /* Ensure buttons are not stretched */
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        .back-button:hover, .view-button:hover {
             background-color: #0056b3;
         }
     </style>
@@ -233,23 +209,20 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
         <!-- Hidden Equipment ID -->
         <input type="hidden" id="equipment_id" name="equipment_id" value="<?php echo htmlspecialchars($equipment_id); ?>">
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
+        <label for="admin_number">Admin Number:</label>
+        <input type="text" id="admin_number" name="admin_number" required>
 
         <label for="equipment_id">Equipment ID:</label>
         <input type="text" id="equipment_id" name="equipment_id" value="<?php echo $equipment_id; ?>" required>
-
-        <button type="submit">Create Assignment</button>
-
-        <!-- View Assignments Button -->
         <button type="button" class="view-button" onclick="window.location.href='edit_assignment.php';">View Assignments</button>
 
         <!-- Go back to admin.php -->
         <button type="button" class="back-button" onclick="window.location.href='assignment.php';">Back to Equipment</button>
+
+        <button type="submit">Create Assignment</button>
     </form>
 </div>
 
-<!-- JavaScript to handle pop-ups -->
 <?php if ($assignment_created): ?>
 <script>
     alert("Assignment has been created successfully!");
@@ -261,3 +234,4 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
 <?php endif; ?>
 </body>
 </html>
+

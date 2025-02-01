@@ -90,7 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (isset($_POST['update_id'])) {
         $update_id = $_POST['update_id'];
         $new_status = $_POST['status'];
-        $email = isset($_POST['email']) ? $_POST['email'] : $_POST['hidden_email'];
+        $admin_number = isset($_POST['admin_number']) ? $_POST['admin_number'] : $_POST['hidden_admin_number'];
 
 
         // Existing logic for general updates
@@ -107,12 +107,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $current_profile_id = $current_status_row['profile_id'];
 
         // Fetch profile_id from the email
-        $profile_query = "SELECT id FROM profile WHERE LOWER(email) = LOWER('$email') LIMIT 1";
-        $profile_result = mysqli_query($connect, $profile_query);
+        // Fetch profile_id using Admin Number
+        $profile_query = "SELECT id FROM profile WHERE admin_number = ? LIMIT 1";
+        $stmt = $connect->prepare($profile_query);
+        $stmt->bind_param("s", $admin_number);
+        $stmt->execute();
+        $profile_result = $stmt->get_result();
 
-        if (mysqli_num_rows($profile_result) > 0) {
-            $profile_row = mysqli_fetch_assoc($profile_result);
+
+        if ($profile_result->num_rows > 0) {
+            $profile_row = $profile_result->fetch_assoc();
             $profile_id = $profile_row['id'];
+            $admin_number = $profile_row['admin_number']; // Ensure Admin Number is stored correctly
+        
 
             // Handle specific "Returned" status with returned date
             if ($new_status == 3 && !empty($returned_date)) {
@@ -159,13 +166,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </script>";
                 exit();
             }
-        } else {
-            echo "<script>
-                alert('Error: No profile found for the provided email.');
-                window.location.href = 'status.php';
-            </script>";
-            exit();
-        }
+         } else {
+                echo "<script>
+                    alert('Error: No profile found for the provided Admin Number.');
+                    window.location.href = 'status.php';
+                </script>";
+                exit();
+            }
+            
     } else {
         echo "<script>
             alert('Error: Record not found or invalid update ID.');
@@ -178,13 +186,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 // Fetch all assignments from the loan table
+
 $query = "SELECT loan.id, loan.status_id, loan.profile_id, loan.equipment_id, 
-                 IFNULL(status.name, 'NULL') as status_name, profile.email as profile_email,
+                 IFNULL(status.name, 'NULL') as status_name, 
+                 COALESCE(profile.admin_number, 'N/A') as profile_admin_number,
                  (SELECT returned_date FROM usage_log WHERE equipment_id = loan.equipment_id LIMIT 1) as returned_date,
                  (SELECT assigned_date FROM usage_log WHERE equipment_id = loan.equipment_id LIMIT 1) as assigned_date
           FROM loan
           LEFT JOIN status ON loan.status_id = status.id
           LEFT JOIN profile ON loan.profile_id = profile.id";
+
 $result = mysqli_query($connect, $query);
 
 if (!$result) {
@@ -429,7 +440,7 @@ if (!$result) {
                 <thead>
                     <tr>
                         <th>Status</th>
-                        <th>Email</th>
+                        <th>Admin Number</th>
                         <th>Equipment ID</th>
                         <th>Assigned Date</th>
                         <th>Returned Date</th>
@@ -440,7 +451,7 @@ if (!$result) {
                     <?php while ($row = mysqli_fetch_assoc($result)): ?>
                     <tr>
                         <td><?php echo $row['status_name']; ?></td>
-                        <td><?php echo aes_decrypt($row['profile_email']); ?></td>
+                        <<td><?php echo isset($row['profile_admin_number']) ? htmlspecialchars($row['profile_admin_number']) : 'N/A'; ?></td>
                         <td><?php echo $row['equipment_id']; ?></td>
                         <td><?php echo $row['assigned_date'] ?: 'NIL'; ?></td>
                         <td><?php echo $row['returned_date'] ?: 'NIL'; ?></td>
@@ -448,11 +459,10 @@ if (!$result) {
                             <form action="status.php" method="POST" style="text-align: left;">
                                 <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
                                 <!-- Email Field: Disable when status is "Assigned," "In-Use," or "Returned" -->
-                                <label for="email_<?php echo $row['id']; ?>">Email:</label>
-                                <input type="email" id="email_<?php echo $row['id']; ?>" name="email" 
-                                    value="<?php echo aes_decrypt($row['profile_email']); ?>" 
-                                    <?php echo (in_array($row['status_id'], [1, 2, 3])) ? 'disabled' : ''; ?> required>
-                                <input type="hidden" name="hidden_email" value="<?php echo $row['profile_email']; ?>">
+                                <input type="text" id="admin_number_<?php echo $row['id']; ?>" name="admin_number" 
+                                    value="<?php echo isset($row['profile_admin_number']) ? htmlspecialchars($row['profile_admin_number']) : ''; ?>" 
+                                    <?php echo ($row['status_id'] === NULL) ? '' : 'readonly'; ?> required>
+
 
                                 <!-- Status Field: Always editable -->
                                 <label for="status_<?php echo $row['id']; ?>">Status:</label>
