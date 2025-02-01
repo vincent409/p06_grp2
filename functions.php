@@ -10,14 +10,14 @@ function generateCsrfToken() {
 }
 
 // Validate CSRF token with expiry and session ID check
-function validateCsrfToken($csrfToken, $redirectPage) {
+function validateCsrfToken($csrfToken) {
     // Check if token exists, matches session token, and has not expired
     if (!isset($_SESSION['csrf_token']) || $csrfToken !== $_SESSION['csrf_token'] || time() > $_SESSION['csrf_token_expiry']) {
         // Destroy session and alert user
         session_destroy();
         echo "<script>
                 alert('Security alert: CSRF validation failed. Please refresh the page.');
-                window.location.href = '$redirectPage';
+                window.location.href = '/p06_grp2/sites/index.php';
               </script>";
         exit;
     }

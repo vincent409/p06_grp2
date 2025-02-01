@@ -19,7 +19,7 @@ $success_message = '';
 $csrf_token = generateCsrfToken();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    validateCsrfToken($_POST['csrf_token'], 'edit_usage_logs.php');
+    validateCsrfToken($_POST['csrf_token']);
 
     $equipment_id = trim($_POST['equipment_id']);
     $log_details = trim($_POST['log_details']); // Usage or maintenance details
@@ -103,7 +103,7 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
     <?php } ?>
 
     <form method="POST" action="add_usage_logs.php">
-        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
 
         <label for="equipment_id">Equipment ID:</label>
         <input type="text" id="equipment_id" name="equipment_id" value="<?php echo htmlspecialchars($equipment_id); ?>" required>

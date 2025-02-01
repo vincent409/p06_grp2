@@ -20,6 +20,7 @@ $success_message = '';
 
 // Handle DELETE request (only if the user is an Admin)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
+    validateCsrfToken($_POST['csrf_token']);
     $delete_id = $_POST['delete_id'];
     $delete_query = "DELETE FROM usage_log WHERE id = '$delete_id'";
 
@@ -32,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESS
 
 // Handle UPDATE request
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
-    validateCsrfToken($_POST['csrf_token'], 'equipment.php');
+    validateCsrfToken($_POST['csrf_token']);
     $update_id = $_POST['update_id'];
     $new_log_details = trim($_POST['log_details']);
     $new_assigned_date = $_POST['assigned_date'];
@@ -158,7 +159,7 @@ if (isset($_GET['search'])) {
                     <td><?php echo $row['returned_date']; ?></td>
                     <td>
                         <form action="edit_usage_logs.php" method="POST">
-                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                             <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
 
                             <label for="log_details">Log Details:</label>

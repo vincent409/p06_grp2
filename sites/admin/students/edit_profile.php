@@ -14,7 +14,7 @@
     manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
     // Generate CSRF token
-    $csrf_token = generateCsrfToken();
+    generateCsrfToken();
 
     // Initialize variables
     $id = $name = $email = $phone_number = $department = "";
@@ -48,7 +48,7 @@
 
     // Handle profile update
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
-        validateCsrfToken($_POST['csrf_token'],'profile.php'); // ✅ Validate CSRF token
+        validateCsrfToken($_POST['csrf_token']); // ✅ Validate CSRF token
     
         $id = intval($_POST['id']);
         $name = trim($_POST['name']);
@@ -185,12 +185,10 @@
     
     // Handle profile deletion
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
+        validateCsrfToken($_POST['csrf_token']);
         if ($_SESSION['role'] != 'Admin') {
             die("You do not have permission to delete profiles.");
         }
-    
-        // Validate CSRF token
-        validateCsrfToken($_POST['csrf_token'], 'profile.php'); 
     
         $id = intval($_POST['id']);
     
@@ -286,7 +284,6 @@
         <?php if ($_SESSION['role'] == 'Admin') { ?>
         <form action="edit_profile.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this profile?');">
             <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
-            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
             <button type="submit" name="delete" class="delete-button">Delete Profile</button>
         </form>
     <?php } ?>

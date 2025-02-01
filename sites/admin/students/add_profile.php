@@ -21,11 +21,11 @@ use PHPMailer\PHPMailer\Exception;
 $inputErrors = [];
 $success_message = '';
 
-$csrf_token = generateCsrfToken();
+generateCsrfToken();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate CSRF token
-    validateCsrfToken($_POST['csrf_token'], 'profile.php');
+    validateCsrfToken($_POST['csrf_token']);
 
     // Collect form data
     $name = trim($_POST['name']);
