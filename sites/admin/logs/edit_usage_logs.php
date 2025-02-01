@@ -117,6 +117,18 @@ if (isset($_GET['search'])) {
     <div class="box">
         <div class="container-flex">
             <h1>Manage Usage Logs</h1>
+
+            <?php if (isset($success_message)) { ?>
+                <div style="color:green;"><?php echo $success_message; ?></div>
+            <?php } ?>
+
+            <?php if (!empty($inputErrors)) { ?>
+                <ul style="color: red; font-weight: bold;">
+                    <?php foreach ($inputErrors as $error) { ?>
+                        <li><?php echo $error; ?></li>
+                    <?php } ?>
+                </ul>
+            <?php } ?>
             <form method="GET" action="">
                 <input type="text" name="search" placeholder="Search ID" value="<?php echo htmlspecialchars($searchQuery); ?>">
                 <button type="submit">Search</button>
@@ -169,16 +181,6 @@ if (isset($_GET['search'])) {
         <a href="add_usage_logs.php" class="enter-logs-button">Add Usage Logs</a>
     </div>
 </div>
-
-<?php if (!empty($success_message)): ?>
-<script>alert("<?php echo $success_message; ?>");</script>
-<?php endif; ?>
-
-<?php if (!empty($inputErrors)): ?>
-<script>alert("<?php echo implode('\n', $inputErrors); ?>");</script>
-<?php endif; ?>
-</body>
-</html>
 
 <?php
 mysqli_close($connect);

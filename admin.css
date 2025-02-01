@@ -14,6 +14,13 @@ header {
     padding: 10px 20px;
 }
 
+.dashboard-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: bold;
+}
+
 nav {
     display: flex;
     gap: 15px;
@@ -265,6 +272,7 @@ h1,
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    width: 90%;
 }
 
 .box {

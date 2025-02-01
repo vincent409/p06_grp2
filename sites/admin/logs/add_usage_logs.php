@@ -90,6 +90,18 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
 <div class="main-container">
     <h1>Add Equipment Usage Log</h1>
 
+    <?php if (isset($success_message)) { ?>
+                <div style="color:green;"><?php echo $success_message; ?></div>
+            <?php } ?>
+
+            <?php if (!empty($inputErrors)) { ?>
+                <ul style="color: red; font-weight: bold;">
+                    <?php foreach ($inputErrors as $error) { ?>
+                        <li><?php echo $error; ?></li>
+                    <?php } ?>
+                </ul>
+            <?php } ?>
+
     <form method="POST" action="add_usage_logs.php">
         <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
 
@@ -106,17 +118,6 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
         <button type="button" onclick="window.location.href='edit_usage_logs.php';">View Usage Logs</button>
     </form>
 </div>
-<!-- Display success or error messages using JavaScript -->
-<?php if (!empty($success_message)): ?>
-<script>
-    alert("<?php echo $success_message; ?>");
-</script>
-<?php endif; ?>
 
-<?php if (!empty($inputErrors)): ?>
-<script>
-    alert("<?php echo implode('\n', $inputErrors); ?>");
-</script>
-<?php endif; ?>
 </body>
 </html>
