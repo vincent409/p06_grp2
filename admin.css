@@ -18,7 +18,6 @@ header {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    font-weight: bold;
 }
 
 nav {

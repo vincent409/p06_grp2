@@ -96,126 +96,14 @@ mysqli_close($connect);
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #E5D9B6;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            color: black;
-            padding: 10px 20px;
-        }
-        .welcome-text {
-            flex: 1; /* Take the remaining space between logo and logout */
-            text-align: center;
-            font-size: 18px; /* Adjust font size */
-            color: #333;
-            font-weight: bold;
-        }
-        nav {
-            display: flex;
-            gap: 15px;
-            background-color: #f4f4f4;
-            padding: 10px 20px;
-        }
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-        }
+    <link rel="stylesheet" href="/p06_grp2/student.css"> <!-- Corrected Path -->
+    </head>
 
-        .logout-btn button {
-            padding: 8px 12px;
-            background-color: #FF6347;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .logout-btn button:hover {
-            background-color: #FF4500;
-        }
 
-        h1 {
-            margin: 20px 0;
-            text-align: center;
-            color: #333;
-        }
-
-        .inventory-section {
-            width: 100%;
-            max-width: 900px;
-            margin: 20px auto;
-            text-align: center;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 15px;
-            text-align: center;
-            background-color: #f4f4f4;
-        }
-
-        th {
-            background-color: #f4f4f4;
-            font-weight: bold;
-        }
-
-        .actions button {
-            padding: 8px 12px;
-            font-size: 14px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 5px;
-        }
-
-        .actions .details-btn {
-            background-color: #007BFF;
-            color: white;
-        }
-
-        .actions .details-btn:hover {
-            background-color: #0056b3;
-        }
-
-        .actions .return-btn {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .actions .return-btn:hover {
-            background-color: #218838;
-        }
-
-        .details-section {
-            display: none;
-            background-color: #f9f9f9;
-            padding: 20px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
-        
-    </style>
     <script>
         function confirmReturn(equipmentId) {
             if (confirm("Are you sure you want to return this equipment?")) {
@@ -241,10 +129,10 @@ mysqli_close($connect);
 <body>
     <header>
         <div class="logo">
-            <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
+            <img src="/p06_grp2/img/TP-logo.png">
         </div>
         <div class="dashboard-title">
-            Welcome to Your Dashboard, <?php echo htmlspecialchars($name); ?>!
+            Welcome to Your Dashboard
         </div>
         <div class="logout-btn">
             <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>

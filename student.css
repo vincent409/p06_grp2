@@ -1,0 +1,135 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #E5D9B6;
+}
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    color: black;
+    padding: 10px 20px;
+}
+
+.dashboard-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+nav {
+    display: flex;
+    gap: 15px;
+    background-color: #f4f4f4;
+    padding: 10px 20px;
+}
+nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+.logout-btn button {
+    padding: 8px 12px;
+    background-color: #FF6347;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+.logout-btn button:hover {
+    background-color: #FF4500;
+}
+h1 {
+    margin: 20px 0;
+    text-align: center;
+    color: #333;
+}
+.inventory-section {
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    text-align: center;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 15px;
+    text-align: center;
+    background-color: #f4f4f4;
+}
+th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+.actions button {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px;
+}
+.actions .details-btn {
+    background-color: #007BFF;
+    color: white;
+}
+.actions .details-btn:hover {
+    background-color: #0056b3;
+}
+.actions .return-btn {
+    background-color: #28a745;
+    color: white;
+}
+.actions .return-btn:hover {
+    background-color: #218838;
+}
+.details-section {
+    display: none;
+    background-color: #f9f9f9;
+    padding: 20px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.profile-info {
+    border: 1px solid #ddd;
+    padding: 20px;
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 500px;
+    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+.btn-container {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+button {
+    padding: 10px 15px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+}
+button:hover {
+    background-color: #0056b3;
+}
+.logo img {
+    width: 135px;
+    height: 50px;
+}
