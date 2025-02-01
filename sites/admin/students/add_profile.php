@@ -184,28 +184,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $mail->send();
 
                 // ✅ Use JavaScript for alert and redirect
-                echo "<script>
-                        alert('Profile created successfully! Login credentials sent to the student\'s email.');
-                        window.location.href = 'profile.php';
-                      </script>";
-                exit;
+                $success_message = "Profile created successfully! Login credentials have been sent to the student's email.";
 
             } catch (Exception $e) {
-                echo "<script>
-                        alert('Profile created, but email could not be sent. Error: " . addslashes($mail->ErrorInfo) . "');
-                        window.location.href = 'profile.php';
-                      </script>";
-                exit;
+                $inputErrors = "Profile created, but email could not be sent. Error: " . htmlspecialchars($mail->ErrorInfo);
             }
         } else {
-            echo "<script>
-                    alert('An error occurred while creating the profile. Please try again.');
-                  </script>";
+            $inputErrors = "An error occurred while creating the profile. Please try again.";
         }
     }
 }
-
-    
 ?>
 
 

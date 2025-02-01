@@ -19,8 +19,6 @@
     // Initialize variables
     $id = $name = $email = $phone_number = $department = "";
     $inputErrors = [];
-    $successMessage = "";
-   
     // Fetch profile ID (Supports both POST and GET)
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
         $id = intval($_POST['id']);
@@ -175,10 +173,7 @@
             
     
             if ($stmt->execute()) {
-                echo "<script>
-                        alert('Profile updated successfully!');
-                        window.location.href = 'profile.php';
-                      </script>";
+                $success_message = "Profile updated successfully!";
                 exit;
             } else {
                 $inputErrors = "Error updating profile: " . $stmt->error;
@@ -211,10 +206,7 @@
     
             if ($deletestmt->execute()) {
                 $connect->query("SET FOREIGN_KEY_CHECKS=1");
-                echo "<script>
-                        alert('Profile deleted successfully.');
-                        window.location.href = 'profile.php';
-                      </script>";
+                    $success_message = "Profile deleted successfully!";
                 exit;
             } else {
                 $inputErrors = "Error deleting profile: " . $deletestmt->error;
@@ -222,7 +214,7 @@
             }
             $deletestmt->close();
         } else {
-            echo "<script>alert('Invalid profile ID.');</script>";
+            $inputErrors ="Invalid profile ID.";
         }
     }
     

@@ -12,6 +12,8 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
 // Connect to the database
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 
+$csrf_token = generateCsrfToken();
+
 // Handle DELETE request for Admin users
 if (isset($_GET['delete_id']) && $_SESSION['role'] === "Admin") {
     $delete_id = $_GET['delete_id'];
@@ -81,6 +83,8 @@ $result = mysqli_query($connect, $query);
 
 if (mysqli_num_rows($result) > 0):
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">

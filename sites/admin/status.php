@@ -12,6 +12,8 @@ include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/functions.php';
 manageCookieAndRedirect("/p06_grp2/logout.php");
+$csrf_token = generateCsrfToken();
+
 
 // Connect to the database
 $connect = mysqli_connect("localhost", "root", "", "amc");
@@ -65,6 +67,7 @@ if (isset($_GET['delete_id'])) {
 // Handle UPDATE request or Confirm Return
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['confirm_return'])) {
+        validateCsrfToken($_POST['csrf_token'], 'status.php');
         $confirm_return_id = $_POST['confirm_return'];
         $returned_date = date('Y-m-d'); // Today's date
     
