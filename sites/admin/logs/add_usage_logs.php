@@ -90,17 +90,17 @@ $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
 <div class="main-container">
     <h1>Add Equipment Usage Log</h1>
 
-    <?php if (isset($success_message)) { ?>
-                <div style="color:green;"><?php echo $success_message; ?></div>
-            <?php } ?>
+    <?php if (!empty($success_message)) { ?>
+        <div class="success-message"><?php echo $success_message; ?></div>
+    <?php } ?>
 
-            <?php if (!empty($inputErrors)) { ?>
-                <ul style="color: red; font-weight: bold;">
-                    <?php foreach ($inputErrors as $error) { ?>
-                        <li><?php echo $error; ?></li>
-                    <?php } ?>
-                </ul>
-            <?php } ?>
+    <?php if (!empty($inputErrors)) { ?>
+    <ul class="error-message">
+        <?php foreach ($inputErrors as $error) { ?>
+            <li><?php echo $error; ?></li>
+        <?php } ?>
+    </ul>
+    <?php } ?>
 
     <form method="POST" action="add_usage_logs.php">
         <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">

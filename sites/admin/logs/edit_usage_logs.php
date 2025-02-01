@@ -16,6 +16,7 @@ manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 generateCsrfToken();
 $inputErrors = [];
+$success_message = '';
 
 // Handle DELETE request (only if the user is an Admin)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
@@ -117,19 +118,19 @@ if (isset($_GET['search'])) {
     <div class="box">
         <div class="container-flex">
             <h1>Manage Usage Logs</h1>
-            <?php if (isset($success_message)) { ?>
-                <div style="color:green;"><?php echo $success_message; ?></div>
+            <?php if (!empty($success_message)) { ?>
+                <div class="success-message"><?php echo $success_message; ?></div>
             <?php } ?>
 
             <?php if (!empty($inputErrors)) { ?>
-                <ul style="color: red; font-weight: bold;">
-                    <?php foreach ($inputErrors as $error) { ?>
-                        <li><?php echo $error; ?></li>
-                    <?php } ?>
-                </ul>
+            <ul class="error-message">
+                <?php foreach ($inputErrors as $error) { ?>
+                    <li><?php echo $error; ?></li>
+                <?php } ?>
+            </ul>
             <?php } ?>
             <form method="GET" action="">
-                <input type="text" name="search" placeholder="Search ID" value="<?php echo htmlspecialchars($searchQuery); ?>">
+                <input type="text" name="search" placeholder="Search Equipment ID" value="<?php echo htmlspecialchars($searchQuery); ?>">
                 <button type="submit">Search</button>
             </form>
         </div>
