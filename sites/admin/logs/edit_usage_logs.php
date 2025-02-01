@@ -16,6 +16,7 @@ manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 generateCsrfToken();
 $inputErrors = [];
+$success_message = '';
 
 // Handle DELETE request (only if the user is an Admin)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
@@ -129,7 +130,7 @@ if (isset($_GET['search'])) {
                 </ul>
             <?php } ?>
             <form method="GET" action="">
-                <input type="text" name="search" placeholder="Search ID" value="<?php echo htmlspecialchars($searchQuery); ?>">
+                <input type="text" name="search" placeholder="Search Equipment ID" value="<?php echo htmlspecialchars($searchQuery); ?>">
                 <button type="submit">Search</button>
             </form>
         </div>
