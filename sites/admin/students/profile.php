@@ -9,8 +9,10 @@ manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 // Check if the user is an Admin or Facility Manager
 if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager')) {
-    die("You do not have permission to view this page.");
+    header("Location: /p06_grp2/sites/index.php?error=No permission");
+    exit();
 }
+
 
 $searchQuery = "";
 $result = null;

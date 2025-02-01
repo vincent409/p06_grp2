@@ -70,25 +70,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         validateCsrfToken($_POST['csrf_token'], 'status.php');
         $confirm_return_id = $_POST['confirm_return'];
         $returned_date = date('Y-m-d'); // Today's date
-    
-        // ❌ Fix: Change NULL to 3 (Returned)
-        $update_query = "UPDATE loan SET status_id = NULL WHERE id = '$confirm_return_id'";
-        $update_usage_log_query = "UPDATE usage_log 
-                                   SET returned_date = '$returned_date' 
-                                   WHERE equipment_id = (SELECT equipment_id FROM loan WHERE id = '$confirm_return_id' LIMIT 1)";
-    
-        if (mysqli_query($connect, $update_query) && mysqli_query($connect, $update_usage_log_query)) {
-            echo "<script>
-                alert('Return confirmed and status updated to Returned.');
-                window.location.href = 'status.php';
-            </script>";
-            exit();
-        } else {
-            echo "<script>
-                alert('Error confirming return: " . mysqli_error($connect) . "');
-                window.location.href = 'status.php';
-            </script>";
-            exit();
+
+        // Fetch the assigned date from the database
+        $assigned_date_query = "SELECT assigned_date FROM usage_log 
+                                WHERE equipment_id = (SELECT equipment_id FROM loan WHERE id = '$confirm_return_id' LIMIT 1)";
+        $assigned_date_result = mysqli_query($connect, $assigned_date_query);
+        
+        if ($assigned_date_result && mysqli_num_rows($assigned_date_result) > 0) {
+            $assigned_date_row = mysqli_fetch_assoc($assigned_date_result);
+            $assigned_date = $assigned_date_row['assigned_date'];
+
+            // Check if the returned date is earlier than the assigned date
+            if ($returned_date < $assigned_date) {
+                echo "<script>
+                    alert('Error: Returned date cannot be earlier than the assigned date.');
+                    window.location.href = 'status.php';
+                </script>";
+                exit();
+            }
+
+            // Update the status and usage log if the date check passes
+            $update_query = "UPDATE loan SET status_id = 3 WHERE id = '$confirm_return_id'";
+            $update_usage_log_query = "UPDATE usage_log 
+                                       SET returned_date = '$returned_date' 
+                                       WHERE equipment_id = (SELECT equipment_id FROM loan WHERE id = '$confirm_return_id' LIMIT 1)";
+
+            if (mysqli_query($connect, $update_query) && mysqli_query($connect, $update_usage_log_query)) {
+                echo "<script>
+                    alert('Return confirmed and status updated to Returned.');
+                    window.location.href = 'status.php';
+                </script>";
+                exit();
+            } else {
+                echo "<script>
+                    alert('Error confirming return: " . mysqli_error($connect) . "');
+                    window.location.href = 'status.php';
+                </script>";
+                exit();
+            }
         }
     } elseif (isset($_POST['update_id'])) {
         $update_id = $_POST['update_id'];

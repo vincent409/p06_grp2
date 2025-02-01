@@ -2,8 +2,10 @@
 session_start();
 // Check if the user is an Admin or Facility Manager
 if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
-    die("You do not have permission to create profiles.");
+    header("Location: /p06_grp2/sites/index.php?error=No permission");
+    exit();
 }
+
 include 'C:/xampp/htdocs/p06_grp2/functions.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
