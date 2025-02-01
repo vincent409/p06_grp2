@@ -21,8 +21,7 @@
     $inputErrors = [];
     $successMessage = "";
     $errorMessage = "";
-    $name = aes_encrypt($name);
-    $phone_number = aes_encrypt($phone_number);
+
 
 
     // Fetch profile ID (Supports both POST and GET)
@@ -59,7 +58,7 @@
         $id = intval($_POST['id']);
         $name = trim($_POST['name']);
         $admin_number = trim($_POST['admin_number']);
-        $email = aes_encrypt(trim($_POST['email'])); // ✅ Encrypt email before storing
+        $entered_email = (trim($_POST['email'])); // ✅ Encrypt email before storing
         $phone_number = trim($_POST['phone_number']);
         $department = trim($_POST['department']);
     
@@ -74,7 +73,8 @@
         }
     
         // ✅ Validate Email Format
-        $emailValidationResult = validateEmail(aes_decrypt($email)); // Decrypt first to validate
+        $emailValidationResult = validateEmail($entered_email); // ✅ Validate before encrypting
+        // Decrypt first to validate
         if ($emailValidationResult !== true) {
             $inputErrors[] = $emailValidationResult;
         }
@@ -84,57 +84,106 @@
             $inputErrors[] = "Phone number must start with 8 or 9 and be exactly 8 digits.";
         }
         
-        $name = aes_encrypt($name);
-        $phone_number = aes_encrypt($phone_number);
+        $encrypted_name = aes_encrypt($name);
+        $encrypted_phone = aes_encrypt($phone_number);
+        $encrypted_email = aes_encrypt($entered_email); // Encrypt only for database storage
+
+
         // ✅ Check if Name Already Exists (Exclude current ID)
-        $check_name_sql = "SELECT id FROM Profile WHERE name = ? AND id != ?";
-        $stmt = $connect->prepare($check_name_sql);
-        $stmt->bind_param("si", $name, $id);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows > 0) {
+        $check_name_sql = "SELECT id, name FROM Profile WHERE id != ?";
+        $checknamestmt = $connect->prepare($check_name_sql);
+        $checknamestmt->bind_param("i", $id);
+        $checknamestmt->execute();
+        $result = $checknamestmt->get_result();
+        
+        $duplicate_found = false;
+        $entered_name = trim($_POST['name']); // Get the user input (not encrypted yet)
+        
+        while ($row = $result->fetch_assoc()) {
+            $decrypted_name = aes_decrypt($row['name']); // 🔹 Decrypt before comparing
+            if (strcasecmp($decrypted_name, $entered_name) === 0) { // ✅ Compare plain input
+                $duplicate_found = true;
+                break;
+            }
+        }
+        $checknamestmt->close();
+        
+        if ($duplicate_found) {
             $inputErrors[] = "This name is already registered.";
         }
-        $stmt->close();
+        
+        
+        
     
         // ✅ Check if Admin Number Already Exists (Exclude current ID)
         $check_admin_sql = "SELECT id FROM Profile WHERE admin_number = ? AND id != ?";
-        $stmt = $connect->prepare($check_admin_sql);
-        $stmt->bind_param("si", $admin_number, $id);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows > 0) {
+        $checkadminstmt = $connect->prepare($check_admin_sql);
+        $checkadminstmt->bind_param("si", $admin_number, $id);
+        $checkadminstmt->execute();
+        $checkadminstmt->store_result();    
+        if ($checkadminstmt->num_rows > 0) {
             $inputErrors[] = "This Admin Number is already registered.";
         }
         $stmt->close();
     
         // ✅ Check if Email Already Exists (Exclude current ID)
-        $check_email_sql = "SELECT id FROM Profile WHERE email = ? AND id != ?";
-        $stmt = $connect->prepare($check_email_sql);
-        $stmt->bind_param("si", $email, $id);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows > 0) {
+        $check_email_sql = "SELECT id, email FROM Profile WHERE id != ?";
+        $checkemailstmt = $connect->prepare($check_email_sql);
+        $checkemailstmt->bind_param("i", $id);
+        $checkemailstmt->execute();
+        $result = $checkemailstmt->get_result();
+        
+        $duplicate_email = false;
+        $entered_email = trim($_POST['email']); // Get user input before encryption
+        
+        while ($row = $result->fetch_assoc()) {
+            $decrypted_email = aes_decrypt($row['email']); // 🔹 Decrypt before comparing
+            if (strcasecmp($decrypted_email, $entered_email) === 0) { // ✅ Compare plain input
+                $duplicate_email = true;
+                break;
+            }
+        }
+        $checkemailstmt->close();
+        
+        if ($duplicate_email) {
             $inputErrors[] = "This email address is already registered.";
         }
-        $stmt->close();
+        
+        
     
         // ✅ Check if Phone Number Already Exists (Exclude current ID)
-        $check_phone_sql = "SELECT id FROM Profile WHERE phone_number = ? AND id != ?";
-        $stmt = $connect->prepare($check_phone_sql);
-        $stmt->bind_param("si", $phone_number, $id);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows > 0) {
+        $check_phone_sql = "SELECT id, phone_number FROM Profile WHERE id != ?";
+        $checkphonestmt = $connect->prepare($check_phone_sql);
+        $checkphonestmt->bind_param("i", $id);
+        $checkphonestmt->execute();
+        $result = $checkphonestmt->get_result();
+
+        $duplicate_phone = false;
+        $entered_phone = trim($_POST['phone_number']); // Get user input before encryption
+
+        while ($row = $result->fetch_assoc()) {
+            $decrypted_phone = aes_decrypt($row['phone_number']); // 🔹 Decrypt before comparing
+            if (strcasecmp($decrypted_phone, $entered_phone) === 0) { // ✅ Compare plain input
+                $duplicate_phone = true;
+                break;
+            }
+        }
+        $checkphonestmt->close();
+
+        if ($duplicate_phone) {
             $inputErrors[] = "This phone number is already registered.";
         }
-        $stmt->close();
+
+        
+        
     
         // ✅ Update the profile if no validation errors
         if (empty($inputErrors)) {
             $updateSql = "UPDATE Profile SET name = ?, admin_number = ?, email = ?, phone_number = ?, department = ? WHERE id = ?";
             $stmt = $connect->prepare($updateSql);
-            $stmt->bind_param("sssssi", $name, $admin_number, $email, $phone_number, $department, $id);
+            $stmt->bind_param("sssssi", $encrypted_name, $admin_number, $encrypted_email, $encrypted_phone, $department, $id);
+
+            
     
             if ($stmt->execute()) {
                 echo "<script>
@@ -144,6 +193,7 @@
                 exit;
             } else {
                 $errorMessage = "Error updating profile: " . $stmt->error;
+
             }
             $stmt->close();
         }
@@ -167,10 +217,10 @@
     
             // Delete profile from database
             $delete_sql = "DELETE FROM Profile WHERE id = ?";
-            $stmt = $connect->prepare($delete_sql);
-            $stmt->bind_param("i", $id);
+            $deletestmt = $connect->prepare($delete_sql);
+            $deletestmt->bind_param("i", $id);
     
-            if ($stmt->execute()) {
+            if ($deletestmt->execute()) {
                 $connect->query("SET FOREIGN_KEY_CHECKS=1");
                 echo "<script>
                         alert('Profile deleted successfully.');
@@ -178,10 +228,10 @@
                       </script>";
                 exit;
             } else {
-                $errorMessage = "Error deleting profile: " . $stmt->error;
+                $errorMessage = "Error deleting profile: " . $deletestmt->error;
                 $connect->query("SET FOREIGN_KEY_CHECKS=1");
             }
-            $stmt->close();
+            $deletestmt->close();
         } else {
             echo "<script>alert('Invalid profile ID.');</script>";
         }
@@ -195,7 +245,7 @@
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Profile</title>
+    <title>Edit rofile</title>
     <link rel="stylesheet" href="/p06_grp2/admin.css">
     </head>
     <body>

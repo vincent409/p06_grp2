@@ -22,8 +22,6 @@ $inputErrors = [];
 $success_message = '';
 
 $csrf_token = generateCsrfToken();
-$name = aes_encrypt($name);
-$phone_number = aes_encrypt($phone_number);
 
 
 
@@ -34,15 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Collect form data
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
-    $admin_number = trim($_POST['admin_number']); // ✅ New admin number field
+    $admin_number = trim($_POST['admin_number']);
     $phone_number = trim($_POST['phone_number']);
     $department = trim($_POST['department']);
     $role_id = 3; // Assuming '3' corresponds to the Student role
 
-    // ✅ Encrypt the email before storing
+    // 🔹 Encrypt values before inserting into the database
+    $encrypted_name = aes_encrypt($name);
     $encrypted_email = aes_encrypt($email);
+    $encrypted_phone = aes_encrypt($phone_number);
 
-        // Generate a random password
+    // Generate a random password
     $plain_password = bin2hex(random_bytes(4)); // Generates an 8-character password
     $hashed_password = password_hash($plain_password, PASSWORD_BCRYPT); // Hash before storing
 
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Validate name
-    if (!preg_match($alphanumeric_pattern, $name)) {
+    if (!preg_match("/^[a-zA-Z0-9\s]+$/", $name)) {
         $inputErrors[] = "Name must contain only alphanumeric characters and spaces.";
     }
 
@@ -63,59 +63,100 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Validate phone number
-    if (!preg_match($phonePattern, $phone_number)) {
+    if (!preg_match("/^[89][0-9]{7}$/", $phone_number)) {
         $inputErrors[] = "Phone number must start with 8 or 9 and be exactly 8 digits.";
     }
-    //check for duplicate name
-    $check_name_sql = "SELECT id FROM Profile WHERE name = ?";
-    $stmt = $connect->prepare($check_name_sql);
-    $stmt->bind_param("s", $name);
-    $stmt->execute();
-    $stmt->store_result();
-    if ($stmt->num_rows > 0) {
+
+    // 🔹 **Check for duplicate name**
+    $check_name_sql = "SELECT id, name FROM Profile";
+    $checknamestmt = $connect->prepare($check_name_sql);
+    $checknamestmt->execute();
+    $result = $checknamestmt->get_result();
+    
+    $duplicate_found = false;
+    
+    while ($row = $result->fetch_assoc()) {
+        if (aes_decrypt($row['name']) === $name) {
+            $duplicate_found = true;
+            break; // Stop checking further once a match is found
+        }
+    }
+    $checknamestmt->close();
+    
+    if ($duplicate_found) {
         $inputErrors[] = "This name is already registered.";
     }
-    $stmt->close();
+    
 
-    // Check for duplicate admin number
+    // 🔹 **Check for duplicate admin number**
     $check_admin_sql = "SELECT id FROM Profile WHERE admin_number = ?";
-    $stmt = $connect->prepare($check_admin_sql);
-    $stmt->bind_param("s", $admin_number);
-    $stmt->execute();
-    $stmt->store_result();
-    if ($stmt->num_rows > 0) {
+    $checkadminstmt = $connect->prepare($check_admin_sql);
+    $checkadminstmt->bind_param("s", $admin_number);
+    $checkadminstmt->execute();
+    $checkadminstmt->store_result();
+    if ($checkadminstmt->num_rows > 0) {
         $inputErrors[] = "This Admin Number is already registered.";
     }
-    $stmt->close();
+    $checkadminstmt->close();
 
-    // Check for duplicate email (encrypted)
-    $check_email_sql = "SELECT id FROM Profile WHERE email = ?";
-    $stmt = $connect->prepare($check_email_sql);
-    $stmt->bind_param("s", $encrypted_email);
-    $stmt->execute();
-    $stmt->store_result();
-    if ($stmt->num_rows > 0) {
+    // 🔹 **Check for duplicate email**
+// 🔹 Check for duplicate email
+    $check_email_sql = "SELECT id, email FROM Profile";
+    $checkemailstmt = $connect->prepare($check_email_sql);
+    $checkemailstmt->execute();
+    $result = $checkemailstmt->get_result();
+
+    $duplicate_email = false;
+
+    while ($row = $result->fetch_assoc()) {
+        if (aes_decrypt($row['email']) === $email) {
+            $duplicate_email = true;
+            break;
+        }
+    }
+    $checkemailstmt->close();
+
+    if ($duplicate_email) {
         $inputErrors[] = "This email address is already registered.";
     }
-    $stmt->close();
+
+    // 🔹 Check for duplicate phone number
+    $check_phone_sql = "SELECT id, phone_number FROM Profile";
+    $checkphonestmt = $connect->prepare($check_phone_sql);
+    $checkphonestmt->execute();
+    $result = $checkphonestmt->get_result();
+
+    $duplicate_phone = false;
+
+    while ($row = $result->fetch_assoc()) {
+        if (aes_decrypt($row['phone_number']) === $phone_number) {
+            $duplicate_phone = true;
+            break;
+        }
+    }
+    $checkphonestmt->close();
+
+    if ($duplicate_phone) {
+        $inputErrors[] = "This phone number is already registered.";
+    }
 
     // If no errors, insert into the database
     if (empty($inputErrors)) {
         $insert_sql = "INSERT INTO Profile (name, email, admin_number, phone_number, department, role_id) 
                        VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $connect->prepare($insert_sql);
-        $stmt->bind_param("sssssi", $name, $encrypted_email, $admin_number, $phone_number, $department, $role_id);
+        $stmt->bind_param("sssssi", $encrypted_name, $encrypted_email, $admin_number, $encrypted_phone, $department, $role_id);
 
         if ($stmt->execute()) {
             $profile_id = $stmt->insert_id; // Get the last inserted profile ID
-        
+
             // Store user credentials
             $insert_cred_sql = "INSERT INTO User_Credentials (profile_id, password) VALUES (?, ?)";
             $stmt_cred = $connect->prepare($insert_cred_sql);
             $stmt_cred->bind_param("is", $profile_id, $hashed_password);
             $stmt_cred->execute();
             $stmt_cred->close();
-        
+
             // Send email with credentials
             $mail = new PHPMailer(true);
             try {
@@ -126,10 +167,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $mail->Password = 'itub szoc bbtw mqld';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port = 587;
-        
+
                 $mail->setFrom('amctemasek@gmail.com', 'Admin Team');
                 $mail->addAddress($email);
-        
+
                 $mail->isHTML(true);
                 $mail->Subject = "Account Created - Login Credentials";
                 $mail->Body = "
@@ -141,16 +182,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <p><a href='http://localhost/p06_grp2/sites/index.php'>Login Here</a></p>
                     <p>Regards,<br>Admin Team</p>
                 ";
-        
+
                 $mail->send();
-                
+
                 // ✅ Use JavaScript for alert and redirect
                 echo "<script>
                         alert('Profile created successfully! Login credentials sent to the student\'s email.');
                         window.location.href = 'profile.php';
                       </script>";
                 exit;
-        
+
             } catch (Exception $e) {
                 echo "<script>
                         alert('Profile created, but email could not be sent. Error: " . addslashes($mail->ErrorInfo) . "');
@@ -165,6 +206,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
+
+    
 ?>
 
 
@@ -173,9 +216,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add profile</title>
+    <title>Add Profile</title>
     <link rel="stylesheet" href="/p06_grp2/admin.css">
-</head>
+<head>
 <body>
 <header>
     <div class="logo">
