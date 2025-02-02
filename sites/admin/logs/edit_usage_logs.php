@@ -41,7 +41,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESS
 
 // Handle UPDATE request
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
-    
     $update_id = intval($_POST['update_id']);
     $new_log_details = trim($_POST['log_details']);
     $new_assigned_date = $_POST['assigned_date'];
@@ -63,9 +62,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
 
         // Use prepared statement to prevent SQL injection
         if (empty($new_returned_date)) {
+            validateCsrfToken($_POST['csrf_token']);
             $stmt = $connect->prepare("UPDATE usage_log SET log_details = ?, assigned_date = ?, returned_date = NULL WHERE id = ?");
             $stmt->bind_param("ssi", $encrypted_log_details, $new_assigned_date, $update_id);
         } else {
+            validateCsrfToken($_POST['csrf_token']);
             $stmt = $connect->prepare("UPDATE usage_log SET log_details = ?, assigned_date = ?, returned_date = ? WHERE id = ?");
             $stmt->bind_param("sssi", $encrypted_log_details, $new_assigned_date, $new_returned_date, $update_id);
         }
