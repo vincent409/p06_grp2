@@ -41,8 +41,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESS
 
 // Handle UPDATE request
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
-    validateCsrfToken($_POST['csrf_token']);
-    $update_id = $_POST['update_id'];
+    
+    $update_id = intval($_POST['update_id']);
     $new_log_details = trim($_POST['log_details']);
     $new_assigned_date = $_POST['assigned_date'];
     $new_returned_date = $_POST['returned_date'];
@@ -57,20 +57,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
 
     // Only proceed if no validation errors
     if (empty($inputErrors)) {
+        validateCsrfToken($_POST['csrf_token']);
         // Encrypt the log details before updating
         $encrypted_log_details = aes_encrypt($new_log_details);
-        $update_query = empty($new_returned_date) 
-            ? "UPDATE usage_log SET log_details = '$encrypted_log_details', assigned_date = '$new_assigned_date', returned_date = NULL WHERE id = '$update_id'"
-            : "UPDATE usage_log SET log_details = '$encrypted_log_details', assigned_date = '$new_assigned_date', returned_date = '$new_returned_date' WHERE id = '$update_id'";
+
+        // Use prepared statement to prevent SQL injection
+        if (empty($new_returned_date)) {
+            $stmt = $connect->prepare("UPDATE usage_log SET log_details = ?, assigned_date = ?, returned_date = NULL WHERE id = ?");
+            $stmt->bind_param("ssi", $encrypted_log_details, $new_assigned_date, $update_id);
+        } else {
+            $stmt = $connect->prepare("UPDATE usage_log SET log_details = ?, assigned_date = ?, returned_date = ? WHERE id = ?");
+            $stmt->bind_param("sssi", $encrypted_log_details, $new_assigned_date, $new_returned_date, $update_id);
+        }
 
         // Execute the query
-        if (mysqli_query($connect, $update_query)) {
+        if ($stmt->execute()) {
             $success_message = "Usage log updated successfully!";
         } else {
-            $inputErrors[] = "Error updating usage log: " . mysqli_error($connect);
+            $inputErrors[] = "Error updating usage log: " . $stmt->error;
         }
+
+        $stmt->close();
     }
 }
+
 
 // Fetch all usage logs
 $sql = "SELECT * FROM usage_log ORDER BY equipment_id ASC";

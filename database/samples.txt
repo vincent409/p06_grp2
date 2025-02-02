@@ -22,6 +22,6 @@ VALUES
 
 INSERT INTO `usage_log` (`equipment_id`, `log_details`, `assigned_date`, `returned_date`)
 VALUES 
-    (1, 'Cool', '2025-10-10', NULL),
-    (2, 'Hard', '2025-11-11', NULL),
-    (3, 'Wrench Wrench', '2025-12-12', NULL);
+    (1, 'OShZRoxsdXEt6pTkygj+qE9BdFpIVjlxcFpXSEpwOUFUV0VDT3EvbjQ0cUlRMklpRWxpWnJrWjQ5c3c9', '2025-10-10', NULL),
+    (2, 'FnJbiQ0V3MH7/eQRwtB4S2tsSmNjcjlJYnJUMFdBZEdxU0lMeFE9PQ==', '2025-11-11', NULL),
+    (3, 'kFGvh2pnazgH7Nh71ds2EDFSZmNHQzZvVkFLUXIxeXZNcEpCYWc9PQ==', '2025-12-12', NULL);
