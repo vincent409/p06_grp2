@@ -73,4 +73,49 @@ function aes_decrypt($encrypted_data) {
     return $decrypted_data;
 }
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+function sendAccountCreationEmail($email, $admin_number, $plain_password) {
+    require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\PHPMailer.php';
+    require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\Exception.php';
+    require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\SMTP.php';
+
+    $mail = new PHPMailer(true);
+
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'amctemasek@gmail.com';
+        $mail->Password = 'itub szoc bbtw mqld';  // ⚠️ NEVER expose credentials directly in code (Use ENV variables)
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+
+        $mail->setFrom('amctemasek@gmail.com', 'Admin Team');
+        $mail->addAddress($email);
+
+        $mail->isHTML(true);
+        $mail->Subject = "Account Created - Login Credentials";
+        $mail->Body = "
+            <h3>Welcome to the System</h3>
+            <p>Your student account has been created successfully. Here are your login details:</p>
+            <p><strong>Admin Number:</strong> $admin_number</p>
+            <p><strong>Password:</strong> $plain_password</p>
+            <p>Please login and change your password upon first login.</p>
+            <p><a href='http://localhost/p06_grp2/sites/index.php'>Login Here</a></p>
+            <p>Regards,<br>Admin Team</p>
+        ";
+
+        $mail->send();
+        return true;  // Email sent successfully
+    } catch (Exception $e) {
+        return "Profile created, but email could not be sent. Error: " . htmlspecialchars($mail->ErrorInfo);
+    }
+}
+
+
+
+
+
 ?>
