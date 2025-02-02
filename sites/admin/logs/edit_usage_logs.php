@@ -101,12 +101,12 @@ if (!$result) {
 $searchQuery = "";
 if (isset($_GET['search'])) { // Check if the 'search' parameter is set in the GET request
     $searchQuery = trim($_GET['search']); // Retrieve and trim whitespace
-    $stmt = empty($searchQuery) 
-        ? $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log ORDER BY equipment_id ASC")
-        : $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log WHERE equipment_id = ? ORDER BY equipment_id ASC");
-    
-    if (!empty($searchQuery)) { // If not empty, bind parameter to prevent SQL
+    // Fix: Ensure '0' is treated as a valid input by checking explicitly for an empty string
+    if ($searchQuery !== "") {
+        $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log WHERE equipment_id = ? ORDER BY equipment_id ASC");
         $stmt->bind_param("i", $searchQuery);
+    } else {
+        $stmt = $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log ORDER BY equipment_id ASC");
     }
 
     $stmt->execute(); // Execute the SQL query
