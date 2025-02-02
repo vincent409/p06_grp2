@@ -28,11 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESS
         $stmt = $connect->prepare("DELETE FROM usage_log WHERE id = ?");
         $stmt->bind_param("i", $delete_id);
 
-        if ($stmt->execute()) {
-            $_SESSION['success_message'] = "Usage log deleted successfully.";
-        } else {
-            $_SESSION['inputErrors'] = "Error deleting usage log: " . $stmt->error;
-        }
+        $stmt->execute(); 
         $stmt->close();
 
         // 🔹 Redirect after deletion to prevent resubmission issues
@@ -42,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESS
         $_SESSION['inputErrors'] = "Invalid usage log ID.";
     }
 }
+
 
 // Handle UPDATE request
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
