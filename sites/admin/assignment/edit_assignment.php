@@ -27,13 +27,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $delete_id = intval($_POST['delete_id']);
 
     if ($delete_id > 0) {
+        // Fetch the equipment_id linked to this loan record before deleting the assignment
+        $fetch_equipment_query = "SELECT equipment_id FROM loan WHERE id = ?";
+        $stmt = $connect->prepare($fetch_equipment_query);
+        $stmt->bind_param("i", $delete_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $equipment_id = null;
+
+        if ($row = $result->fetch_assoc()) {
+            $equipment_id = $row['equipment_id'];
+        }
+        $stmt->close();
+
+        // If equipment_id exists, delete the corresponding usage log first
+        if ($equipment_id !== null) {
+            $delete_log_query = "DELETE FROM usage_log WHERE equipment_id = ?";
+            $stmt_log = $connect->prepare($delete_log_query);
+            $stmt_log->bind_param("i", $equipment_id);
+            $stmt_log->execute();
+            $stmt_log->close();
+        }
+
+        // Delete the assignment from loan table
         $delete_query = "DELETE FROM loan WHERE id = ?";
         $stmt = $connect->prepare($delete_query);
         $stmt->bind_param("i", $delete_id);
 
         if ($stmt->execute()) {
             echo "<script>
-                alert('Assignment deleted successfully.');
+                alert('Assignment and related usage log deleted successfully.');
                 window.location.href = 'edit_assignment.php';
             </script>";
             exit();
@@ -59,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_id'])) {
 
     $update_id = intval($_POST['update_id']);
     $new_admin_number = trim($_POST['admin_number']);
-    $new_equipment_id = trim($_POST['equipment_id']);
+    $new_equipment_id = intval($_POST['equipment_id']); // Convert to integer for safety
 
     // Validate admin number format
     if (!preg_match("/^[0-9]{7}[a-zA-Z]$/", $new_admin_number)) {
@@ -114,28 +137,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_id'])) {
     }
     $stmt->close();
 
-    // Check if the equipment is already assigned to another user
-    $check_assignment_query = "SELECT * FROM loan WHERE equipment_id = ? AND id != ?";
-    $stmt = $connect->prepare($check_assignment_query);
-    $stmt->bind_param("ii", $new_equipment_id, $update_id);
+    // Fetch the current equipment_id before updating
+    $fetch_old_equipment_query = "SELECT equipment_id FROM loan WHERE id = ?";
+    $stmt = $connect->prepare($fetch_old_equipment_query);
+    $stmt->bind_param("i", $update_id);
     $stmt->execute();
     $result = $stmt->get_result();
+    $old_equipment_id = null;
 
-    if ($result->num_rows > 0) {
-        echo "<script>
-            alert('Error: This equipment ID is already assigned to another user.');
-            window.location.href = 'edit_assignment.php';
-        </script>";
-        exit();
+    if ($row = $result->fetch_assoc()) {
+        $old_equipment_id = $row['equipment_id'];
     }
     $stmt->close();
 
-    // Update the assignment
+    // Proceed with updating the loan table
     $update_query = "UPDATE loan SET profile_id = ?, equipment_id = ? WHERE id = ?";
     $stmt = $connect->prepare($update_query);
     $stmt->bind_param("iii", $profile_id, $new_equipment_id, $update_id);
 
     if ($stmt->execute()) {
+        // ✅ Delete the old usage log if equipment_id has changed
+        if ($old_equipment_id !== null && $old_equipment_id !== $new_equipment_id) {
+            $delete_log_query = "DELETE FROM usage_log WHERE equipment_id = ?";
+            $stmt_log = $connect->prepare($delete_log_query);
+            $stmt_log->bind_param("i", $old_equipment_id);
+            $stmt_log->execute();
+            $stmt_log->close();
+
+            // ✅ Insert a new usage log entry for the updated equipment_id
+            $insert_log_query = "INSERT INTO usage_log (equipment_id, assigned_date, log_details) VALUES (?, NOW(), 'Updated assignment')";
+            $stmt_log = $connect->prepare($insert_log_query);
+            $stmt_log->bind_param("i", $new_equipment_id);
+            $stmt_log->execute();
+            $stmt_log->close();
+        }
+
         echo "<script>
             alert('Assignment updated successfully.');
             window.location.href = 'edit_assignment.php';
@@ -214,7 +250,7 @@ $assignments_exist = mysqli_num_rows($result) > 0;
 
             <!-- Back Button Below H1 -->
             <div class="centered-button">
-                <a href="add_assignment.php" class="back-button">Back</a>
+                <a href="assignment.php" class="back-button">Back</a>
             </div>
         </div>
 
