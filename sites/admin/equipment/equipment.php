@@ -1,33 +1,40 @@
 <?php
 session_start();
-
+#checking for the user's role and sending them to the home page if they are not an admin or facility manager
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
     header("Location: /p06_grp2/sites/index.php");
     exit();
 }
 
+#including file that contain functions that are used on this webpage
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
+#setting varibles
 $searchQuery = "";
 $result = null;
 $inputErrors = [];
 
+#checks url for the deleted query and stores an message accordingly
 if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
     $message = "Equipment deleted successfully!";
 }
+#checks for the search query
 if (isset($_GET['search'])) {
+    #removes whitespaces from the start and end of the search
     $searchQuery = trim($_GET['search']);
+    #checks that the search is not blank
     if ($searchQuery !== "") {
+        #check if search is alphanumeric and displays and error but displays all equipment
         if (!preg_match($alphanumeric_pattern, $searchQuery)) {
             $inputErrors[] = "Search input must contain only alphanumeric characters and spaces.";
             $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number FROM Equipment");
             $stmt->execute();
             $result = $stmt->get_result();
             $stmt->close();
-        } else {
+        } else { 
             $stmt = $connect->prepare("SELECT id, name, type, purchase_date, model_number 
                                        FROM Equipment 
                                        WHERE name LIKE ? OR type LIKE ?");
@@ -100,7 +107,7 @@ if (isset($_GET['search'])) {
                 <?php echo $message;  ?>
             </div>
         <?php } ?>
-
+        <button onclick="window.location.href='add-equipment.php';">Add Equipment</button>
         <?php if ($result && mysqli_num_rows($result) > 0) { ?>
             <table>
                 <thead>
@@ -132,7 +139,6 @@ if (isset($_GET['search'])) {
         <?php } else { ?>
             <p>No equipment found in the database.</p>
         <?php } ?>
-        <button onclick="window.location.href='add-equipment.php';">Add equipment</button>
     </div>
 </div>
 </body>
