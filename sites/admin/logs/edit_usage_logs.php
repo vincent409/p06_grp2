@@ -127,7 +127,7 @@ if (isset($_GET['search'])) {
         <a href="/p06_grp2/sites/admin/status.php">Status</a>
     </nav>
 
-<div class="container">
+    <div class="container">
     <div class="box">
         <div class="container-flex">
             <h1>Manage Usage Logs</h1>
@@ -142,16 +142,18 @@ if (isset($_GET['search'])) {
                 <?php } ?>
             </ul>
             <?php } ?>
+
             <form method="GET" action="">
                 <input type="text" name="search" placeholder="Search Equipment ID" value="<?php echo htmlspecialchars($searchQuery); ?>">
                 <button type="submit">Search</button>
             </form>
         </div>
     
-    <div class="left-content">
-        <a href="add_usage_logs.php" class="enter-logs-button">Add Usage Logs</a>
-    </div>
+        <div class="left-content">
+            <a href="add_usage_logs.php" class="enter-logs-button">Add Usage Logs</a>
+        </div>
 
+        <?php if (mysqli_num_rows($result) > 0) { ?>  <!-- ✅ Check if records exist -->
         <table>
             <thead>
                 <tr>
@@ -196,8 +198,12 @@ if (isset($_GET['search'])) {
                 <?php endwhile; ?>
             </tbody>
         </table>
+        <?php } else { ?> 
+            <p>No usage logs found.</p>
+        <?php } ?>
     </div>
 </div>
+
 
 <?php
 mysqli_close($connect);
