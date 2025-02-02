@@ -1,255 +1,198 @@
 <?php
 session_start();
+// Check if the user is an Admin or Facility Manager
+if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
+    header("Location: /p06_grp2/sites/index.php?error=No permission");
+    exit();
+}
 
-// Include database connection
+include 'C:/xampp/htdocs/p06_grp2/functions.php';
+include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
-include 'C:/xampp/htdocs/p06_grp2/validation.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
-$error_message = ''; // Initialize error message variable
-$success_message = ''; // Initialize success message variable
-
-// Remove assignments where status is NULL or blank
-$cleanup_query = "DELETE FROM loan WHERE status_id IS NULL OR TRIM(status_id) = ''";
-mysqli_query($connect, $cleanup_query);
+$inputErrors = [];
 
 // Handle DELETE request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
-    $delete_id = intval($_POST['delete_id']); // Ensure it's an integer
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        echo "<script>
+            alert('CSRF validation failed. Redirecting to login page.');
+            window.location.href='/p06_grp2/sites/index.php';
+        </script>";
+        exit();
+    }
+
+    $delete_id = intval($_POST['delete_id']);
 
     if ($delete_id > 0) {
         $delete_query = "DELETE FROM loan WHERE id = ?";
         $stmt = $connect->prepare($delete_query);
+        $stmt->bind_param("i", $delete_id);
 
-        if ($stmt) {
-            $stmt->bind_param("i", $delete_id);
-            if ($stmt->execute()) {
-                echo "<script>
-                    alert('Assignment deleted successfully.');
-                    window.location.href = 'edit_assignment.php';
-                </script>";
-                exit();
-            } else {
-                echo "<script>
-                    alert('Error: Unable to delete assignment.');
-                    window.location.href = 'edit_assignment.php';
-                </script>";
-                exit();
-            }
+        if ($stmt->execute()) {
+            echo "<script>
+                alert('Assignment deleted successfully.');
+                window.location.href = 'edit_assignment.php';
+            </script>";
+            exit();
         } else {
             echo "<script>
-                alert('Error: Failed to prepare the SQL statement.');
+                alert('Error: Unable to delete assignment.');
                 window.location.href = 'edit_assignment.php';
             </script>";
             exit();
         }
+    }
+}
+
+// Handle UPDATE request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_id'])) {
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        echo "<script>
+            alert('CSRF validation failed. Redirecting to login page.');
+            window.location.href='/p06_grp2/sites/index.php';
+        </script>";
+        exit();
+    }
+
+    $update_id = intval($_POST['update_id']);
+    $new_admin_number = trim($_POST['admin_number']);
+    $new_equipment_id = trim($_POST['equipment_id']);
+
+    // Validate admin number format
+    if (!preg_match("/^[0-9]{7}[a-zA-Z]$/", $new_admin_number)) {
+        echo "<script>
+            alert('Error: Admin number must be 7 digits followed by 1 letter (e.g., 1234567A).');
+            window.location.href = 'edit_assignment.php';
+        </script>";
+        exit();
+    }
+
+    // Validate equipment ID format
+    if (!preg_match("/^[0-9]+$/", $new_equipment_id)) {
+        echo "<script>
+            alert('Error: Equipment ID must contain only numbers.');
+            window.location.href = 'edit_assignment.php';
+        </script>";
+        exit();
+    }
+
+    // Check if admin number exists
+    $check_admin_query = "SELECT id FROM profile WHERE admin_number = ?";
+    $stmt = $connect->prepare($check_admin_query);
+    $stmt->bind_param("s", $new_admin_number);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows == 0) {
+        echo "<script>
+            alert('Error: The entered admin number does not exist.');
+            window.location.href = 'edit_assignment.php';
+        </script>";
+        exit();
+    } else {
+        $profile_row = $result->fetch_assoc();
+        $profile_id = $profile_row['id'];
+    }
+    $stmt->close();
+
+    // Check if equipment ID exists
+    $check_equipment_query = "SELECT id FROM equipment WHERE id = ?";
+    $stmt = $connect->prepare($check_equipment_query);
+    $stmt->bind_param("i", $new_equipment_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows == 0) {
+        echo "<script>
+            alert('Error: The entered equipment ID does not exist.');
+            window.location.href = 'edit_assignment.php';
+        </script>";
+        exit();
+    }
+    $stmt->close();
+
+    // Check if the equipment is already assigned to another user
+    $check_assignment_query = "SELECT * FROM loan WHERE equipment_id = ? AND id != ?";
+    $stmt = $connect->prepare($check_assignment_query);
+    $stmt->bind_param("ii", $new_equipment_id, $update_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        echo "<script>
+            alert('Error: This equipment ID is already assigned to another user.');
+            window.location.href = 'edit_assignment.php';
+        </script>";
+        exit();
+    }
+    $stmt->close();
+
+    // Update the assignment
+    $update_query = "UPDATE loan SET profile_id = ?, equipment_id = ? WHERE id = ?";
+    $stmt = $connect->prepare($update_query);
+    $stmt->bind_param("iii", $profile_id, $new_equipment_id, $update_id);
+
+    if ($stmt->execute()) {
+        echo "<script>
+            alert('Assignment updated successfully.');
+            window.location.href = 'edit_assignment.php';
+        </script>";
+        exit();
     } else {
         echo "<script>
-            alert('Invalid delete request.');
+            alert('Error: Unable to update assignment.');
             window.location.href = 'edit_assignment.php';
         </script>";
         exit();
     }
 }
 
-// Handle UPDATE request
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_id'])) {
+// Get search query
+$searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-    $update_id = intval($_POST['update_id']); // The update_id comes from the hidden input
-    $new_email = trim($_POST['email']);  // Get the email from the form
-    $new_equipment_id = trim($_POST['equipment_id']); // Get the equipment ID from the form
-
-    // Check if the email exists in the Profile table
-    $check_email_query = "SELECT * FROM profile WHERE LOWER(email) = LOWER(?)";
-    $stmt = $connect->prepare($check_email_query);
-    $stmt->bind_param("s", $new_email);
-    $stmt->execute();
-    $check_email_result = $stmt->get_result();
-
-    if ($check_email_result->num_rows == 0) {
-        $error_message = "Error: The entered email does not exist.";
-    } else {
-        // Check if the equipment_id exists in the Equipment table
-        $check_equipment_query = "SELECT * FROM equipment WHERE id = ?";
-        $stmt = $connect->prepare($check_equipment_query);
-        $stmt->bind_param("i", $new_equipment_id);
-        $stmt->execute();
-        $check_equipment_result = $stmt->get_result();
-
-        if ($check_equipment_result->num_rows == 0) {
-            $error_message = "Error: The entered equipment ID does not exist.";
-        } else {
-            // Check if the equipment_id is already assigned to another user
-            $check_assignment_query = "SELECT * FROM loan WHERE equipment_id = ? AND id != ?";
-            $stmt = $connect->prepare($check_assignment_query);
-            $stmt->bind_param("ii", $new_equipment_id, $update_id);
-            $stmt->execute();
-            $check_assignment_result = $stmt->get_result();
-
-            if ($check_assignment_result->num_rows > 0) {
-                $error_message = "Error: This equipment ID is already assigned to another user.";
-            } else {
-                $profile_row = $check_email_result->fetch_assoc();
-                $profile_id = $profile_row['id'];
-
-                // Update the loan table (profile_id and equipment_id)
-                $update_query = "UPDATE loan SET profile_id = ?, equipment_id = ? WHERE id = ?";
-                $stmt = $connect->prepare($update_query);
-                $stmt->bind_param("iii", $profile_id, $new_equipment_id, $update_id);
-
-                if ($stmt->execute()) {
-                    $success_message = "Assignment updated successfully.";
-                } else {
-                    $error_message = "Error: Unable to update assignment.";
-                }
-            }
-        }
-    }
-}
-
-// Fetch all assignments from the 'loan' table and get the assigned_date from 'usage_log' and status name
-$query = "SELECT loan.id, loan.status_id, loan.profile_id, loan.equipment_id, usage_log.assigned_date, status.name as status_name, profile.email as profile_email
+// Start base query
+$query = "SELECT loan.id, loan.status_id, loan.profile_id, loan.equipment_id, 
+                 usage_log.assigned_date, status.name AS status_name, profile.admin_number
           FROM loan
           LEFT JOIN usage_log ON loan.equipment_id = usage_log.equipment_id
           LEFT JOIN status ON loan.status_id = status.id
-          LEFT JOIN profile ON loan.profile_id = profile.id
-          ORDER BY loan.profile_id ASC";
-$result = mysqli_query($connect, $query);
+          LEFT JOIN profile ON loan.profile_id = profile.id";
 
-// Check if there are any records
+// If searching, filter by `equipment_id`
+if (!empty($searchQuery)) {
+    $query .= " WHERE loan.equipment_id = ?";
+}
+
+// Prepare and execute query
+$stmt = $connect->prepare($query);
+
+if (!empty($searchQuery)) {
+    $stmt->bind_param("i", $searchQuery);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
 $assignments_exist = mysqli_num_rows($result) > 0;
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Assignments</title>
-    <style>
-        body {
-            background-color: #E5D9B6;
-            font-family: Arial, sans-serif;
-            color: black;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            color: black;
-            padding: 10px 20px;
-        }
-
-        .logout-btn button {
-            background-color: #E53D29; /* Red button */
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .logout-btn button:hover {
-            background-color: #CC3221; /* Darker red */
-        }
-
-        nav {
-            display: flex;
-            gap: 15px;
-            background-color: #f4f4f4;
-            padding: 10px 20px;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        h1 {
-            text-align: center; /* Centralize the heading */
-            margin: 20px 0; /* Add spacing above and below */
-            font-size: 2em;
-            color: black;
-        }
-
-        .container {
-            background-color: white;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px auto;
-            width: 90%;
-            max-width: 1200px;
-            text-align: center; /* Center content inside the container */
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background-color: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-            font-size: 1em;
-            background-color: #F9F9F9;
-        }
-
-        th {
-            background-color: #F1F1F1;
-        }
-
-        td input, td button {
-            width: 90%;
-            max-width: 250px;
-            padding: 8px;
-            font-size: 0.9em;
-            background-color: #ffffff;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        td input:focus {
-            border-color: #007BFF;
-            outline: none;
-        }
-
-        .back-button {
-            background-color: #007BFF;
-            color: white;
-            padding: 12px 20px;
-            margin-top: 20px;
-            font-size: 1.2em;
-            text-decoration: none;
-            display: inline-block;
-            border-radius: 4px;
-        }
-
-        .back-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <link rel="stylesheet" href="/p06_grp2/assign.css">
 </head>
 <body>
 <header>
     <div class="logo">
         <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
     </div>
+    <div class="dashboard-title">Dashboard</div>
     <div class="logout-btn">
         <button onclick="window.location.href='/p06_grp2/logout.php';">Logout</button>
     </div>
@@ -265,16 +208,37 @@ $assignments_exist = mysqli_num_rows($result) > 0;
 </nav>
 
 <div class="container">
-    <h1>Manage Inventory Assignments</h1>
+    <div class="header-container">
+        <div>
+            <h1>Edit Assignments</h1>
+
+            <!-- Back Button Below H1 -->
+            <div class="centered-button">
+                <a href="add_assignment.php" class="back-button">Back</a>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <form method="GET" action="">
+                <input type="text" name="search" placeholder="Search by Equipment ID..." 
+                    value="<?php echo htmlspecialchars($searchQuery ?? ''); ?>" 
+                    pattern="[0-9]*" 
+                    title="Only numbers are allowed"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+    </div>
 
     <?php if (!$assignments_exist): ?>
-        <a href="add_assignment.php" class="back-button">Back to Add Assignment</a>
+        <p>No assignments found.</p>
     <?php else: ?>
         <table>
             <thead>
                 <tr>
                     <th>Status</th>
-                    <th>Email</th>
+                    <th>Admin Number</th>
                     <th>Equipment ID</th>
                     <th>Assignment Date</th>
                     <th>Actions</th>
@@ -283,49 +247,26 @@ $assignments_exist = mysqli_num_rows($result) > 0;
             <tbody>
                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
                 <tr>
-                    <td><?php echo $row['status_name']; ?></td>
-                    <td><?php echo $row['profile_email']; ?></td>
-                    <td><?php echo $row['equipment_id']; ?></td>
-                    <td><?php echo $row['assigned_date']; ?></td>
+                    <td><?php echo htmlspecialchars($row['status_name']); ?></td>
+                    <td><?php echo htmlspecialchars($row['admin_number']); ?></td>
+                    <td><?php echo htmlspecialchars($row['equipment_id']); ?></td>
+                    <td><?php echo htmlspecialchars($row['assigned_date']); ?></td>
                     <td>
-                        <form method="POST" style="display: flex; flex-direction: column; gap: 10px;">
-                            <!-- Hidden input to hold the update ID -->
+                        <form method="POST" class="form-container">
                             <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
+                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
-                            <!-- Input for email -->
-                            <label for="email" style="font-size: 0.9em; margin-bottom: 5px;">Email:</label>
-                            <input 
-                                type="email" 
-                                name="email" 
-                                value="<?php echo $row['profile_email']; ?>" 
-                                required 
-                                style="width: 100%; max-width: none;">
+                            <label for="admin_number">Admin Number:</label>
+                            <input type="text" name="admin_number" value="<?php echo htmlspecialchars($row['admin_number']); ?>" required>
 
-                            <!-- Input for equipment ID -->
-                            <label for="equipment_id" style="font-size: 0.9em; margin-bottom: 5px;">Equipment ID:</label>
-                            <input 
-                                type="text" 
-                                name="equipment_id" 
-                                value="<?php echo $row['equipment_id']; ?>" 
-                                required 
-                                style="width: 100%; max-width: none;">
+                            <label for="equipment_id">Equipment ID:</label>
+                            <input type="text" name="equipment_id" value="<?php echo htmlspecialchars($row['equipment_id']); ?>" required>
 
-                            <!-- Buttons container -->
-                            <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-                                <!-- Update Button -->
-                                <button 
-                                    type="submit" 
-                                    name="update" 
-                                    style="background-color: #007BFF; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; flex: 1;">
-                                    Update
-                                </button>
-
-                                <!-- Delete Button (inside same form) -->
-                                <button type="submit" 
-                                        name="delete_id" 
-                                        value="<?php echo $row['id']; ?>"
-                                        onclick="return confirm('Are you sure you want to delete this assignment?');"
-                                        style="background-color: #FF0000; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; flex: 1; margin-left: 10px;">
+                            <div class="btn-group">
+                                <button type="submit" name="update" class="btn-update">Update</button>
+                                <button type="submit" name="delete_id" value="<?php echo $row['id']; ?>" 
+                                        onclick="return confirm('Are you sure you want to delete this assignment?');" 
+                                        class="btn-delete">
                                     Delete
                                 </button>
                             </div>
@@ -339,16 +280,9 @@ $assignments_exist = mysqli_num_rows($result) > 0;
 </div>
 
 <?php if (!empty($success_message)): ?>
-<script>
-    alert("<?php echo $success_message; ?>");
-</script>
+<script>alert("<?php echo $success_message; ?>");</script>
 <?php endif; ?>
-
-<?php if (!empty($error_message)): ?>
-<script>
-    alert("<?php echo $error_message; ?>");
-</script>
-<?php endif; ?>
-
 </body>
 </html>
+
+

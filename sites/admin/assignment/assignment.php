@@ -15,13 +15,21 @@ if (!$connect) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Search functionality
+// Search functionality with validation
 $searchQuery = "";
+$errorMsg = "";
+
 if (isset($_GET['search'])) {
     $searchQuery = trim($_GET['search']);
+
+    // Validate search input to allow only numbers, or allow empty input
+    if (!preg_match('/^[0-9]*$/', $searchQuery)) {
+        $errorMsg = "Invalid input. Only numbers are allowed.";
+        $searchQuery = ""; // Reset search query if invalid
+    }
 }
 
-// SQL query to fetch equipment data with search filtering
+// SQL query to fetch equipment data with or without filtering
 $sql = "
 SELECT 
     Equipment.id AS equipment_id,
@@ -31,12 +39,20 @@ SELECT
 FROM Equipment
 LEFT JOIN Loan ON Loan.equipment_id = Equipment.id
 LEFT JOIN Status ON Loan.status_id = Status.id
-LEFT JOIN Profile ON Loan.profile_id = Profile.id
-WHERE Equipment.id LIKE ?";
+LEFT JOIN Profile ON Loan.profile_id = Profile.id";
+
+// If a valid numeric search is provided, filter by Equipment ID
+if ($searchQuery !== "") {
+    $sql .= " WHERE Equipment.id LIKE ?";
+}
 
 $stmt = $connect->prepare($sql);
-$searchParam = "%{$searchQuery}%";
-$stmt->bind_param("s", $searchParam);
+
+if ($searchQuery !== "") {
+    $searchParam = "%{$searchQuery}%";
+    $stmt->bind_param("s", $searchParam);
+}
+
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -50,123 +66,7 @@ if (!$result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equipment Assignments</title>
-    <style>
-        body {
-            background-color: #E5D9B6;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: black;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            padding: 10px 20px;
-        }
-
-        nav {
-            display: flex;
-            gap: 15px;
-            background-color: #f4f4f4;
-            padding: 10px 20px;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        .logout-btn button {
-            padding: 8px 12px;
-            background-color: #E53D29;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        .logout-btn button:hover {
-            background-color: #E03C00;
-        }
-
-        .container {
-            background-color: white;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px auto;
-            width: 90%;
-            max-width: 1200px;
-        }
-
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .search-container input {
-            width: 250px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1em;
-        }
-
-        .search-container button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            margin-left: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 1em;
-        }
-
-        .search-container button:hover {
-            background-color: #0056b3;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background-color: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-            font-size: 1em;
-            background-color: #F9F9F9;
-        }
-
-        th {
-            background-color: #F1F1F1;
-        }
-
-        a {
-            text-decoration: none;
-            color: #007BFF;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="/p06_grp2/assign.css">
 </head>
 <body>
 <header>
@@ -195,11 +95,16 @@ if (!$result) {
         <!-- Search Bar -->
         <div class="search-container">
             <form method="GET" action="">
-                <input type="text" name="search" placeholder="Search by Equipment ID..." value="<?php echo htmlspecialchars($searchQuery); ?>">
+                <input type="text" name="search" placeholder="Search by Equipment ID..." 
+                    value="<?php echo htmlspecialchars($searchQuery); ?>" 
+                    pattern="[0-9]*" 
+                    title="Only numbers are allowed"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 <button type="submit">Search</button>
             </form>
         </div>
     </div>
+
 
     <table>
         <thead>
@@ -215,17 +120,20 @@ if (!$result) {
             <?php
             if (mysqli_num_rows($result) > 0) {
                 while ($row = mysqli_fetch_assoc($result)) {
-                    $assign_link = "add_assignment.php?equipment_id=" . $row['equipment_id'];
+                    $assign_link = "add_assignment.php?equipment_id=" . urlencode($row['equipment_id']);
                     $admin_number = !empty($row['admin_number']) ? htmlspecialchars($row['admin_number']) : "N/A";
                     echo "<tr>
                         <td>{$row['equipment_id']}</td>
                         <td>{$row['equipment_name']}</td>
                         <td>" . ($row['equipment_status'] ? $row['equipment_status'] : "N/A") . "</td>
                         <td>{$admin_number}</td>
-                        <td><a href='$assign_link'>Assign</a></td>
+                        <td>
+                            <a href='{$assign_link}'>Assign</a>
+                        </td>
                     </tr>";                
                 }
-            } else {
+            }
+            else {
                 echo "<tr><td colspan='5'>No data available</td></tr>";
             }
 

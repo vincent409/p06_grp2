@@ -1,0 +1,379 @@
+/* General Styles */
+body {
+    background-color: #E5D9B6;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: black;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 10px 20px;
+}
+
+.dashboard-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Navigation */
+nav {
+    display: flex;
+    gap: 15px;
+    background-color: #f4f4f4;
+    padding: 10px 20px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* Logout Button */
+.logout-btn button {
+    padding: 8px 12px;
+    background-color: #E53D29;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.logout-btn button:hover {
+    background-color: #E03C00;
+}
+
+/* Main Content Container */
+.container {
+    background-color: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 1200px;
+}
+
+h1 {
+    text-align: left;
+    margin: 20px auto;
+    font-size: 1.8em;
+    color: black;
+}
+
+h2 {
+    text-align: center;
+    margin: 20px auto;
+    font-size: 1.8em;
+    color: black;
+}
+
+.add-container {
+    background-color: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 600px;
+    text-align: left;
+}
+
+/* Header Container */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.header-container h1 {
+    margin: 0;
+    font-size: 2em;
+    font-weight: bold;
+    text-align: left;
+    color: black;
+}
+
+/* General Styles */
+body {
+    background-color: #E5D9B6;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: black;
+}
+
+/* Header Container */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.header-container h1 {
+    margin: 0;
+    font-size: 2em;
+    font-weight: bold;
+    text-align: left;
+    color: black;
+}
+
+/* Search Bar Styling */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    flex-direction: row;
+}
+
+.search-container form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-container input {
+    width: 250px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    height: 40px;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.search-container input:focus {
+    border-color: #007BFF;
+    box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Search Button Styling */
+.search-container button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+    box-shadow: none;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 100px;
+    white-space: nowrap;
+}
+
+.search-container button:hover {
+    background-color: #0056b3;
+}
+
+.search-container button:active {
+    background-color: #004494;
+}
+
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+    font-size: 1em;
+    background-color: #F9F9F9;
+}
+
+th {
+    background-color: #F1F1F1;
+    font-weight: bold;
+}
+
+td {
+    vertical-align: middle;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+    color: #007BFF;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Error Message */
+.error-msg {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+form {
+    text-align: left;
+}
+
+label {
+    font-size: 1em;
+    display: block;
+    margin: 10px 0 5px;
+}
+
+input, button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    font-size: 1em;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+    border: none;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.form-group label {
+    font-size: 1em;
+    font-weight: bold;
+    flex: 1;
+}
+
+.form-group input {
+    flex: 2;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+}
+.btn-group {
+display: flex;
+gap: 10px;
+margin-top: 10px;
+}
+
+.btn-update, .btn-delete {
+    flex: 1;
+    padding: 10px;
+    font-size: 1em;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-update {
+    background-color: blue;
+    color: white;
+}
+
+.btn-update:hover {
+    background-color: darkblue;
+}
+
+.btn-delete {
+    background-color: red;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: darkred;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-container input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+}
+/* Back Button Styling */
+.centered-button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 10px;
+}
+
+.back-button {
+    background-color: #007BFF;
+    color: white;
+    font-size: 1em;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out;
+    display: inline-block;
+}
+
+.back-button:hover {
+    background-color: #0056b3;
+    text-decoration: none;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .search-container {
+        margin-top: 10px;
+    }
+
+    table, th, td {
+        font-size: 14px;
+    }
+}
