@@ -3,6 +3,7 @@
     $alphabet_pattern = "/^[a-zA-Z]+(?: [a-zA-Z]+)*$/"; // Allows letters and single spaces only between words
     $model_number_pattern = "/^[a-zA-Z0-9-_]+$/"; // Alphanumeric, dashes, and underscores
     $phonePattern = "/^[89][0-9]{7}$/";
+    $admin_number_pattern = "/^[0-9]{7}[a-zA-Z]$/";
     function validateDate($date) {
         // Check if the date is in the format yyyy-mm-dd
         if (preg_match("/^([0-9]{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $date)) {

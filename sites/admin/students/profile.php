@@ -1,10 +1,13 @@
 <?php
-session_start();
+session_start();//start the session to manage user authentication
 
+
+//include necessary files for database connection,validation,cookie,functions
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
-include 'C:/xampp/htdocs/p06_grp2/functions.php'; // Include decryption functions
+include 'C:/xampp/htdocs/p06_grp2/functions.php'; 
+//manage cookie and redirect if inactivity
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
 // Ensure user is Admin or Facility Manager
@@ -12,11 +15,12 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['rol
     header("Location: /p06_grp2/sites/index.php?error=No permission");
     exit();
 }
-
+//Retrieve search query if provided
 $searchQuery = isset($_GET['search']) ? trim($_GET['search']) : "";
 $filteredResults = [];
 
 // Fetch all student profiles (no search filtering in MySQL for encrypted fields)
+// Prepare sql statement using connect,prepare()function help prevent sql injection by allowing parameter binding
 $stmt = $connect->prepare("
     SELECT Profile.id, Profile.name, Profile.admin_number, Profile.email, Profile.phone_number, Profile.department
     FROM Profile 
@@ -27,13 +31,13 @@ $stmt->execute();
 $result = $stmt->get_result();
 $stmt->close();
 
-// Process search manually in PHP
+// loop through each retrieved student profile
 while ($row = mysqli_fetch_assoc($result)) {
     $decrypted_name = aes_decrypt($row['name']); // Decrypt name
     $decrypted_email = aes_decrypt($row['email']); // Decrypt email
     $decrypted_phone = aes_decrypt($row['phone_number']); // Decrypt phone number
 
-    // If search query is empty, show all results
+    // If search query is empty, show all results otherwise,filter by name or admin_number
     if ($searchQuery === "" || 
         stripos($decrypted_name, $searchQuery) !== false || 
         stripos($row['admin_number'], $searchQuery) !== false) {
@@ -107,7 +111,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                     </tr>
                   </thead>";
             echo "<tbody>";
-
+            //loop thorugh each filtered result that is stored and display each student in a table row
             foreach ($filteredResults as $row) {
                 echo "<tr>
                         <td>" . htmlspecialchars($row['name']) . "</td>
@@ -127,10 +131,10 @@ while ($row = mysqli_fetch_assoc($result)) {
             echo "</tbody>";
             echo "</table>";
         } else {
-            echo "<p>No student profiles found.</p>";
+            echo "<p>No student profiles found.</p>";//error message if no student profile is found
         }
 
-        mysqli_close($connect);
+        mysqli_close($connect);//close the database connection
         ?>
 
     </div>

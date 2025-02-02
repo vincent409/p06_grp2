@@ -1,5 +1,5 @@
 <?php
-session_start();
+session_start();//start the session to manage user authenticaiton
 
 // Ensure user is an Admin or Facility Manager
 if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager')) {
@@ -63,24 +63,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
     $department = trim($_POST['department']);
 
     // ✅ Validate Admin Number (7 digits + 1 letter)
-    if (!preg_match("/^[0-9]{7}[a-zA-Z]$/", $admin_number)) {
-        $inputErrors[] = "Admin number must be 7 digits followed by 1 letter (e.g., 2304581H).";
+    if (!preg_match($admin_number_pattern, $admin_number)) {
+        $inputErrors[] = "Admin number must be 7 digits followed by 1 letter (e.g., 1234567A).";
     }
 
-    // ✅ Validate Name
-    if (!preg_match("/^[a-zA-Z0-9\s]+$/", $name)) {
+    // Validate name
+    if (!preg_match($alphanumeric_pattern, $name)) {
         $inputErrors[] = "Name must contain only alphanumeric characters and spaces.";
     }
 
-    // ✅ Validate Email Format
-    $emailValidationResult = validateEmail($entered_email); // ✅ Validate before encrypting
-    // Decrypt first to validate
+    // Validate email
+    $emailValidationResult = validateEmail($email);
     if ($emailValidationResult !== true) {
         $inputErrors[] = $emailValidationResult;
     }
 
-    // ✅ Validate Phone Number
-    if (!preg_match("/^[89][0-9]{7}$/", $phone_number)) {
+    // Validate phone number
+    if (!preg_match($phonePattern, $phone_number)) {
         $inputErrors[] = "Phone number must start with 8 or 9 and be exactly 8 digits.";
     }
     

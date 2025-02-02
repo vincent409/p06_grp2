@@ -1,20 +1,22 @@
 <?php
-session_start();
+session_start();//start the session to authenticate users
 // Check if the user is an Admin or Facility Manager
 if ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager') {
     header("Location: /p06_grp2/sites/index.php?error=No permission");
     exit();
 }
-
+//include necessary files for database connection,validation,functions and cookie
 include 'C:/xampp/htdocs/p06_grp2/functions.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+//redirect users to index.php if inactive
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
+//initialize variable and arrays
 $inputErrors = [];
 $success_message = '';
-
+//generate a csrf token
 generateCsrfToken();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -27,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $admin_number = trim($_POST['admin_number']);
     $phone_number = trim($_POST['phone_number']);
     $department = trim($_POST['department']);
-    $role_id = 3; // Assuming '3' corresponds to the Student role
+    $role_id = 3; // assign role ID for students
 
     // 🔹 Encrypt values before inserting into the database
     $encrypted_name = aes_encrypt($name);
@@ -39,12 +41,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $hashed_password = password_hash($plain_password, PASSWORD_BCRYPT); // Hash before storing
 
     // Validate admin number (should be 7 digits followed by 1 letter)
-    if (!preg_match("/^[0-9]{7}[a-zA-Z]$/", $admin_number)) {
+    if (!preg_match($admin_number_pattern, $admin_number)) {
         $inputErrors[] = "Admin number must be 7 digits followed by 1 letter (e.g., 1234567A).";
     }
 
     // Validate name
-    if (!preg_match("/^[a-zA-Z0-9\s]+$/", $name)) {
+    if (!preg_match($alphanumeric_pattern, $name)) {
         $inputErrors[] = "Name must contain only alphanumeric characters and spaces.";
     }
 
@@ -55,21 +57,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Validate phone number
-    if (!preg_match("/^[89][0-9]{7}$/", $phone_number)) {
+    if (!preg_match($phonePattern, $phone_number)) {
         $inputErrors[] = "Phone number must start with 8 or 9 and be exactly 8 digits.";
     }
 
-    // 🔹 **Check for duplicate name**
+    // 🔹 Check for duplicate name
     $check_name_sql = "SELECT id, name FROM Profile";
     $checknamestmt = $connect->prepare($check_name_sql);
     $checknamestmt->execute();
     $result = $checknamestmt->get_result();
     
-    $duplicate_found = false;
-    
+    $duplicate_found = false;// initialize a flag variable
+    //loop thorugh each row in the result
     while ($row = $result->fetch_assoc()) {
         if (aes_decrypt($row['name']) === $name) {
-            $duplicate_found = true;
+            $duplicate_found = true;//if a match is found set the flag to true
             break; // Stop checking further once a match is found
         }
     }
@@ -86,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $checkadminstmt->bind_param("s", $admin_number);
     $checkadminstmt->execute();
     $checkadminstmt->store_result();
-    if ($checkadminstmt->num_rows > 0) {
+    if ($checkadminstmt->num_rows > 0) { //check the num_rows > 0 
         $inputErrors[] = "This Admin Number is already registered.";
     }
     $checkadminstmt->close();
@@ -97,12 +99,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $checkemailstmt = $connect->prepare($check_email_sql);
     $checkemailstmt->execute();
     $result = $checkemailstmt->get_result();
-
+    //initialize the flag
     $duplicate_email = false;
-
+    //loop through each row in result
     while ($row = $result->fetch_assoc()) {
         if (aes_decrypt($row['email']) === $email) {
-            $duplicate_email = true;
+            $duplicate_email = true;//if duplicate email is found se tto true
             break;
         }
     }
@@ -117,9 +119,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $checkphonestmt = $connect->prepare($check_phone_sql);
     $checkphonestmt->execute();
     $result = $checkphonestmt->get_result();
-
+    //initialize the flag 
     $duplicate_phone = false;
-
+    //loop through each result in row
     while ($row = $result->fetch_assoc()) {
         if (aes_decrypt($row['phone_number']) === $phone_number) {
             $duplicate_phone = true;
@@ -137,6 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $insert_sql = "INSERT INTO Profile (name, email, admin_number, phone_number, department, role_id) 
                        VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $connect->prepare($insert_sql);
+        //bind the parameters to string or interger
         $stmt->bind_param("sssssi", $encrypted_name, $encrypted_email, $admin_number, $encrypted_phone, $department, $role_id);
 
         if ($stmt->execute()) {
@@ -149,7 +152,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt_cred->execute();
             $stmt_cred->close();
 
-            // Send email with credentials
             // Call sendEmail function from functions.php
         $emailResult = sendAccountCreationEmail($email, $admin_number, $plain_password);
         if ($emailResult === true) {
@@ -194,7 +196,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <div class="main-container">
     <h1>Create New Student Profile</h1>
-
     <?php if (!empty($success_message)) { ?>
         <div class="success-message"><?php echo $success_message; ?></div>
     <?php } ?>
