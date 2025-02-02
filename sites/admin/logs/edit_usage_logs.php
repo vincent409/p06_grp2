@@ -62,11 +62,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
 
         // Use prepared statement to prevent SQL injection
         if (empty($new_returned_date)) {
-            validateCsrfToken($_POST['csrf_token']);
             $stmt = $connect->prepare("UPDATE usage_log SET log_details = ?, assigned_date = ?, returned_date = NULL WHERE id = ?");
             $stmt->bind_param("ssi", $encrypted_log_details, $new_assigned_date, $update_id);
         } else {
-            validateCsrfToken($_POST['csrf_token']);
             $stmt = $connect->prepare("UPDATE usage_log SET log_details = ?, assigned_date = ?, returned_date = ? WHERE id = ?");
             $stmt->bind_param("sssi", $encrypted_log_details, $new_assigned_date, $new_returned_date, $update_id);
         }
@@ -184,7 +182,6 @@ if (isset($_GET['search'])) {
                             <td><?php echo $row['returned_date']; ?></td>
                             <td>
                                 <form action="edit_usage_logs.php" method="POST">
-                                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                     <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
 
                                     <label for="log_details">Log Details:</label>
