@@ -1,24 +1,26 @@
 <?php
 session_start();
-
+#checking for the user's role and sending them to the home page if they are not an admin or facility manager
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
     header("Location: /p06_grp2/sites/index.php");
     exit();
 }
-
+#displays warning message if id is not set
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id'])) {
     die("No equipment ID provided.");
 }
-
+#inculding funtions from other files
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/functions.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
-
+#generating CSRF token
 generateCsrfToken();
+#takes the hidden field of id in form and stores it as equipment id
 $equipment_id = $_POST['id'];
 
+#calling all the equipment's infomation from database
 $stmt = $connect->prepare("SELECT * FROM Equipment WHERE id = ?");
 $stmt->bind_param("i", $equipment_id);
 $stmt->execute();
@@ -27,38 +29,46 @@ $result = $stmt->get_result();
 if ($result->num_rows === 0) {
     die("Equipment not found.");
 }
-
+#setting varibles
 $equipment = $result->fetch_assoc();
 $inputErrors = [];
 $successMessage = "";
 $errorMessage = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    #creating delete feature
     if (isset($_POST['delete'])) {
         validateCsrfToken($_POST['csrf_token']);
         try {
-            // Check if equipment is currently assigned
+            #ensures only admins can use this feature
+            if (!isset($_SESSION['role']) || $_SESSION['role'] !== "Admin") {
+                throw new Exception("You do not have permissons to perform this action");
+            }
+            #check if equipment is currently assigned
             $checkAssignmentStmt = $connect->prepare("SELECT COUNT(*) AS count FROM Loan WHERE equipment_id = ? AND status_id = (SELECT id FROM Status WHERE name = 'Assigned')");
             $checkAssignmentStmt->bind_param("i", $equipment_id);
             $checkAssignmentStmt->execute();
             $assignmentResult = $checkAssignmentStmt->get_result();
             $assignmentData = $assignmentResult->fetch_assoc();
-
+        
+            #prevents deletion is assigned
             if ($assignmentData['count'] > 0) {
                 throw new Exception("Equipment cannot be deleted because it is currently assigned.");
             }
 
-            // Proceed with deletion
+            #Proceed with deletion
             $deleteStmt = $connect->prepare("DELETE FROM Equipment WHERE id = ?");
             $deleteStmt->bind_param("i", $equipment_id);
             $deleteStmt->execute();
-
+            #redirect user to equipments page with success message
             header("Location: equipment.php?deleted=1");
             exit();
         } catch (Exception $e) {
             $errorMessage = $e->getMessage();
         }
+    #creating update feature
     } elseif (isset($_POST['update'])) {
+        #vaildatation for all user inputs
         validateCsrfToken($_POST['csrf_token']);
         $name = trim($_POST['name']);
         $type = trim($_POST['type']);
@@ -108,6 +118,7 @@ mysqli_close($connect);
     <link rel="stylesheet" href="/p06_grp2/admin.css">
 </head>
 <body>
+<!--Default header for all admin pages-->
 <header>
     <div class="logo">
         <img src="/p06_grp2/img/TP-logo.png" alt="TP Logo" width="135" height="50">
@@ -145,7 +156,7 @@ mysqli_close($connect);
             <?php } ?>
         </ul>
     <?php } ?>
-
+    <!--Dynamically calls all equipment details into their respective fields-->
     <form action="edit-equipment.php" method="POST">
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($equipment['id']); ?>">
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
@@ -165,11 +176,13 @@ mysqli_close($connect);
             <button type="submit" name="update">Update Equipment</button>
         </div>
         <div>
+            <!--checks if user is an admin before displaying delete button-->
             <?php if ($_SESSION['role'] === "Admin") { ?>
                 <button type="submit" name="delete">Delete Equipment</button>
             <?php } ?>
         </div>
         <div>
+            <!--return button-->
             <button type="button" onclick="window.location.href='equipment.php';">View All Equipment</button>
         </div>
     </form>
