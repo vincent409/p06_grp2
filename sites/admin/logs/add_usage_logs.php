@@ -41,12 +41,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
         $stmt->store_result();
 
+
         if ($stmt->num_rows == 0) {
             $inputErrors[] = "Error: The provided Equipment ID does not exist.";
         } else {
             // Insert usage log into the database
+            $encrypted_log_details = aes_encrypt($log_details);
             $insert_stmt = $connect->prepare("INSERT INTO usage_log (equipment_id, log_details, assigned_date) VALUES (?, ?, ?)");
-            $insert_stmt->bind_param("iss", $equipment_id, $log_details, $assigned_date);
+            $insert_stmt->bind_param("iss", $equipment_id, $encrypted_log_details, $assigned_date);
 
             if ($insert_stmt->execute()) {
                 $success_message = "Usage log added successfully!";

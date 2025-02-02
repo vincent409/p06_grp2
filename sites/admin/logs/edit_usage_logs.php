@@ -20,7 +20,6 @@ $success_message = '';
 
 // Handle DELETE request (only if the user is an Admin)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
-    // 🔹 Check if CSRF token is missing or doesn't match
     validateCsrfToken($_POST['csrf_token']);
     $delete_id = intval($_POST['delete_id']);
 
@@ -58,10 +57,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
 
     // Only proceed if no validation errors
     if (empty($inputErrors)) {
+        // Encrypt the log details before updating
+        $encrypted_log_details = aes_encrypt($new_log_details);
         $update_query = empty($new_returned_date) 
-            ? "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = NULL WHERE id = '$update_id'"
-            : "UPDATE usage_log SET log_details = '$new_log_details', assigned_date = '$new_assigned_date', returned_date = '$new_returned_date' WHERE id = '$update_id'";
+            ? "UPDATE usage_log SET log_details = '$encrypted_log_details', assigned_date = '$new_assigned_date', returned_date = NULL WHERE id = '$update_id'"
+            : "UPDATE usage_log SET log_details = '$encrypted_log_details', assigned_date = '$new_assigned_date', returned_date = '$new_returned_date' WHERE id = '$update_id'";
 
+        // Execute the query
         if (mysqli_query($connect, $update_query)) {
             $success_message = "Usage log updated successfully!";
         } else {
@@ -77,6 +79,7 @@ $result = mysqli_query($connect, $sql);
 if (!$result) {
     die("Query failed: " . mysqli_error($connect));
 }
+
 
 // Handle SEARCH request
 $searchQuery = "";
@@ -151,50 +154,50 @@ if (isset($_GET['search'])) {
         </div>
 
         <?php if (mysqli_num_rows($result) > 0) { ?>  <!-- ✅ Check if records exist -->
-        <table>
-            <thead>
-                <tr>
-                    <th>Equipment ID</th>
-                    <th>Log Details</th>
-                    <th>Assigned Date</th>
-                    <th>Returned Date</th>
-                    <th>Edit</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                <tr>
-                    <td><?php echo $row['equipment_id']; ?></td>
-                    <td><?php echo $row['log_details']; ?></td>
-                    <td><?php echo $row['assigned_date']; ?></td>
-                    <td><?php echo $row['returned_date']; ?></td>
-                    <td>
-                        <form action="edit_usage_logs.php" method="POST">
-                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                            <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
-
-                            <label for="log_details">Log Details:</label>
-                            <input type="text" name="log_details" value="<?php echo $row['log_details']; ?>" required><br>
-
-                            <label for="assigned_date">Assigned Date:</label>
-                            <input type="date" name="assigned_date" value="<?php echo $row['assigned_date']; ?>" required><br>
-
-                            <label for="returned_date">Returned Date:</label>
-                            <input type="date" name="returned_date" value="<?php echo $row['returned_date']; ?>"><br>
-
-                            <div class="button-container">
-                                <button type="submit" name="update-button" class="update-button">Update</button>
-                                <?php if ($_SESSION['role'] === "Admin"): ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Equipment ID</th>
+                        <th>Log Details</th>
+                        <th>Assigned Date</th>
+                        <th>Returned Date</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                        <tr>
+                            <td><?php echo $row['equipment_id']; ?></td>
+                            <td><?php echo aes_decrypt($row['log_details']); ?></td> <!-- Decrypt log_details -->
+                            <td><?php echo $row['assigned_date']; ?></td>
+                            <td><?php echo $row['returned_date']; ?></td>
+                            <td>
+                                <form action="edit_usage_logs.php" method="POST">
                                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                                    <button type="submit" name="delete_id" value="<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure you want to delete this log?')">Delete</button>
-                                <?php endif; ?>
-                            </div>
-                        </form>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+                                    <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
+
+                                    <label for="log_details">Log Details:</label>
+                                    <input type="text" name="log_details" value="<?php echo aes_decrypt($row['log_details']); ?>" required><br> <!-- Decrypt log_details -->
+
+                                    <label for="assigned_date">Assigned Date:</label>
+                                    <input type="date" name="assigned_date" value="<?php echo $row['assigned_date']; ?>" required><br>
+
+                                    <label for="returned_date">Returned Date:</label>
+                                    <input type="date" name="returned_date" value="<?php echo $row['returned_date']; ?>"><br>
+
+                                    <div class="button-container">
+                                        <button type="submit" name="update-button" class="update-button">Update</button>
+                                        <?php if ($_SESSION['role'] === "Admin"): ?>
+                                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                            <button type="submit" name="delete_id" value="<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure you want to delete this log?')">Delete</button>
+                                        <?php endif; ?>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
         <?php } else { ?> 
             <p>No usage logs found.</p>
         <?php } ?>
