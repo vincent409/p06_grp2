@@ -32,6 +32,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $inputErrors[] = "All fields are required.";
     } elseif (!preg_match("/^[a-zA-Z0-9 ]+$/", $log_details)) {
         $inputErrors[] = "Error: Log details must only contain letters and numbers.";
+    } elseif (!filter_var($equipment_id, FILTER_VALIDATE_INT)) {
+        $inputErrors[] = "Error: Equipment ID must be a valid number.";
     } else {
         // Check if the equipment_id exists in the equipment table
         $stmt = $connect->prepare("SELECT id FROM equipment WHERE id = ?");
