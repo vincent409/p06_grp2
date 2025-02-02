@@ -58,7 +58,7 @@ CREATE TABLE Loan (
 CREATE TABLE Usage_Log (
     id INT PRIMARY KEY AUTO_INCREMENT,
     equipment_id INT NOT NULL,
-    log_details VARCHAR(255) NOT NULL,
+    log_details VARCHAR(1000) NOT NULL,
     assigned_date DATE DEFAULT CURRENT_DATE NOT NULL,
     returned_date DATE NULL,
     FOREIGN KEY (equipment_id) REFERENCES Equipment(id)

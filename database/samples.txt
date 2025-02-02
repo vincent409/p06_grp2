@@ -6,13 +6,14 @@ VALUES
 
 INSERT INTO Profile (id, role_id, admin_number, name, email, phone_number, department, has_logged_in)
 VALUES
-    (1, 1, '1234567A', 'Admin', '6HdGi/RVNMYpcilg08iKxXZkU0tSaVBpK3RJa1h2VnUzOUJUWHRmc044UnpvRnZlNnNuRDR0K2V1MEU9', '51234567', 'Marketing', 1),
+    (1, 1, '1234567A', 'udThRA7M3nOQFyYWZ9iQuHc3ZGl3MlFNOE9vQWtLLzEwV3ZOTVE9PQ==', '6HdGi/RVNMYpcilg08iKxXZkU0tSaVBpK3RJa1h2VnUzOUJUWHRmc044UnpvRnZlNnNuRDR0K2V1MEU9', 'eyl6QUZXRJThsW6RXjwMVENZaUhiNmp3SG9vV0hGMlIrNG9kQUE9PQ==', 'Marketing', 1),
     (2, 3, '1234567B', '5Lt6kJadoArbZ1fVxdycPUVqV0V3aytvUHQvNWdQRmcyS2ZMNlE9PQ==', 'b7IbOedGiwnoSWABqz5Q05PSjF0OGc5akMrbTliWjFtZ1VubFZrTHRiWUROTkRDNzBISWV3V0sveDA9', 'NxzAbRYkPoMdZgUl+9e79zJaOERmV2hvS2piSEN3aUVmME5uZXc9PQ==', 'Sales', 0);
-    (3, 2, '1234567C', 'Facility Manager', 'facilitymanager@example.com', '81210473', 'Manager', 1)
+    (3, 2, '1234567C', 'GXY8JnqpAKPxQiBNG352jzZHSmsrby9tWFJhWWp4b00ycjlUSWc9PQ==', 'xOrcoNZFrCXkSXPbZHCz2npKbTI2Ty9wajMwZVZxM2JLWVFabzNDTjh0UXc3WFU2NVhuQjVwUG9ieVE9', 'ZMPq4OHOfgkbUR+Tpncne1NpNU9vb21WR2lWYm1QQUM3citqQXc9PQ==', 'Manager', 1)
 
 INSERT INTO Loan (status_id, profile_id, equipment_id)
 VALUES
     (1, 2, 1);
+    (3, 2, 2);
 
 INSERT INTO User_Credentials (profile_id, password)
 VALUES
