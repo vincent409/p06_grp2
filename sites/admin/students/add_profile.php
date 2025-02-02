@@ -12,14 +12,6 @@ include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
-require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\PHPMailer.php';
-require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\Exception.php';
-require 'C:\xampp\htdocs\p06_grp2\PHPMailer-master\src\SMTP.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-
 $inputErrors = [];
 $success_message = '';
 
@@ -158,41 +150,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt_cred->close();
 
             // Send email with credentials
-            $mail = new PHPMailer(true);
-            try {
-                $mail->isSMTP();
-                $mail->Host = 'smtp.gmail.com';
-                $mail->SMTPAuth = true;
-                $mail->Username = 'amctemasek@gmail.com';
-                $mail->Password = 'itub szoc bbtw mqld';
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port = 587;
-
-                $mail->setFrom('amctemasek@gmail.com', 'Admin Team');
-                $mail->addAddress($email);
-
-                $mail->isHTML(true);
-                $mail->Subject = "Account Created - Login Credentials";
-                $mail->Body = "
-                    <h3>Welcome to the System</h3>
-                    <p>Your student account has been created successfully. Here are your login details:</p>
-                    <p><strong>Admin Number:</strong> $admin_number</p>
-                    <p><strong>Password:</strong> $plain_password</p>
-                    <p>Please login and change your password upon first login.</p>
-                    <p><a href='http://localhost/p06_grp2/sites/index.php'>Login Here</a></p>
-                    <p>Regards,<br>Admin Team</p>
-                ";
-
-                $mail->send();
-
-                // ✅ Use JavaScript for alert and redirect
-                $success_message = "Profile created successfully! Login credentials have been sent to the student's email.";
-
-            } catch (Exception $e) {
-                $inputErrors = "Profile created, but email could not be sent. Error: " . htmlspecialchars($mail->ErrorInfo);
-            }
+            // Call sendEmail function from functions.php
+        $emailResult = sendAccountCreationEmail($email, $admin_number, $plain_password);
+        if ($emailResult === true) {
+            $success_message = "Profile created successfully! Login credentials have been sent to the student's email.";
         } else {
-            $inputErrors = "An error occurred while creating the profile. Please try again.";
+            $inputErrors[] = $emailResult; // Store the error message from sendEmail function
+        }
+
         }
     }
 }
