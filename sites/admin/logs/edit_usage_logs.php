@@ -174,6 +174,8 @@ if (isset($_GET['search'])) {
                             <div class="button-container">
                                 <button type="submit" name="update-button" class="update-button">Update</button>
                                 <?php if ($_SESSION['role'] === "Admin"): ?>
+                                    <!-- Include CSRF token for the delete action -->
+                                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                     <button type="submit" name="delete_id" value="<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure you want to delete this log?')">Delete</button>
                                 <?php endif; ?>
                             </div>

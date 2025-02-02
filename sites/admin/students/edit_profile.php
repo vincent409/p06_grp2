@@ -191,7 +191,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
     validateCsrfToken($_POST['csrf_token']);
     if ($_SESSION['role'] != 'Admin') {
-        die("You do not have permission to delete profiles.");
+        header("Location: /p06_grp2/sites/index.php?error=No permission");
+        exit;
     }
 
     $id = intval($_POST['id']);
@@ -208,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
 
         if ($deletestmt->execute()) {
             $connect->query("SET FOREIGN_KEY_CHECKS=1");
-                $success_message = "Profile deleted successfully!";
+            header("Location: profile.php?success=ProfileDeleted");
             exit;
         } else {
             $inputErrors = "Error deleting profile: " . $deletestmt->error;
@@ -287,6 +288,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
 
     <?php if ($_SESSION['role'] == 'Admin') { ?>
     <form action="edit_profile.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this profile?');">
+        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">  <!-- ✅ Add this line -->
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
         <button type="submit" name="delete">Delete Profile</button>
     </form>
