@@ -9,30 +9,35 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
     exit(); // Stop further execution
 }
 
+// Include files
 include 'C:/xampp/htdocs/p06_grp2/functions.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+
+// Manage user session cookies and redirect if necessary
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
+// Initialize error messages and success message
 $inputErrors = [];
 $success_message = '';
 
+// Generate CSRF
 $csrf_token = generateCsrfToken();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    validateCsrfToken($_POST['csrf_token']);
+    validateCsrfToken($_POST['csrf_token']); // Validate
 
     $equipment_id = trim($_POST['equipment_id']);
     $log_details = trim($_POST['log_details']); // Usage or maintenance details
     $assigned_date = $_POST['assigned_date']; // Date when the equipment was assigned
 
-    // Validate inputs
+    // Validate inputs to ensure all required fields are filled
     if (empty($equipment_id) || empty($log_details) || empty($assigned_date)) {
         $inputErrors[] = "All fields are required.";
     } elseif (!preg_match("/^[a-zA-Z0-9 ]+$/", $log_details)) {
         $inputErrors[] = "Error: Log details must only contain letters and numbers.";
-    } elseif (!filter_var($equipment_id, FILTER_VALIDATE_INT)) {
+    } elseif (!filter_var($equipment_id, FILTER_VALIDATE_INT)) { // Check if ID is a number
         $inputErrors[] = "Error: Equipment ID must be a valid number.";
     } else {
         // Check if the equipment_id exists in the equipment table
@@ -41,15 +46,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
         $stmt->store_result();
 
-
+        // If the equipment ID does not exist, add an error message
         if ($stmt->num_rows == 0) {
             $inputErrors[] = "Error: The provided Equipment ID does not exist.";
         } else {
-            // Insert usage log into the database
+            // Insert usage log into the database and encrypt before storing
             $encrypted_log_details = aes_encrypt($log_details);
             $insert_stmt = $connect->prepare("INSERT INTO usage_log (equipment_id, log_details, assigned_date) VALUES (?, ?, ?)");
             $insert_stmt->bind_param("iss", $equipment_id, $encrypted_log_details, $assigned_date);
 
+            // Execute the insert query and check for errors
             if ($insert_stmt->execute()) {
                 $success_message = "Usage log added successfully!";
             } else {

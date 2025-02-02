@@ -1,5 +1,4 @@
 <?php
-// Generate CSRF token (once per session)
 // Generate a secure CSRF token with expiry time
 function generateCsrfToken() {
     if (empty($_SESSION['csrf_token']) || time() > $_SESSION['csrf_token_expiry']) {
@@ -22,7 +21,7 @@ function validateCsrfToken($csrfToken) {
         exit;
     }
 
-    // ✅ Rotate CSRF token after successful validation (prevents replay attacks)
+    // Rotate CSRF token after successful validation (prevents replay attacks)
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     $_SESSION['csrf_token_expiry'] = time() + 3600; // Extend expiry time
 }
@@ -88,7 +87,7 @@ function sendAccountCreationEmail($email, $admin_number, $plain_password) {
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
         $mail->Username = 'amctemasek@gmail.com';
-        $mail->Password = 'itub szoc bbtw mqld';  // ⚠️ NEVER expose credentials directly in code (Use ENV variables)
+        $mail->Password = 'itub szoc bbtw mqld'; 
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 

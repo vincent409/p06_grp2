@@ -15,8 +15,7 @@ manageCookieAndRedirect("/p06_grp2/logout.php");
 
 
 // Fetch the logged-in user's name
-// Fetch the logged-in user's name
-$user_id = $_SESSION['profile_id']; // Assuming this session variable holds the logged-in user's profile ID
+$user_id = $_SESSION['profile_id']; 
 
 $sql_user = "SELECT name FROM Profile WHERE id = ?";
 $stmt = $connect->prepare($sql_user);

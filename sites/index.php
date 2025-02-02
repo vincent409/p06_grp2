@@ -25,7 +25,7 @@
             <input type="submit" name="Submit" value="Login" class="btn">
         </form>
 
-        <!-- Update the href to point to forgot_password.php -->
+        <!-- href point to forgot_password.php -->
         <a href="forgot_password.php" class="forgot-password">Forgot password?</a>
     </div>
 

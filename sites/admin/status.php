@@ -114,10 +114,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $update_id = $_POST['update_id'];
         $new_status = $_POST['status'];
         $admin_number = isset($_POST['admin_number']) ? $_POST['admin_number'] : $_POST['hidden_admin_number'];
-
-
-        // Existing logic for general updates
-        // ...
     }
 
     // Check current status
@@ -129,8 +125,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $current_status_id = $current_status_row['status_id'];
         $current_profile_id = $current_status_row['profile_id'];
 
-        // Fetch profile_id from the email
-        // Fetch profile_id using Admin Number
+        // Fetch profile_id from the email using Admin Number
         $profile_query = "SELECT id FROM profile WHERE admin_number = ? LIMIT 1";
         $stmt = $connect->prepare($profile_query);
         $stmt->bind_param("s", $admin_number);
@@ -209,7 +204,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 // Fetch all assignments from the loan table
-
 $query = "SELECT loan.id, loan.status_id, loan.profile_id, loan.equipment_id, 
                  IFNULL(status.name, 'NULL') as status_name, 
                  COALESCE(profile.admin_number, 'N/A') as profile_admin_number,
@@ -429,7 +423,7 @@ if (!$result) {
         if (selectElement.value === "3") { // Show when status is "Returned"
             returnedDateField.style.display = "block";
         } else {
-            returnedDateField.style.display = "none"; // Hide otherwise
+            returnedDateField.style.display = "none"; 
         }
     }
     </script>
@@ -490,7 +484,7 @@ if (!$result) {
 
 
 
-                                <!-- Status Field: Always editable -->
+                                <!-- Status Field -->
                                 <label for="status_<?php echo $row['id']; ?>">Status:</label>
                                 <select id="status_<?php echo $row['id']; ?>" name="status">
                                     <option value="1" <?php echo ($row['status_id'] == 1) ? 'selected' : ''; ?>>Assigned</option>
@@ -498,7 +492,7 @@ if (!$result) {
                                     <option value="3" <?php echo ($row['status_id'] == 3) ? 'selected' : ''; ?>>Returned</option>
                                 </select>
 
-                                <!-- Confirm Return Button: Only appears when status is "Returned" -->
+                                <!-- Confirm Return Button -->
                                 <?php if ($row['status_id'] == 3): ?>
                                     <div id="confirm_return_<?php echo $row['id']; ?>">
                                         <label for="confirm_return_btn_<?php echo $row['id']; ?>">Confirm Return:</label>

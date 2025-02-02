@@ -2,35 +2,43 @@
 // Start the session
 session_start();
 
-// Check user role
+// Check if the user has the required role which is Admin or Facility Manager
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
-    // Redirect the user to login page or show an error message
+    // Redirect unauthorized users to login page or show an error message
     header("Location: /p06_grp2/sites/index.php");
     exit(); // Stop further execution
 }
+
+// Include files for database connection, cookie, validation, CSRF
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include 'C:/xampp/htdocs/p06_grp2/functions.php';
+
+// Manage user session cookies
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
+// Manage user session cookies
 generateCsrfToken();
+
+// Initialize error messages and success message
 $inputErrors = [];
 $success_message = '';
 
 // Handle DELETE request (only if the user is an Admin)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
-    validateCsrfToken($_POST['csrf_token']);
-    $delete_id = intval($_POST['delete_id']);
+    validateCsrfToken($_POST['csrf_token']); // Validate CSRF token for security
+    $delete_id = intval($_POST['delete_id']); // Sanitize input
 
     if ($delete_id > 0) {
+        // Prepare and execute DELTE query
         $stmt = $connect->prepare("DELETE FROM usage_log WHERE id = ?");
         $stmt->bind_param("i", $delete_id);
 
         $stmt->execute(); 
         $stmt->close();
 
-        // 🔹 Redirect after deletion to prevent resubmission issues
+        // Redirect after deletion to prevent resubmission issues
         header("Location: edit_usage_logs.php");
         exit;
     } else {
@@ -41,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESS
 
 // Handle UPDATE request
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
-    $update_id = intval($_POST['update_id']);
+    $update_id = intval($_POST['update_id']); // Sanitize input
     $new_log_details = trim($_POST['log_details']);
     $new_assigned_date = $_POST['assigned_date'];
     $new_returned_date = $_POST['returned_date'];
@@ -60,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
         // Encrypt the log details before updating
         $encrypted_log_details = aes_encrypt($new_log_details);
 
-        // Use prepared statement to prevent SQL injection
+        // Prepared statements to prevent SQL injection
         if (empty($new_returned_date)) {
             $stmt = $connect->prepare("UPDATE usage_log SET log_details = ?, assigned_date = ?, returned_date = NULL WHERE id = ?");
             $stmt->bind_param("ssi", $encrypted_log_details, $new_assigned_date, $update_id);
@@ -81,30 +89,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
 }
 
 
-// Fetch all usage logs
+// Fetch all usage logs, ordered by equipment_id ascending
 $sql = "SELECT * FROM usage_log ORDER BY equipment_id ASC";
 $result = mysqli_query($connect, $sql);
-
 if (!$result) {
     die("Query failed: " . mysqli_error($connect));
 }
 
 
-// Handle SEARCH request
+// Handle SEARCH request for filtering by equipment ID
 $searchQuery = "";
-if (isset($_GET['search'])) {
-    $searchQuery = trim($_GET['search']);
+if (isset($_GET['search'])) { // Check if the 'search' parameter is set in the GET request
+    $searchQuery = trim($_GET['search']); // Retrieve and trim whitespace
     $stmt = empty($searchQuery) 
         ? $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log ORDER BY equipment_id ASC")
         : $connect->prepare("SELECT id, equipment_id, log_details, assigned_date, returned_date FROM usage_log WHERE equipment_id = ? ORDER BY equipment_id ASC");
     
-    if (!empty($searchQuery)) {
+    if (!empty($searchQuery)) { // If not empty, bind parameter to prevent SQL
         $stmt->bind_param("i", $searchQuery);
     }
 
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $stmt->close();
+    $stmt->execute(); // Execute the SQL query
+    $result = $stmt->get_result(); // Retrive the result set
+    $stmt->close(); // Close the prepared statement
 }
 ?>
 
