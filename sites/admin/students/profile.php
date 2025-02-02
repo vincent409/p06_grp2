@@ -4,60 +4,50 @@ session_start();
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/validation.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
-include 'C:/xampp/htdocs/p06_grp2/functions.php'; // Include encryption functions
+include 'C:/xampp/htdocs/p06_grp2/functions.php'; // Include decryption functions
 manageCookieAndRedirect("/p06_grp2/sites/index.php");
 
-// Check if the user is an Admin or Facility Manager
+// Ensure user is Admin or Facility Manager
 if (!isset($_SESSION['role']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Facility Manager')) {
     header("Location: /p06_grp2/sites/index.php?error=No permission");
     exit();
 }
 
+$searchQuery = isset($_GET['search']) ? trim($_GET['search']) : "";
+$filteredResults = [];
 
-$searchQuery = "";
-$result = null;
-$inputErrors = []; // Array to store validation errors
+// Fetch all student profiles (no search filtering in MySQL for encrypted fields)
+$stmt = $connect->prepare("
+    SELECT Profile.id, Profile.name, Profile.admin_number, Profile.email, Profile.phone_number, Profile.department
+    FROM Profile 
+    JOIN Role ON Profile.role_id = Role.id 
+    WHERE Role.name = 'Student'
+");
+$stmt->execute();
+$result = $stmt->get_result();
+$stmt->close();
 
-if (isset($_GET['search'])) {
-    $searchQuery = trim($_GET['search']); // Trim whitespace
+// Process search manually in PHP
+while ($row = mysqli_fetch_assoc($result)) {
+    $decrypted_name = aes_decrypt($row['name']); // Decrypt name
+    $decrypted_email = aes_decrypt($row['email']); // Decrypt email
+    $decrypted_phone = aes_decrypt($row['phone_number']); // Decrypt phone number
 
-    if ($searchQuery !== "") {
-        // Use a prepared statement to execute the search
-        $stmt = $connect->prepare("
-            SELECT Profile.id, Profile.name, Profile.admin_number,Profile.email, Profile.phone_number, Profile.department 
-            FROM Profile 
-            JOIN Role ON Profile.role_id = Role.id 
-            WHERE Role.name = 'Student' 
-                  AND (Profile.admin_number LIKE ?)
-        ");
-        $searchParam = "%" . $searchQuery . "%";
-        $stmt->bind_param("s", $searchParam);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $stmt->close();
-    } else {
-        // Fetch all student profiles
-        $stmt = $connect->prepare("
-            SELECT Profile.id, Profile.name,profile.admin_number, Profile.email, Profile.phone_number, Profile.department 
-            FROM Profile 
-            JOIN Role ON Profile.role_id = Role.id 
-            WHERE Role.name = 'Student'
-        ");
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $stmt->close();
+    // If search query is empty, show all results
+    if ($searchQuery === "" || 
+        stripos($decrypted_name, $searchQuery) !== false || 
+        stripos($row['admin_number'], $searchQuery) !== false) {
+        
+        // Store all results or matched results
+        $filteredResults[] = [
+            'id' => $row['id'],
+            'name' => $decrypted_name,
+            'admin_number' => $row['admin_number'],
+            'email' => $decrypted_email,
+            'phone_number' => $decrypted_phone,
+            'department' => $row['department']
+        ];
     }
-} else {
-    // Default query to fetch all student profiles if no search is performed
-    $stmt = $connect->prepare("
-        SELECT Profile.id, Profile.name,Profile.admin_number,Profile.email, Profile.phone_number, Profile.department 
-        FROM Profile 
-        JOIN Role ON Profile.role_id = Role.id 
-        WHERE Role.name = 'Student'
-    ");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $stmt->close();
 }
 ?>
 
@@ -94,16 +84,17 @@ if (isset($_GET['search'])) {
         <div class="container-flex">
             <h1>Student Profiles</h1>
             <form method="GET" action="">
-                <input type="text" name="search" placeholder="Search" value="<?php echo htmlspecialchars($searchQuery); ?>">
+                <input type="text" name="search" placeholder="Search by Name or Admin Number" value="<?php echo htmlspecialchars($searchQuery); ?>">
                 <button type="submit">Search</button>
             </form>
         </div>
+    
     <div class="left-content">
         <a href="add_profile.php" class="enter-logs-button">Add New Profile</a>
     </div>
 
         <?php
-        if ($result && mysqli_num_rows($result) > 0) {
+        if (!empty($filteredResults)) {
             echo "<table>";
             echo "<thead>
                     <tr>
@@ -117,17 +108,12 @@ if (isset($_GET['search'])) {
                   </thead>";
             echo "<tbody>";
 
-            while ($row = mysqli_fetch_assoc($result)) {
-                // ✅ Decrypt Email Before Displaying
-                $decrypted_email = aes_decrypt($row['email']);
-                $decrypted_name = aes_decrypt($row['name']);
-                $decryptrd_phone_number = aes_decrypt($row['phone_number']);
-
+            foreach ($filteredResults as $row) {
                 echo "<tr>
-                        <td>" . htmlspecialchars($decrypted_name) . "</td>
+                        <td>" . htmlspecialchars($row['name']) . "</td>
                         <td>" . htmlspecialchars($row['admin_number']) . "</td>
-                        <td>" . htmlspecialchars($decrypted_email) . "</td> 
-                        <td>" . htmlspecialchars($decryptrd_phone_number) . "</td>
+                        <td>" . htmlspecialchars($row['email']) . "</td>
+                        <td>" . htmlspecialchars($row['phone_number']) . "</td>
                         <td>" . htmlspecialchars($row['department']) . "</td>
                         <td>
                             <form action='edit_profile.php' method='POST' style='display:inline;'>

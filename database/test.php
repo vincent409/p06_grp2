@@ -41,7 +41,7 @@
 
         return $decrypted_data;
         }
-        $text = "98325674";
+        $text = "88472222";
         $en = aes_encrypt($text);
         echo $en;
         

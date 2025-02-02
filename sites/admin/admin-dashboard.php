@@ -10,8 +10,11 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['ro
 
 include_once 'C:/xampp/htdocs/p06_grp2/connect-db.php';
 include 'C:/xampp/htdocs/p06_grp2/cookie.php';
+include_once 'C:/xampp/htdocs/p06_grp2/functions.php';
 manageCookieAndRedirect("/p06_grp2/logout.php");
 
+
+// Fetch the logged-in user's name
 // Fetch the logged-in user's name
 $user_id = $_SESSION['profile_id']; // Assuming this session variable holds the logged-in user's profile ID
 
@@ -22,7 +25,9 @@ $stmt->execute();
 $result = $stmt->get_result();
 $user_data = $result->fetch_assoc();
 
-$user_name = $user_data['name']; // Store the user's name
+$encrypted_user_name = $user_data['name']; // Get the encrypted name
+$user_name = aes_decrypt($encrypted_user_name); // Decrypt it before displaying
+
 
 // SQL query to get the counts of equipment in each status
 $sql = "

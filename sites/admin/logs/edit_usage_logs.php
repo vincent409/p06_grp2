@@ -20,14 +20,26 @@ $success_message = '';
 
 // Handle DELETE request (only if the user is an Admin)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
+    // 🔹 Check if CSRF token is missing or doesn't match
     validateCsrfToken($_POST['csrf_token']);
-    $delete_id = $_POST['delete_id'];
-    $delete_query = "DELETE FROM usage_log WHERE id = '$delete_id'";
+    $delete_id = intval($_POST['delete_id']);
 
-    if (mysqli_query($connect, $delete_query)) {
-        $success_message = "Usage log deleted successfully.";
+    if ($delete_id > 0) {
+        $stmt = $connect->prepare("DELETE FROM usage_log WHERE id = ?");
+        $stmt->bind_param("i", $delete_id);
+
+        if ($stmt->execute()) {
+            $_SESSION['success_message'] = "Usage log deleted successfully.";
+        } else {
+            $_SESSION['inputErrors'] = "Error deleting usage log: " . $stmt->error;
+        }
+        $stmt->close();
+
+        // 🔹 Redirect after deletion to prevent resubmission issues
+        header("Location: edit_usage_logs.php");
+        exit;
     } else {
-        $inputErrors[] = "Error: " . mysqli_error($connect);
+        $_SESSION['inputErrors'] = "Invalid usage log ID.";
     }
 }
 
@@ -174,7 +186,6 @@ if (isset($_GET['search'])) {
                             <div class="button-container">
                                 <button type="submit" name="update-button" class="update-button">Update</button>
                                 <?php if ($_SESSION['role'] === "Admin"): ?>
-                                    <!-- Include CSRF token for the delete action -->
                                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                     <button type="submit" name="delete_id" value="<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure you want to delete this log?')">Delete</button>
                                 <?php endif; ?>
