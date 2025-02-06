@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         validateCsrfToken($_POST['csrf_token']);
         try {
             #ensures only admins can use this feature
-            if (!isset($_SESSION['role']) || $_SESSION['role'] !== "Admin") {
+            if (!isset($_SESSION['role']) || ($_SESSION['role'] !== "Admin" && $_SESSION['role'] !== "Facility Manager")) {
                 throw new Exception("You do not have permissons to perform this action");
             }
             #check if equipment is currently assigned
@@ -177,7 +177,7 @@ mysqli_close($connect);
         </div>
         <div>
             <!--checks if user is an admin before displaying delete button-->
-            <?php if ($_SESSION['role'] === "Admin") { ?>
+            <?php if ($_SESSION['role'] === "Admin" || $_SESSION['role'] === "Facility Manager" ) { ?>
                 <button type="submit" name="delete">Delete Equipment</button>
             <?php } ?>
         </div>

@@ -16,7 +16,7 @@ function validateCsrfToken($csrfToken) {
         session_destroy();
         echo "<script>
                 alert('Security alert: CSRF validation failed. Please refresh the page.');
-                window.location.href = '/p06_grp2/sites/index.php';
+                window.location.href = '/p06_grp2/logout.php';
               </script>";
         exit;
     }
