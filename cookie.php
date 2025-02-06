@@ -1,5 +1,5 @@
 <?php
-function manageCookieAndRedirect($redirectURL = "/p06_grp2/index.php", $warningMessage = "You have been idle for 5 seconds. Click OK to stay logged in.", $logoutMessage = "You have been idle for 10 seconds. Click OK to log out.") {
+function manageCookieAndRedirect($redirectURL = "/p06_grp2/index.php", $warningMessage = "You have been idle for 50 minutes. Click OK to stay logged in.", $logoutMessage = "You have been idle for 1 hour. Click OK to log out.") {
     // Start the session if it's not already started
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -44,13 +44,13 @@ function manageCookieAndRedirect($redirectURL = "/p06_grp2/index.php", $warningM
             inactivityTime++;
 
             if (inactivityTime === 3000 && !warningShown) {
-                // Show the warning dialog at 5 seconds
+                // Show the warning dialog at 50 minutes
                 warningShown = true;
                 showDialog('warningDialog', '$warningMessage');
             }
 
             if (inactivityTime >= 3600 && !logoutShown) {
-                // Hide the warning dialog and show the logout dialog at 10 seconds
+                // Hide the warning dialog and show the logout dialog at 1 hour
                 hideDialog('warningDialog'); // Ensure warning dialog is hidden
                 logoutShown = true;
                 showDialog('logoutDialog', '$logoutMessage');
@@ -88,7 +88,7 @@ function manageCookieAndRedirect($redirectURL = "/p06_grp2/index.php", $warningM
         // Function to reset the timer when the user interacts with the warning dialog
         function resetWarning() {
             inactivityTime = 0; // Reset the timer
-            warningShown = false; // Allow the warning to show again after the next 5 seconds
+            warningShown = false; // Allow the warning to show again after the next 50 minutes
             hideDialog('warningDialog'); // Hide the warning dialog
         }
     </script>";
