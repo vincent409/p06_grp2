@@ -28,7 +28,7 @@ $success_message = '';
 // Handle DELETE request (only if the user is an Admin)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESSION['role'] === "Admin") {
     validateCsrfToken($_POST['csrf_token']); // Validate CSRF token for security
-    $delete_id = intval($_POST['delete_id']); // Sanitize input
+    $delete_id = intval($_POST['delete_id']); // Sanitize input and convert value into integer.
 
     if ($delete_id > 0) {
         // Prepare and execute DELETE query
@@ -55,13 +55,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
     $new_returned_date = $_POST['returned_date'];
 
     // Validation
-    if (!preg_match("/^[a-zA-Z0-9 ]+$/", $new_log_details)) {
+    if (!preg_match("/^[a-zA-Z0-9 ]+$/", $new_log_details)) { //check a-z, A-Z, 0-9, space, $ for end of string
         $inputErrors[] = "Error: Log details must only contain letters and numbers.";
     }
     if (!empty($new_returned_date) && $new_returned_date < $new_assigned_date) {
         $inputErrors[] = "Error: Returned date cannot be earlier than assigned date.";
     }
 
+    
     // Only proceed if no validation errors
     if (empty($inputErrors)) {
         validateCsrfToken($_POST['csrf_token']);
@@ -169,7 +170,7 @@ if (isset($_GET['search'])) { // Check if the 'search' parameter is set in the G
             <a href="add_usage_logs.php" class="enter-logs-button">Add Usage Logs</a>
         </div>
 
-        <?php if (mysqli_num_rows($result) > 0) { ?>  <!-- ✅ Check if records exist -->
+        <?php if (mysqli_num_rows($result) > 0) { ?>  <!-- Check if records exist -->
             <table>
                 <thead>
                     <tr>
@@ -201,6 +202,7 @@ if (isset($_GET['search'])) { // Check if the 'search' parameter is set in the G
                                     <input type="date" name="returned_date" value="<?php echo $row['returned_date']; ?>"><br>
 
                                     <div class="button-container">
+                                        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                         <button type="submit" name="update-button" class="update-button">Update</button>
                                         <?php if ($_SESSION['role'] === "Admin"): ?>
                                             <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
