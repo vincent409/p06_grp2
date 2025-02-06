@@ -23,9 +23,9 @@ if (!$connect) {
 }
 
 // Handle DELETE request for Admins and Facility Managers
-if (isset($_GET['delete_id'])) {
+if (isset($_POST['delete_id'])) {
     validateCsrfToken($_POST['csrf_token']);
-    $delete_id = $_GET['delete_id'];
+    $delete_id = $_POST['delete_id'];
 
     $check_status_query = "SELECT status_id FROM loan WHERE id = '$delete_id'";
     $check_status_result = mysqli_query($connect, $check_status_query);
@@ -474,7 +474,7 @@ if (!$result) {
                         <td><?php echo $row['returned_date'] ?: 'NIL'; ?></td>
                         <td>
                         <form action="status.php" method="POST" style="text-align: left;">
-                        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                             <input type="hidden" name="update_id" value="<?php echo $row['id']; ?>">
                             <!-- Add label for Admin Number -->
                             <label for="admin_number_<?php echo $row['id']; ?>"><strong>Admin Number:</strong></label>
@@ -504,7 +504,7 @@ if (!$result) {
                                 <div class="button-container">
                                     <button type="submit" class="update-button">Update</button>
                                     <?php if ($_SESSION['role'] === "Admin" || $row['status_id'] === NULL): ?>
-                                        <a href="status.php?delete_id=<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure?')">Delete</a>
+                                        <button type="submit" name="delete_id" value="<?php echo $row['id']; ?>" class="delete-button" onclick="return confirm('Are you sure you want to delete this log?')">Delete</button>
                                     <?php endif; ?>
                                 </div>
                             </form>
