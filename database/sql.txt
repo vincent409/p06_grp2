@@ -51,7 +51,7 @@ CREATE TABLE Loan (
     equipment_id INT NOT NULL,
     FOREIGN KEY (profile_id) REFERENCES Profile(id),
     FOREIGN KEY (equipment_id) REFERENCES Equipment(id),
-    FOREIGN KEY (status_id) REFERENCES Status(id)
+    FOREIGN KEY (status_id) REFERENCES Status(id) ON DELETE CASCADE
 );
 
 -- Create the Usage_Log table
@@ -61,7 +61,7 @@ CREATE TABLE Usage_Log (
     log_details VARCHAR(1000) NOT NULL,
     assigned_date DATE DEFAULT CURRENT_DATE NOT NULL,
     returned_date DATE NULL,
-    FOREIGN KEY (equipment_id) REFERENCES Equipment(id)
+    FOREIGN KEY (equipment_id) REFERENCES Equipment(id) ON DELETE CASCADE
 );
 
 -- Insert data into Role table
