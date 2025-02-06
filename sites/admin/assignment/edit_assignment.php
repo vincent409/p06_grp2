@@ -83,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_id'])) {
     $update_id = intval($_POST['update_id']);
     $new_admin_number = trim($_POST['admin_number']);
     $new_equipment_id = intval($_POST['equipment_id']); // Convert to integer for safety
+    $new_assignment_date = $_POST['assignment_date'];  // Get the new assignment date from the form
 
     // Validate admin number format
     if (!preg_match("/^[0-9]{7}[a-zA-Z]$/", $new_admin_number)) {

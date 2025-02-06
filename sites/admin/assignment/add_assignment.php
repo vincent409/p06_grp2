@@ -18,8 +18,8 @@ $assignment_created = false;
 // Get equipment_id from URL
 $equipment_id = isset($_GET['equipment_id']) ? $_GET['equipment_id'] : '';
 
-// Default assignment date (today's date)
-$assignment_date = date('Y-m-d');
+// Set assignment date based on user input or default to today's date
+$assignment_date = isset($_POST['assignment_date']) && !empty($_POST['assignment_date']) ? $_POST['assignment_date'] : date('Y-m-d');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate CSRF token
@@ -100,12 +100,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($inputErrors)) {
         $status_id = 1; // Default status_id for "Assigned"
 
-        // Insert into usage_log table
-        $insert_log_query = "INSERT INTO usage_log (equipment_id, assigned_date, log_details) VALUES (?, NOW(), 'New assignment')";
+        // Insert into usage_log table with the provided assignment date
+        $insert_log_query = "INSERT INTO usage_log (equipment_id, assigned_date, log_details) VALUES (?, ?, 'New assignment')";
         $stmt_log = $connect->prepare($insert_log_query);
-        $stmt_log->bind_param("i", $equipment_id);
+        $stmt_log->bind_param("is", $equipment_id, $assignment_date);
         $stmt_log->execute();
         $stmt_log->close();
+
 
         $insert_query = "INSERT INTO Loan (profile_id, equipment_id, status_id) VALUES (?, ?, ?)";
         $stmt = $connect->prepare($insert_query);
