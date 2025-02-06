@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id']) && $_SESS
     $delete_id = intval($_POST['delete_id']); // Sanitize input
 
     if ($delete_id > 0) {
-        // Prepare and execute DELTE query
+        // Prepare and execute DELETE query
         $stmt = $connect->prepare("DELETE FROM usage_log WHERE id = ?");
         $stmt->bind_param("i", $delete_id);
 
