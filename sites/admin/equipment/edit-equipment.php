@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("You do not have permissons to perform this action");
             }
             #check if equipment is currently assigned
-            $checkAssignmentStmt = $connect->prepare("SELECT COUNT(*) AS count FROM Loan WHERE equipment_id = ? AND status_id = (SELECT id FROM Status WHERE name = 'Assigned')");
+            $checkAssignmentStmt = $connect->prepare("SELECT COUNT(*) AS count FROM Loan WHERE equipment_id = ?");
             $checkAssignmentStmt->bind_param("i", $equipment_id);
             $checkAssignmentStmt->execute();
             $assignmentResult = $checkAssignmentStmt->get_result();
